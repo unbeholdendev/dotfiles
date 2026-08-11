@@ -27,6 +27,10 @@ alias ll='ls -lah'
 alias ..='cd ..'
 alias ...='cd ../..'
 
+dots() {
+  ( cd ~/dotfiles && git pull --rebase --autostash && stow -R zsh ssh niri )
+}
+
 autoload -Uz vcs_info add-zsh-hook
 zstyle ':vcs_info:*' enable git
 zstyle ':vcs_info:git:*' check-for-changes true
