@@ -8,3 +8,7 @@ RUN dnf install -y --setopt=install_weak_deps=False \
 RUN useradd -m -s /usr/bin/zsh dev
 USER dev
 WORKDIR /home/dev
+
+RUN curl -fsSL https://claude.ai/install.sh | bash
+
+ENV PATH="/home/dev/.local/bin:${PATH}"

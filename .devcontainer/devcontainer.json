@@ -2,4 +2,7 @@
   "name": "dotfiles",
   "build": { "dockerfile": "Dockerfile" },
   "remoteUser": "dev"
+  "mounts": [
+    "source=claude-auth,target=/home/dev/.claude,type=volume"
+  ]
 }
