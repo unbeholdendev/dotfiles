@@ -4,7 +4,7 @@
   "remoteUser": "dev",
   "containerEnv": {
     "FORGEJO_URL": "https://git.home.unbeholden.dev",
-    "IS_SANDBOX": true
+    "IS_SANDBOX": 1
   },
   "mounts": [
     "source=claude-auth,target=/home/dev/.claude,type=volume",
