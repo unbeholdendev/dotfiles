@@ -1,0 +1,6 @@
+{
+  "forgejo": {
+    "command": "sh",
+    "args": ["-c", "exec forgejo-mcp --transport stdio --token \"$(cat /home/dev/.forgejo-token)\""]
+  }
+}

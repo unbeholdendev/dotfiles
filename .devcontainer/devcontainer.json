@@ -1,8 +1,13 @@
 {
   "name": "dotfiles",
   "build": { "dockerfile": "Dockerfile" },
-  "remoteUser": "dev"
+  "remoteUser": "dev",
+  "containerEnv": {
+    "FORGEJO_URL": "https://git.home.unbeholden.dev"
+  },
   "mounts": [
-    "source=claude-auth,target=/home/dev/.claude,type=volume"
-  ]
+    "source=claude-auth,target=/home/dev/.claude,type=volume",
+    "source=/root/.forgejo-token,target=/home/dev/.forgejo-token,type=bind,readonly"
+  ],
+  "postCreateCommand": ".devcontainer/post-create.sh"
 }
