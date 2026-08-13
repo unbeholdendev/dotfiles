@@ -3,7 +3,8 @@
   "build": { "dockerfile": "Dockerfile" },
   "remoteUser": "dev",
   "containerEnv": {
-    "FORGEJO_URL": "https://git.home.unbeholden.dev"
+    "FORGEJO_URL": "https://git.home.unbeholden.dev",
+    "IS_SANDBOX": true
   },
   "mounts": [
     "source=claude-auth,target=/home/dev/.claude,type=volume",
