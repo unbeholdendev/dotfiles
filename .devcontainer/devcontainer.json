@@ -4,11 +4,14 @@
   "containerEnv": {
     "FORGEJO_URL": "https://git.home.unbeholden.dev",
     "IS_SANDBOX": "1",
-    "CLAUDE_CONFIG_DIR": "/root/.claude"
+    "CLAUDE_CONFIG_DIR": "/root/.claude",
+    "ZSH_HISTFILE": "/root/.history/zsh_history"
   },
   "mounts": [
     "source=claude-auth,target=/root/.claude,type=volume",
+    "source=/root/.devcontainer-state/dotfiles,target=/root/.history,type=bind",
     "source=/root/.forgejo-token,target=/root/.forgejo-token,type=bind,readonly"
   ],
+  "initializeCommand": "mkdir -p /root/.devcontainer-state/dotfiles",
   "postCreateCommand": ".devcontainer/post-create.sh"
 }

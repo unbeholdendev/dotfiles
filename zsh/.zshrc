@@ -1,4 +1,4 @@
-HISTFILE=~/.zsh_history
+HISTFILE=${ZSH_HISTFILE:-~/.zsh_history}
 HISTSIZE=50000
 SAVEHIST=50000
 setopt extended_history share_history hist_ignore_all_dups hist_verify hist_ignore_space interactive_comments 
