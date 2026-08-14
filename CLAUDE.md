@@ -4,8 +4,8 @@ Config for a Fedora + niri machine. Authored in this dev container, then pulled
 onto the real machine. The container is for editing, not the target.
 
 Each top-level directory is a stow package whose interior mirrors `$HOME`:
-`zsh/`, `ssh/`, `niri/`. Adding a package means adding it to the `stow` call in
-`.devcontainer/post-create.sh` and to `dots()` in `zsh/.zshrc`.
+`zsh/`, `ssh/`, `niri/`, `nvim/`. Adding a package means adding it to the `stow`
+call in `.devcontainer/post-create.sh` and to the one in `dots.sh`.
 
 The container runs as root, so `$HOME` is `/root`; on the real machine it is a
 normal user's home. Never hardcode `/root` or a username in a stowed file.
