@@ -12,11 +12,9 @@ RUN set -o pipefail && curl -sSfL "https://codeberg.org/goern/forgejo-mcp/releas
  RUN git config --system user.name "agent" \
   && git config --system user.email "335420059+unbeholdendev@users.noreply.github.com" \
   && git config --system credential.helper \
-     '!f() { echo username=agent; echo "password=$(cat /home/dev/.forgejo-token)"; }; f'
+     '!f() { echo username=agent; echo "password=$(cat "$HOME/.forgejo-token")"; }; f'
 
-RUN useradd -m -s /usr/bin/zsh dev
-USER dev
-WORKDIR /home/dev
+WORKDIR /root
 
 RUN curl -fsSL https://claude.ai/install.sh | bash
-ENV PATH="/home/dev/.local/bin:${PATH}"
+ENV PATH="/root/.local/bin:${PATH}"
