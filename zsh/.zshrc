@@ -28,7 +28,7 @@ alias ..='cd ..'
 alias ...='cd ../..'
 
 dots() {
-  ( cd ~/dotfiles && git pull --rebase --autostash && stow -R zsh ssh niri )
+  ( cd ~/dotfiles && git pull --rebase --autostash && stow -R zsh ssh niri nvim )
 }
 
 autoload -Uz vcs_info add-zsh-hook

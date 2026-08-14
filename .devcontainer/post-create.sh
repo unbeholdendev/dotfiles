@@ -2,7 +2,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-stow -v --restow --target="$HOME" zsh
+mkdir -p "$HOME/.config"
+stow -v --restow --target="$HOME" zsh nvim
 
 cat > "$CLAUDE_CONFIG_DIR/settings.json" <<'JSON'
 {
