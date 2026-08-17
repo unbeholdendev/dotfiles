@@ -113,19 +113,6 @@ output "eDP-1" {
     position x=512 y=0
 }
 
-// Named workspaces are pinned to DP-1, so the whole set moves there when
-// DP-1 connects, and moves back to eDP-1 when DP-1 goes away. Without a
-// name and an open-on-output, niri keeps them on the laptop screen.
-workspace "one" { open-on-output "DP-1"; }
-workspace "two" { open-on-output "DP-1"; }
-workspace "three" { open-on-output "DP-1"; }
-workspace "four" { open-on-output "DP-1"; }
-workspace "five" { open-on-output "DP-1"; }
-workspace "six" { open-on-output "DP-1"; }
-workspace "seven" { open-on-output "DP-1"; }
-workspace "eight" { open-on-output "DP-1"; }
-workspace "nine" { open-on-output "DP-1"; }
-
 // Settings that influence how windows are positioned and sized.
 // Find more information on the wiki:
 // https://niri-wm.github.io/niri/Configuration:-Layout
@@ -491,9 +478,9 @@ binds {
     // Mod+Shift+Ctrl+Left  { move-window-to-monitor-left; }
     // ...
 
-    // And you can also move a whole workspace to another monitor:
-    // Mod+Shift+Ctrl+Left  { move-workspace-to-monitor-left; }
-    // ...
+    // The monitors are stacked vertically, so only up and down are useful.
+    Mod+Shift+Alt+J { move-workspace-to-monitor-down; }
+    Mod+Shift+Alt+K { move-workspace-to-monitor-up; }
 
     Mod+Page_Down      { focus-workspace-down; }
     Mod+Page_Up        { focus-workspace-up; }
@@ -553,24 +540,24 @@ binds {
     //
     // For example, with 2 workspaces + 1 empty, indices 3, 4, 5 and so on
     // will all refer to the 3rd workspace.
-    Mod+1 { focus-workspace "one"; }
-    Mod+2 { focus-workspace "two"; }
-    Mod+3 { focus-workspace "three"; }
-    Mod+4 { focus-workspace "four"; }
-    Mod+5 { focus-workspace "five"; }
-    Mod+6 { focus-workspace "six"; }
-    Mod+7 { focus-workspace "seven"; }
-    Mod+8 { focus-workspace "eight"; }
-    Mod+9 { focus-workspace "nine"; }
-    Mod+Ctrl+1 { move-column-to-workspace "one"; }
-    Mod+Ctrl+2 { move-column-to-workspace "two"; }
-    Mod+Ctrl+3 { move-column-to-workspace "three"; }
-    Mod+Ctrl+4 { move-column-to-workspace "four"; }
-    Mod+Ctrl+5 { move-column-to-workspace "five"; }
-    Mod+Ctrl+6 { move-column-to-workspace "six"; }
-    Mod+Ctrl+7 { move-column-to-workspace "seven"; }
-    Mod+Ctrl+8 { move-column-to-workspace "eight"; }
-    Mod+Ctrl+9 { move-column-to-workspace "nine"; }
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    Mod+Ctrl+1 { move-column-to-workspace 1; }
+    Mod+Ctrl+2 { move-column-to-workspace 2; }
+    Mod+Ctrl+3 { move-column-to-workspace 3; }
+    Mod+Ctrl+4 { move-column-to-workspace 4; }
+    Mod+Ctrl+5 { move-column-to-workspace 5; }
+    Mod+Ctrl+6 { move-column-to-workspace 6; }
+    Mod+Ctrl+7 { move-column-to-workspace 7; }
+    Mod+Ctrl+8 { move-column-to-workspace 8; }
+    Mod+Ctrl+9 { move-column-to-workspace 9; }
 
     // Alternatively, there are commands to move just a single window:
     // Mod+Ctrl+1 { move-window-to-workspace 1; }
