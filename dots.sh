@@ -10,4 +10,4 @@ if [[ -z ${DOTS_PULLED:-} ]]; then
 fi
 
 mkdir -p "$HOME/.config" "$HOME/.ssh"
-stow -R --target="$HOME" zsh ssh niri nvim foot portal
+stow -R --target="$HOME" zsh ssh niri nvim foot portal wireplumber
