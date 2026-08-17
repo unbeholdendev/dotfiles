@@ -109,6 +109,18 @@ input {
     position x=1280 y=0
 }
 
+// Positions are in logical pixels, so they depend on the scales set here.
+// DP-1 sits above eDP-1, horizontally centred over it.
+output "DP-1" {
+    scale 1
+    position x=0 y=-1440
+}
+
+output "eDP-1" {
+    scale 1.25
+    position x=512 y=0
+}
+
 // Settings that influence how windows are positioned and sized.
 // Find more information on the wiki:
 // https://niri-wm.github.io/niri/Configuration:-Layout
