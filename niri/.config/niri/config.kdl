@@ -14,7 +14,6 @@ input {
         xkb {
             // No grp: option here. The switch is a niri bind, see switch-layout below.
             layout "us,cz"
-            variant ",qwerty"
         }
 
         // Enable numlock on startup, omitting this setting disables it.
