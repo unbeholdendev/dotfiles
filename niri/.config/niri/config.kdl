@@ -104,6 +104,8 @@ input {
 // Positions are in logical pixels, so they depend on the scales set here.
 // DP-1 sits above eDP-1, horizontally centred over it.
 output "DP-1" {
+    // The EDID prefers 60 Hz, so the panel's 165 Hz has to be named here.
+    mode "2560x1440@165.080"
     scale 1
     position x=0 y=-1440
 }
