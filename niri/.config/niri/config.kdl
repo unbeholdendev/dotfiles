@@ -277,6 +277,7 @@ layout {
 // This line starts waybar, a commonly used bar for Wayland compositors.
 spawn-at-startup "foot" "--server"
 spawn-at-startup "noctalia"
+spawn-at-startup "handy" "--start-hidden"
 spawn-at-startup "swayidle" "-w" "timeout" "300" "noctalia msg session lock" "timeout" "360" "niri msg action power-off-monitors" "resume" "niri msg action power-on-monitors" "timeout" "600" "systemctl suspend"
 
 // To run a shell command (with variables, pipes, etc.), use spawn-sh-at-startup:
@@ -384,6 +385,7 @@ binds {
     // Suggested binds for running programs: terminal, app launcher, screen locker.
     Mod+T hotkey-overlay-title="Open a Terminal: foot" { spawn "footclient"; }
     // Mod+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
+    Mod+D repeat=false hotkey-overlay-title="Dictate: handy" { spawn "handy" "--toggle-transcription"; }
     Super+Shift+L { spawn-sh "noctalia msg session lock"; }
     Super+Shift+S { spawn-sh "noctalia msg session lock-and-suspend"; }
     
