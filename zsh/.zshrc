@@ -18,6 +18,9 @@ bindkey '^[OB' history-beginning-search-forward
 source <(fzf --zsh)
 eval "$(zoxide init zsh)"
 
+export EDITOR=nvim
+export VISUAL=nvim
+
 eval "$(dircolors -b)"
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS} 
 alias ls='ls --color=auto'
