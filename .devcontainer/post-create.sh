@@ -3,7 +3,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 mkdir -p "$HOME/.config"
-stow -v --restow --target="$HOME" zsh nvim foot
+stow -v --restow --target="$HOME" zsh nvim foot yazi
 
 cat > "$CLAUDE_CONFIG_DIR/settings.json" <<'JSON'
 {

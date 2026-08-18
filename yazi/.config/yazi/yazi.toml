@@ -1,0 +1,12 @@
+[opener]
+edit = [
+  { run = 'nvim "$@"', desc = "nvim", block = true, for = "unix" },
+]
+pdf = [
+  { run = 'zathura "$@"', orphan = true, desc = "zathura" },
+]
+
+[open]
+prepend_rules = [
+  { mime = "application/pdf", use = "pdf" },
+]
