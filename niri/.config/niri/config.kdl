@@ -281,6 +281,7 @@ spawn-at-startup "foot" "--server"
 spawn-at-startup "noctalia"
 spawn-at-startup "handy" "--start-hidden"
 spawn-at-startup "swayidle" "-w" "timeout" "300" "noctalia msg session lock" "timeout" "360" "niri msg action power-off-monitors" "resume" "niri msg action power-on-monitors" "timeout" "600" "systemctl suspend"
+spawn-sh-at-startup "$HOME/.local/bin/headphone-profile"
 
 // To run a shell command (with variables, pipes, etc.), use spawn-sh-at-startup:
 // spawn-sh-at-startup "qs -c ~/source/qs/MyAwesomeShell"

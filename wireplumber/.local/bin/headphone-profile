@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# The UCM puts Speaker and Headphones in two profiles that both hold the HDMI
+# ports, so both stay available and WirePlumber always takes the higher
+# priority one. It never looks at the jack. This does.
+set -uo pipefail
+
+apply() {
+  local block headphones speaker want current
+
+  block=$(pactl list cards 2>/dev/null | awk -v name="Name: $card" '
+    /^Card #/ { in_card = 0 }
+    index($0, name) { in_card = 1 }
+    in_card
+  ') || return 0
+
+  headphones=$(grep -m1 -oE 'HiFi \([^)]*Headphones[^)]*\)' <<<"$block")
+  speaker=$(grep -m1 -oE 'HiFi \([^)]*Speaker[^)]*\)' <<<"$block")
+  [[ -n $headphones && -n $speaker ]] || return 0
+
+  if grep -qE '\[Out\] Headphones:.*not available' <<<"$block"; then
+    want=$speaker
+  else
+    want=$headphones
+  fi
+
+  current=$(sed -n 's/^[[:space:]]*Active Profile: //p' <<<"$block")
+  [[ $current == "$want" ]] || pactl set-card-profile "$card" "$want"
+}
+
+while :; do
+  card=$(pactl list cards short 2>/dev/null | awk '/skl_hda_dsp_generic/ { print $2; exit }')
+  if [[ -n $card ]]; then
+    apply
+    pactl subscribe | while read -r event; do
+      [[ $event == *"on card"* ]] && apply
+    done
+  fi
+  sleep 2
+done
