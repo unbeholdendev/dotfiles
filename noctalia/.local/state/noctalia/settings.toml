@@ -180,3 +180,4 @@ directory_light = "/home/pycan/Pictures/Wallpapers"
     path = "/home/pycan/Pictures/Wallpapers/8207827.png"
 
 [location]
+auto_locate = true
