@@ -5,6 +5,16 @@ config_version = 8
 [widget.clock]
 format = "{:%a %d %b  %H:%M}"
 
+[battery]
+warning_threshold = 15
+
+[brightness]
+enable_ddcutil = true
+
+[nightlight]
+enabled = true
+temperature_night = 3500
+
 [calendar]
 enabled = true
 
