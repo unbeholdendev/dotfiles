@@ -1,9 +1,25 @@
 config_version = 8
 
 [bar.default]
+start = [ "launcher", "wallpaper", "workspaces", "active_window" ]
+end = [
+    "media", "privacy", "cpu", "ram", "temp", "keyboard_layout",
+    "caffeine", "power_profile", "tray", "notifications", "clipboard",
+    "network", "bluetooth", "volume", "brightness", "battery",
+    "control-center", "session",
+]
+
+    [bar.default.monitor.eDP-1]
+    end = [
+        "media", "privacy", "keyboard_layout", "caffeine", "power_profile",
+        "tray", "notifications", "clipboard", "network", "bluetooth",
+        "volume", "brightness", "battery", "control-center", "session",
+    ]
 
 [widget.clock]
 format = "{:%a %d %b  %H:%M}"
+tooltip_format = "{:%A %d %B %Y (week %V)}"
+font_family = "JetBrains Mono"
 
 [battery]
 warning_threshold = 15
