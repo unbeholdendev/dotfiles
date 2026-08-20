@@ -180,5 +180,6 @@ directory_light = "/home/pycan/Pictures/Wallpapers"
     path = "/home/pycan/Pictures/Wallpapers/8207827.png"
 
 [location]
+auto_locate = true
 latitude = 49.724891
 longitude = 18.466191
