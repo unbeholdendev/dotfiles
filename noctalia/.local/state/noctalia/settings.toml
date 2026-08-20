@@ -158,10 +158,9 @@ screen_time_enabled = true
 
 [theme]
 builtin = "Gruvbox"
-wallpaper_scheme = "m3-content"
 
     [theme.templates]
-    builtin_ids = [ "foot", "niri" ]
+    builtin_ids = [ "foot", "niri", "gtk3", "gtk4", "qt", "btop" ]
     community_ids = [ "zathura", "yazi" ]
 
 [wallpaper]
