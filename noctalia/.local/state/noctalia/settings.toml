@@ -118,6 +118,29 @@ widget_order = [ "lockscreen-login-box@DP-1", "lockscreen-login-box@eDP-1" ]
         show_unlock_hint = true
         show_weather = true
 
+[backdrop]
+enabled = true
+
+[control_center.calendar]
+show_week_numbers = true
+
+[hot_corners]
+enabled = true
+delay_ms = 120
+
+    [hot_corners.top_left]
+    action = "overview"
+
+[lockscreen]
+blurred_desktop = true
+
+[notification]
+monitors = [ "DP-1" ]
+history_retention_hours = 168
+
+[wallpaper.automation]
+enabled = true
+
 [shell]
 polkit_agent = true
 
