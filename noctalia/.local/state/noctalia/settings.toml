@@ -104,3 +104,7 @@ directory_light = "/home/pycan/Pictures/Wallpapers"
 
     [wallpaper.monitors.eDP-1]
     path = "/home/pycan/Pictures/Wallpapers/8207827.png"
+
+[location]
+latitude = 49.724891
+longitude = 18.466191
