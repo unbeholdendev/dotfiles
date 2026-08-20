@@ -30,7 +30,7 @@ alias ll='ls -lah'
 alias ..='cd ..'
 alias ...='cd ../..'
 
-dots() { "${DOTFILES:-$HOME/dotfiles}/dots.sh" }
+dots() { "${DOTFILES:-$HOME/Documents/dotfiles}/dots.sh" }
 
 autoload -Uz vcs_info add-zsh-hook
 zstyle ':vcs_info:*' enable git
