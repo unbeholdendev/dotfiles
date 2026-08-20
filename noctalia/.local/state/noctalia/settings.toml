@@ -79,7 +79,6 @@ polkit_agent = true
 
 [theme]
 builtin = "Gruvbox"
-mode = "dark"
 wallpaper_scheme = "m3-content"
 
     [theme.templates]
