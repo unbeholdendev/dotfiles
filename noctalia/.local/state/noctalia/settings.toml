@@ -142,10 +142,19 @@ history_retention_hours = 168
 enabled = true
 
 [shell]
+date_format = "%A, %d %B"
 polkit_agent = true
+screen_time_enabled = true
 
     [shell.greeter_sync]
     auto_sync = true
+
+    [shell.privacy]
+    mic_filter_regex = "handy"
+
+    [shell.screen_corners]
+    enabled = true
+    size = 12
 
 [theme]
 builtin = "Gruvbox"
