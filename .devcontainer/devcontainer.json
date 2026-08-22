@@ -1,6 +1,6 @@
 {
   "name": "dotfiles",
-  "build": { "dockerfile": "Dockerfile" },
+  "build": { "dockerfile": "Dockerfile", "context": ".." },
   "containerEnv": {
     "FORGEJO_URL": "https://git.home.unbeholden.dev",
     "IS_SANDBOX": "1",

@@ -1,7 +1,7 @@
 FROM fedora:44
 
 RUN dnf install -y --setopt=install_weak_deps=False \
-      zsh stow git niri fzf zoxide ripgrep neovim \
+      zsh stow git niri ripgrep \
       zsh-autosuggestions zsh-syntax-highlighting \
     && dnf clean all
 
@@ -17,4 +17,11 @@ RUN set -o pipefail && curl -sSfL "https://codeberg.org/goern/forgejo-mcp/releas
 WORKDIR /root
 
 RUN curl -fsSL https://claude.ai/install.sh | bash
-ENV PATH="/root/.local/bin:${PATH}"
+RUN curl -fsSL https://mise.run | MISE_INSTALL_PATH=/usr/local/bin/mise sh
+ENV PATH="/root/.local/share/mise/shims:/root/.local/bin:${PATH}"
+
+# The pinned tools are baked into the image so a rebuild does not fetch them
+# again. post-create stows the same file over this path, and stow refuses to
+# overwrite a regular file, so the copy must not stay.
+COPY mise/.config/mise/config.toml /root/.config/mise/config.toml
+RUN mise install && rm /root/.config/mise/config.toml

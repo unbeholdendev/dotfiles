@@ -11,5 +11,5 @@ fi
 
 # The herdr folder must exist, or stow folds it into a link to this repo and the
 # settings screen then writes config.toml here.
-mkdir -p "$HOME/.config/herdr"
-stow -R --target="$HOME" zsh nvim herdr
+mkdir -p "$HOME/.config/herdr" "$HOME/.config/mise"
+stow -R --target="$HOME" zsh nvim herdr mise

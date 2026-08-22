@@ -1,2 +1,2 @@
 typeset -U path PATH
-path=(~/.local/bin $path)
+path=(~/.local/share/mise/shims ~/.local/bin ~/.devcontainers/bin $path)

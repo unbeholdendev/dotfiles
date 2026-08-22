@@ -1,0 +1,8 @@
+[tools]
+neovim = "0.12"
+fzf = "0.74"
+zoxide = "0.10"
+
+# herdr is absent from the mise registry, so it comes from its releases. It is
+# also pre-1.0, where the config format can change, so the pin is exact.
+"github:herdrdev/herdr" = "0.8.2"
