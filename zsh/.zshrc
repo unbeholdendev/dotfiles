@@ -34,7 +34,10 @@ alias ll='ls -lah'
 alias ..='cd ..'
 alias ...='cd ../..'
 
-dots() { "${DOTFILES:-$HOME/Documents/dotfiles}/dots.sh" "$@" }
+dots() {
+  local f=$(readlink -f ~/.zshrc)
+  "${DOTFILES:-${f:h:h}}/dots.sh" "$@"
+}
 
 autoload -Uz vcs_info add-zsh-hook
 zstyle ':vcs_info:*' enable git
