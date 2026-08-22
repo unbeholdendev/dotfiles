@@ -41,6 +41,8 @@ zstyle ':vcs_info:git:*' formats ' (%b%u%c)'
 zstyle ':vcs_info:git:*' actionformats ' (%b|%a%u%c)'
 add-zsh-hook precmd vcs_info
 setopt prompt_subst
-PROMPT='%F{180}%~%f%F{244}${vcs_info_msg_0_}%f %(?.%F{71}.%F{167})❯%f '
+PROMPT=''
+[[ -n ${SSH_CONNECTION:-} ]] && PROMPT='%F{109}%m%f '
+PROMPT+='%F{180}%~%f%F{244}${vcs_info_msg_0_}%f %(?.%F{71}.%F{167})❯%f '
 
 source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
