@@ -21,7 +21,9 @@ eval "$(zoxide init zsh)"
 export EDITOR=nvim
 export VISUAL=nvim
 
-eval "$(dircolors -b)"
+# dircolors has no TERM entry for foot, and an unknown TERM gives an empty
+# LS_COLORS, which turns off colour for ls and for the completion menu.
+eval "$(TERM=xterm-256color dircolors -b)"
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS} 
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'
