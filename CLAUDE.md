@@ -7,6 +7,13 @@ Each top-level directory is a stow package whose interior mirrors `$HOME`:
 `zsh/`, `ssh/`, `niri/`, `nvim/`. Adding a package means adding it to the `stow`
 call in `.devcontainer/post-create.sh` and to the one in `dots.sh`.
 
+`deb-agent` is a headless Debian host that runs coding agents. It has no
+desktop, so `dots-server.sh` stows only what that host needs: `zsh/`, `nvim/`,
+`herdr/`. A package for that host goes in that `stow` call, not in the `dots.sh`
+one. `ssh/` is not stowed there: it names the desktop's own key and every host
+it reaches, and folding `~/.ssh` would take `authorized_keys` with it. The herdr
+binary is not installed by the script; it is managed by hand on the host.
+
 The container runs as root, so `$HOME` is `/root`; on the real machine it is a
 normal user's home. Never hardcode `/root` or a username in a stowed file.
 Container-only behaviour goes in an env var set in `devcontainer.json`, so the
