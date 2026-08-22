@@ -8,7 +8,9 @@ compinit
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 
-source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+if [[ -r /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+  source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
 
 bindkey '^[[A' history-beginning-search-backward    # ↑
 bindkey '^[[B' history-beginning-search-forward     # ↓
@@ -32,7 +34,7 @@ alias ll='ls -lah'
 alias ..='cd ..'
 alias ...='cd ../..'
 
-dots() { "${DOTFILES:-$HOME/Documents/dotfiles}/dots.sh" }
+dots() { "${DOTFILES:-$HOME/Documents/dotfiles}/dots.sh" "$@" }
 
 autoload -Uz vcs_info add-zsh-hook
 zstyle ':vcs_info:*' enable git
@@ -47,4 +49,6 @@ PROMPT=''
 [[ -n ${SSH_CONNECTION:-} ]] && PROMPT='%F{109}%m%f '
 PROMPT+='%F{180}%~%f%F{244}${vcs_info_msg_0_}%f %(?.%F{71}.%F{167})❯%f '
 
-source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+if [[ -r /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+  source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
