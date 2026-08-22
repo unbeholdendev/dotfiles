@@ -5,14 +5,24 @@ onto the real machine. The container is for editing, not the target.
 
 Each top-level directory is a stow package whose interior mirrors `$HOME`:
 `zsh/`, `ssh/`, `niri/`, `nvim/`. Adding a package means adding it to the `stow`
-call in `.devcontainer/post-create.sh` and to the one in `dots.sh`.
+call in `dots.sh`. `.devcontainer/post-create.sh` stows only the packages whose
+tools the container installs, which is `zsh/`, `nvim/` and `mise/`. Anything
+else is an inert link, and foot cannot run here at all.
 
 `deb-agent` is a headless Debian host that runs coding agents. It has no
 desktop, so `dots-server.sh` stows only what that host needs: `zsh/`, `nvim/`,
 `herdr/`. A package for that host goes in that `stow` call, not in the `dots.sh`
 one. `ssh/` is not stowed there: it names the desktop's own key and every host
-it reaches, and folding `~/.ssh` would take `authorized_keys` with it. The herdr
-binary is not installed by the script; it is managed by hand on the host.
+it reaches, and folding `~/.ssh` would take `authorized_keys` with it.
+
+`mise/` pins the tools whose distro version is absent or too old: nvim, fzf,
+zoxide and herdr. Both hosts read the same file, so a version bump is one commit
+rather than a command retyped per host. `zsh/.zshenv` puts the mise shims ahead
+of `~/.local/bin`, so a pinned tool wins over one dropped there by hand. The
+mise binary itself is not installed by either script; install it by hand on each
+host, then run `mise install` after the stow. The dev container differs: its
+Dockerfile installs mise and bakes the pinned tools into the image, so config is
+authored against the same builds the hosts run.
 
 The container runs as root, so `$HOME` is `/root`; on the real machine it is a
 normal user's home. Never hardcode `/root` or a username in a stowed file.

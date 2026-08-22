@@ -11,8 +11,8 @@ fi
 
 # The noctalia state folder must exist, or stow folds it into a link to this
 # repo and the shell then writes state.toml and its caches here.
-mkdir -p "$HOME/.config" "$HOME/.ssh" "$HOME/.local/state/noctalia"
-stow -R --target="$HOME" zsh ssh niri nvim foot portal wireplumber yazi noctalia
+mkdir -p "$HOME/.config" "$HOME/.config/mise" "$HOME/.ssh" "$HOME/.local/state/noctalia"
+stow -R --target="$HOME" zsh ssh niri nvim foot portal wireplumber yazi noctalia mise
 
 # color-scheme drives the settings portal; GTK3 does not read it, so it needs gtk-theme.
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
