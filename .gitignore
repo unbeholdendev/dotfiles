@@ -1,3 +1,6 @@
 # Written by the noctalia yazi template, which renders into the stowed folder.
 yazi/.config/yazi/theme.toml
 yazi/.config/yazi/flavors/noctalia.yazi/
+
+# Local Claude Code state: machine permissions and agent worktrees.
+.claude/
