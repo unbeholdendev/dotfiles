@@ -2,7 +2,10 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-profile=${1:-desktop}
+# Remember the profile per machine, so a bare `dots` on the agent host does not
+# fall back to the desktop set and link ssh/ onto a host that cannot use it.
+marker=$HOME/.dots-profile
+profile=${1:-$(cat "$marker" 2>/dev/null || echo desktop)}
 
 # Every difference between the environments this repo serves is in this table.
 case $profile in
@@ -18,6 +21,8 @@ case $profile in
   *)
     echo "usage: ${0##*/} [desktop|server|container]" >&2; exit 1 ;;
 esac
+
+printf '%s\n' "$profile" > "$marker"
 
 # Re-exec after the pull so the pulled version of this file does the stow.
 # Without it a package added upstream is never linked. The container profile
