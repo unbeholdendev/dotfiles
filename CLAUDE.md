@@ -4,11 +4,19 @@ Config for a Fedora + niri machine. Authored in this dev container, then pulled
 onto the real machine. The container is for editing, not the target.
 
 Each top-level directory is a stow package whose interior mirrors `$HOME`:
-`zsh/`, `ssh/`, `niri/`, `nvim/`. `dots.sh` is the only entry point. It takes a
-profile, `desktop`, `server` or `container`, and the table at the top of it is
-the one place where the environments differ. Adding a package means adding it to
-the profiles whose environment runs its tool; anywhere else it is an inert link.
-niri and foot cannot run in the container at all.
+`zsh/`, `ssh/`, `niri/`, `nvim/`. `install.sh` is the only entry point. It
+takes a profile, `desktop`, `server` or `container`, and the table at the top of
+it is the one place where the environments differ. Adding a package means adding
+it to the profiles whose environment runs its tool; anywhere else it is an inert
+link. niri and foot cannot run in the container at all.
+
+The name `install.sh` is not free choice. A dev container clones this repo and
+runs the first of `install.sh`, `install`, `bootstrap.sh`, `bootstrap`,
+`setup.sh` or `setup` it finds, with no argument. That hook is set per user,
+outside any project, so a repo this one never sees still gets these files. Two
+things follow: the profile falls back to `container` when `/.dockerenv` or
+`/run/.containerenv` exists, and the script installs stow itself, because the
+base image of somebody else's project is not ours to change.
 
 `deb-agent` is a headless Debian host that runs coding agents, on the `server`
 profile. `ssh/` is deliberately absent there: the file names the desktop's own
@@ -30,9 +38,9 @@ Container-only behaviour goes in an env var set in `devcontainer.json`, so the
 stowed file stays correct on the host where that var is unset.
 
 niri cannot be run here (no Wayland session), so review those edits rather than
-testing them. For the rest: `./dots.sh container` must succeed, a package added
-to the `desktop` profile must stow into an empty directory without conflicts,
-and `zsh -ic exit` must be silent.
+testing them. For the rest: `./install.sh container` must succeed, a package
+added to the `desktop` profile must stow into an empty directory without
+conflicts, and `zsh -ic exit` must be silent.
 
 `~/.forgejo-token` is bind-mounted read-only and read at runtime by the git
 credential helper and the forgejo MCP server. Never print or commit its value.

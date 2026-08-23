@@ -4,8 +4,12 @@ cd "$(dirname "$0")"
 
 # Remember the profile per machine, so a bare `dots` on the agent host does not
 # fall back to the desktop set and link ssh/ onto a host that cannot use it.
+# The dev container dotfiles hook runs this file with no argument, and a fresh
+# container has no marker, so the last resort must not be desktop there either.
 marker=$HOME/.dots-profile
-profile=${1:-$(cat "$marker" 2>/dev/null || echo desktop)}
+default=desktop
+[[ -f /.dockerenv || -f /run/.containerenv ]] && default=container
+profile=${1:-$(cat "$marker" 2>/dev/null || echo "$default")}
 
 # Every difference between the environments this repo serves is in this table.
 case $profile in
@@ -30,6 +34,17 @@ printf '%s\n' "$profile" > "$marker"
 if [[ $pull == 1 && -z ${DOTS_PULLED:-} ]]; then
   git pull --rebase --autostash
   DOTS_PULLED=1 exec "$0" "$profile"
+fi
+
+# The standard dev container base images do not carry stow, and an external
+# project's image is not ours to change, so install it here instead.
+if ! command -v stow >/dev/null; then
+  sudo=; [[ $EUID == 0 ]] || sudo=sudo
+  if   command -v apt-get >/dev/null; then $sudo apt-get update && $sudo apt-get install -y stow
+  elif command -v dnf     >/dev/null; then $sudo dnf install -y stow
+  elif command -v apk     >/dev/null; then $sudo apk add stow
+  else echo "stow is missing and no known package manager is present" >&2; exit 1
+  fi
 fi
 
 # --no-folding keeps each folder real. Without it stow replaces a folder that

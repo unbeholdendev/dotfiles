@@ -36,7 +36,7 @@ alias ...='cd ../..'
 
 dots() {
   local f=$(readlink -f ~/.zshrc)
-  "${DOTFILES:-${f:h:h}}/dots.sh" "$@"
+  "${DOTFILES:-${f:h:h}}/install.sh" "$@"
 }
 
 autoload -Uz vcs_info add-zsh-hook
