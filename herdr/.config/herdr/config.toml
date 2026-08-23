@@ -4,6 +4,9 @@
 name = "terminal"
 
 [ui]
+# The default accent is cyan, which clashes with the gruvbox palette foot
+# carries. This is bright4 in that palette.
+accent = "#83a598"
 agent_panel_sort = "priority"
 show_agent_labels_on_pane_borders = true
 prompt_new_workspace_name = true
