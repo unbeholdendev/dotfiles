@@ -1,12 +1,12 @@
-# The desktop themes foot from the noctalia palette, so follow the terminal
-# rather than keep a second palette in step with it.
+onboarding = false
+
 [theme]
-name = "terminal"
+name = "gruvbox"
 
 [ui]
-# The default accent is cyan, which clashes with the gruvbox palette foot
-# carries. This is bright4 in that palette.
-accent = "#83a598"
+# The default accent is cyan. This is the colour noctalia paints the niri focus
+# ring, so a selected pane matches a focused window.
+accent = "#b8bb26"
 agent_panel_sort = "priority"
 show_agent_labels_on_pane_borders = true
 prompt_new_workspace_name = true
