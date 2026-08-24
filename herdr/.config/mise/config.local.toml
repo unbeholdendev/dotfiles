@@ -1,4 +1,0 @@
-# The pin lives with the herdr package, not in the shared config, so only the
-# host that stows herdr installs it. mise merges both global files.
-[tools]
-"github:herdrdev/herdr" = "0.8.2"

@@ -2,5 +2,6 @@
 yazi/.config/yazi/theme.toml
 yazi/.config/yazi/flavors/noctalia.yazi/
 
-# Local Claude Code state: machine permissions and agent worktrees.
-.claude/
+# Local Claude Code state: machine permissions and agent worktrees. Anchored,
+# because the bare pattern also matched the stowed claude/.claude/.
+/.claude/

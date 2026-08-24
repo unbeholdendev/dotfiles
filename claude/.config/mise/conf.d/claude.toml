@@ -1,0 +1,7 @@
+# The work happens in dev containers, so only the container profile stows this.
+# mise reads every file in conf.d, so each package owns its own name and two of
+# them can never collide. Codeberg is the default host of mise's forgejo
+# backend, and forgejo-mcp has no aqua entry, so that backend has to be explicit.
+[tools]
+claude = "2.1"
+"forgejo:goern/forgejo-mcp" = "2.30"

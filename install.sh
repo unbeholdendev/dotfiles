@@ -20,7 +20,7 @@ case $profile in
     packages=(zsh nvim herdr mise)
     pull=1 mise_tools=1 desktop_theme=0 ;;
   container)
-    packages=(zsh nvim mise)
+    packages=(zsh nvim mise claude)
     pull=0 mise_tools=1 desktop_theme=0 ;;
   *)
     echo "usage: ${0##*/} [desktop|server|container]" >&2; exit 1 ;;
@@ -36,14 +36,25 @@ if [[ $pull == 1 && -z ${DOTS_PULLED:-} ]]; then
   DOTS_PULLED=1 exec "$0" "$profile"
 fi
 
-# The standard dev container base images do not carry stow, and an external
-# project's image is not ours to change, so install it here instead.
-if ! command -v stow >/dev/null; then
+# A bare distro image has none of these, and an external project's image is not
+# ours to change, so install them here instead. A failure is not fatal: the stow
+# call below reports a missing stow, and `.zshrc` already skips a plugin it
+# cannot read.
+missing=()
+command -v git  >/dev/null || missing+=(git)
+command -v zsh  >/dev/null || missing+=(zsh)
+command -v stow >/dev/null || missing+=(stow)
+[[ -r /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] \
+  || missing+=(zsh-autosuggestions)
+[[ -r /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] \
+  || missing+=(zsh-syntax-highlighting)
+
+if (( ${#missing[@]} )); then
   sudo=; [[ $EUID == 0 ]] || sudo=sudo
-  if   command -v apt-get >/dev/null; then $sudo apt-get update && $sudo apt-get install -y stow
-  elif command -v dnf     >/dev/null; then $sudo dnf install -y stow
-  elif command -v apk     >/dev/null; then $sudo apk add stow
-  else echo "stow is missing and no known package manager is present" >&2; exit 1
+  if   command -v apt-get >/dev/null; then $sudo apt-get update && $sudo apt-get install -y "${missing[@]}"
+  elif command -v dnf     >/dev/null; then $sudo dnf install -y "${missing[@]}"
+  elif command -v apk     >/dev/null; then $sudo apk add "${missing[@]}"
+  else echo "cannot install ${missing[*]}: no known package manager" >&2
   fi
 fi
 
@@ -54,13 +65,15 @@ fi
 stow -R --no-folding --target="$HOME" "${packages[@]}"
 
 if [[ $mise_tools == 1 ]]; then
-  PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
+  [[ -z ${MISE_DATA_DIR:-} && -d /mise ]] && export MISE_DATA_DIR=/mise
+  shims=${MISE_DATA_DIR:-$HOME/.local/share/mise}/shims
+  PATH="$shims:$HOME/.local/bin:$PATH"
   command -v mise >/dev/null || curl -fsSL https://mise.run | sh
   mise install
 
   # A mise shim falls through to the system binary when no version is selected,
   # so a link that did not happen would give the wrong build and no error.
-  if [[ $(command -v nvim) != "$HOME/.local/share/mise/shims/"* ]]; then
+  if [[ $(command -v nvim) != "$shims/"* ]]; then
     echo "nvim is not the mise build; the mise package did not link" >&2
     exit 1
   fi
