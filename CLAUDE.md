@@ -106,6 +106,19 @@ server is to us. A `postCreateCommand` is then for a project's own work alone,
 this one included, at the price of a container which has neither token nor
 identity where the flag was forgotten.
 
+`dcclaude` is the other half of that pair: it starts claude in a container
+`dcup` brought up. herdr names a pane from the comm and the argv0 of the
+foreground process group it can see on the host. That is the devcontainer CLI,
+which is node, and the agent is in the container, out of that process tree, so
+no pane ever showed an agent and the sidebar stayed empty. `HERDR_AGENT` is the
+hint for a wrapper that hides the agent, and `dcclaude` sets it on the host side
+of the command, where herdr reads it from `/proc`. It is a label alone, so no
+agent is installed on that host. The same variable set in the container is out
+of reach, and `zsh/.zshenv` must not export it: this repo is on that host too,
+where it would name every foreground process an agent. The pane is an agent
+while claude runs and a shell prompt after it ends, which is what the label must
+say.
+
 That mount is provisional. This repo is to become public, and `ssh/` is to come
 out of it, because that package is the only reason it must stay private: the
 file is a map of hosts, ports and accounts. Once it is public the hook needs no

@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+command -v devcontainer >/dev/null ||
+  { echo "no devcontainer CLI: npm i -g @devcontainers/cli" >&2; exit 1; }
+
+folder=${1:-.}
+
+# herdr names a pane from the comm and the argv0 of the foreground process group
+# on this host. That is the devcontainer CLI, which is node, and the agent runs
+# in the container, out of that process tree, so nothing identifies it.
+# HERDR_AGENT is the hint for a wrapper that hides the agent. It goes on this
+# process, because herdr reads it from /proc on the host and cannot see a copy
+# set in the container. It is a label alone: no agent is installed here.
+#
+# Through zsh, because the shims that hold claude reach PATH from .zshenv.
+exec env HERDR_AGENT=claude devcontainer exec --workspace-folder "$folder" \
+  zsh -c 'exec claude "$@"' claude "${@:2}"
