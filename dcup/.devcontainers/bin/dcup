@@ -8,6 +8,12 @@ command -v devcontainer >/dev/null ||
 f=$(readlink -f ~/.zshrc)
 dotfiles=${DOTFILES:-${f%/*/*}}
 
+# --token copies the Forgejo token in, for the MCP server. Off by default,
+# because that credential is worth more to the other people in a shared project
+# than the server is to you.
+token=0
+if [[ ${1:-} == --token ]]; then token=1; shift; fi
+
 folder=${1:-.}
 
 # Shell history outlives the container it was typed in, one store per project.
@@ -37,5 +43,17 @@ devcontainer up --workspace-folder "$folder" --no-lockfile \
 # This project installs these files itself, in its postCreateCommand, from the
 # workspace copy of the same clone. A second stow from /dotfiles then finds links
 # it does not own and aborts, so only a project we do not control needs the exec.
-[[ $(readlink -f "$folder") == "$dotfiles" ]] ||
+if [[ $(readlink -f "$folder") != "$dotfiles" ]]; then
   devcontainer exec --workspace-folder "$folder" /dotfiles/install.sh container
+
+  # The forgejo MCP server is registered once per Claude Code store, so it runs
+  # in every project and reads the token in each. A copy and not a mount:
+  # `--mount` takes only type, source, target and external, so a read-only bind
+  # is not expressible and the file on this host would be writable from inside
+  # that container. The copy also follows `$HOME`, which is not /root in a
+  # project that runs as its own user.
+  if (( token )) && [[ -r ~/.forgejo-token ]]; then
+    devcontainer exec --workspace-folder "$folder" \
+      sh -c 'umask 077; cat > "$HOME/.forgejo-token"' < ~/.forgejo-token
+  fi
+fi
