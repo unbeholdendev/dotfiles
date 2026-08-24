@@ -34,8 +34,8 @@ for the server, `claude/` for the container, which is where claude and
 forgejo-mcp are wanted. Each file is named after its package, so two of them can
 never collide. forgejo-mcp needs an explicit `forgejo:` backend, whose default
 host is Codeberg, where it is released. `claude/` also holds
-`.claude/settings.json`, which `post-create.sh` used to write, so every
-container gets the same permissions and theme rather than only this one. The
+`.claude/settings.json`, which a post-create script used to write into this
+container alone, so every container gets the same permissions and theme. The
 `.claude/` rule in `.gitignore` is anchored to the root, because the bare
 pattern also matched that file. `zsh/.zshenv` puts the mise shims ahead of
 `~/.local/bin`, so a pinned tool wins over one dropped there by hand. The
@@ -44,26 +44,29 @@ pattern also matched that file. `zsh/.zshenv` puts the mise shims ahead of
 
 The container runs as root, so `$HOME` is `/root`; on the real machine it is a
 normal user's home. Never hardcode `/root` or a username in a stowed file.
-Container-only behaviour goes in an env var set in `devcontainer.json`, so the
-stowed file stays correct on the host where that var is unset. That file has no
-Dockerfile behind it any more, only `image`, because everything the image used
-to carry now has somewhere better to be: git, zsh, stow and the zsh plugins are
-installed by `install.sh` when they are missing, the tools come from mise, and
-the git identity and credential helper are three `git config --global` lines in
-`post-create.sh`, which keeps them in this project rather than in every container
-these files reach. That script and not a stowed file, because the identity is
-right here and wrong in a project shared with other people, and the helper is
-scoped to `$FORGEJO_URL`, so it answers for no other forge.
+Container-only behaviour is switched by a test, never by a variable a
+`devcontainer.json` sets, because these files must behave the same in a project
+whose file is not ours to edit. `IS_SANDBOX` shows why: Claude Code exits rather
+than run as root without it, and `claude/.claude/settings.json` asks for
+`bypassPermissions` in every container these files reach, so `zsh/.zshenv`
+exports it where `/.dockerenv` or `/run/.containerenv` is present.
 
-`/mise`, `/history` and `/claude` are the exceptions to that env var rule.
-`dcup` mounts all three, and no `devcontainer.json` does, so they reach a
-project whose file is not ours to edit and no container is ever handed one
-twice. For the same reason no env var announces them: `zsh/.zshenv` tests for
-each directory and sets `MISE_DATA_DIR`, `ZSH_HISTFILE` and `CLAUDE_CONFIG_DIR`
-itself, `zsh/.zshrc` reads the second, and `install.sh` repeats the first and
-third because it runs before any shell does. Each falls back to its old default
-where the directory is absent, and an explicitly set variable wins over the
-test.
+`/mise`, `/history` and `/claude` follow the same rule. `dcup` mounts all three
+and no `devcontainer.json` does, so they reach a project whose file is not ours
+and no container is ever handed one twice, and no variable announces them:
+`zsh/.zshenv` tests for each directory and sets `MISE_DATA_DIR`, `ZSH_HISTFILE`
+and `CLAUDE_CONFIG_DIR` itself, `zsh/.zshrc` reads the second, and `install.sh`
+repeats the first and third because it runs before any shell does. Each falls
+back to its old default where the directory is absent, and an explicitly set
+variable wins over the test.
+
+`devcontainer.json` has no Dockerfile behind it any more, only `image`, because
+everything the image used to carry now has somewhere better to be: git, zsh,
+stow and the zsh plugins are installed by `install.sh` when they are missing,
+the tools come from mise, and the git identity and credential helper are three
+`git config --global` lines in `dcup`. It has no `postCreateCommand` either, so
+this project is started the same way as any other, and the file is down to a
+name and an image.
 
 `/mise` is one mise store shared by every container, so 385M is fetched once
 rather than each time. `/history` is the opposite, one per project under
@@ -91,18 +94,15 @@ inside a project that is not ours. The mount cannot be read-only, because the
 CLI validates `--mount` against a regex that takes only type, source, target and
 external, so a container can write to the clone on that host. Anything after the
 folder argument is passed straight to `devcontainer up`, which is where a
-per-project difference goes. The `exec` that installs the files skips this
-project, which installs them in its own `postCreateCommand` from the workspace
-copy of the same clone: a second stow from `/dotfiles` finds links it does not
-own and aborts. `--no-lockfile` is there because the CLI otherwise writes
-`devcontainer-lock.json` into the project it starts, and that project's tree is
-not ours to dirty. `dcup --token` copies `~/.forgejo-token` into the container,
-for the MCP server and the git credential helper. A flag and not the default:
-that credential is worth more to the other people in a shared project than the
-server is to us. This project takes the same route as any other, so it is
-started with that flag and no `devcontainer.json` mounts the file. One way in
-rather than two, at the price of a container which has no token where the flag
-was forgotten.
+per-project difference goes. `--no-lockfile` is there because the CLI otherwise
+writes `devcontainer-lock.json` into the project it starts, and that project's
+tree is not ours to dirty. `dcup --token` copies `~/.forgejo-token` in and sets
+the git identity and the credential helper, which is the one place that names
+the forge. A flag and not the default: that identity is wrong in a project
+shared with other people, and the credential is worth more to them than the MCP
+server is to us. A `postCreateCommand` is then for a project's own work alone,
+this one included, at the price of a container which has neither token nor
+identity where the flag was forgotten.
 
 That mount is provisional. This repo is to become public, and `ssh/` is to come
 out of it, because that package is the only reason it must stay private: the
@@ -122,8 +122,13 @@ stowed file, so a new store wants the entry once:
 
 ```
 claude mcp add --scope user forgejo -- \
-  sh -c 'exec forgejo-mcp --transport stdio --token "$(cat "$HOME/.forgejo-token")"'
+  sh -c 'exec forgejo-mcp --transport stdio --url https://git.home.unbeholden.dev \
+    --token "$(cat "$HOME/.forgejo-token")"'
 ```
+
+The `--url` is in that entry rather than an env var, because the entry serves
+every project and only this one used to set `FORGEJO_URL`. Without it the server
+stops with `Missing required configuration`.
 
 `~/.forgejo-token` reaches a container through `dcup --token` alone, and is read
 there at runtime by the git credential helper and that server. Never print or
