@@ -40,18 +40,24 @@ devcontainer up --workspace-folder "$folder" --no-lockfile \
   --mount "type=volume,source=claude-state,target=/claude" \
   "${@:2}"
 
-# This project installs these files itself, in its postCreateCommand, from the
-# workspace copy of the same clone. A second stow from /dotfiles then finds links
-# it does not own and aborts, so only a project we do not control needs the exec.
-[[ $(readlink -f "$folder") == "$dotfiles" ]] ||
-  devcontainer exec --workspace-folder "$folder" /dotfiles/install.sh container
+devcontainer exec --workspace-folder "$folder" /dotfiles/install.sh container
 
 # A copy and not a mount: `--mount` takes only type, source, target and
 # external, so a read-only bind is not expressible and the file on this host
 # would be writable from inside the container. The copy also follows `$HOME`,
-# which is not /root in a project that runs as its own user. This project takes
-# the same route as any other, so no `devcontainer.json` carries that file.
+# which is not /root in a project that runs as its own user.
+#
+# The identity and the helper travel with the token, because a project that
+# gets one wants the other, and a project that gets neither must keep the git
+# config it already has. This is the only place that names the forge.
 if (( token )) && [[ -r ~/.forgejo-token ]]; then
   devcontainer exec --workspace-folder "$folder" \
     sh -c 'umask 077; cat > "$HOME/.forgejo-token"' < ~/.forgejo-token
+
+  devcontainer exec --workspace-folder "$folder" sh -s <<'EOF'
+git config --global user.name agent
+git config --global user.email 335420059+unbeholdendev@users.noreply.github.com
+git config --global credential.https://git.home.unbeholden.dev.helper \
+  '!f() { echo username=agent; echo "password=$(cat "$HOME/.forgejo-token")"; }; f'
+EOF
 fi

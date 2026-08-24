@@ -1,9 +1,4 @@
 {
   "name": "dotfiles",
-  "image": "fedora:44",
-  "containerEnv": {
-    "FORGEJO_URL": "https://git.home.unbeholden.dev",
-    "IS_SANDBOX": "1"
-  },
-  "postCreateCommand": ".devcontainer/post-create.sh"
+  "image": "fedora:44"
 }
