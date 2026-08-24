@@ -52,12 +52,49 @@ installed by `install.sh` when they are missing, the tools come from mise, and
 the git identity and credential helper are `GIT_CONFIG_*` variables, which keeps
 them in this project rather than in every container these files reach.
 
-`/mise` is the exception to that env var rule. It is a shared volume holding the
-mise store, so one download serves every container rather than 385M each, and an
-external project's `devcontainer.json` is not ours to add a var to. So
-`zsh/.zshenv` and `install.sh` test for the directory and set `MISE_DATA_DIR`
-themselves, and both fall back to `~/.local/share/mise` where it is absent. An
-explicitly set `MISE_DATA_DIR` wins over the test.
+`/mise`, `/history` and `/claude` are the exceptions to that env var rule.
+`dcup` mounts all three, and no `devcontainer.json` does, so they reach a
+project whose file is not ours to edit and no container is ever handed one
+twice. For the same reason no env var announces them: `zsh/.zshenv` tests for
+each directory and sets `MISE_DATA_DIR`, `ZSH_HISTFILE` and `CLAUDE_CONFIG_DIR`
+itself, `zsh/.zshrc` reads the second, and `install.sh` repeats the first and
+third because it runs before any shell does. Each falls back to its old default
+where the directory is absent, and an explicitly set variable wins over the
+test.
+
+`/mise` is one mise store shared by every container, so 385M is fetched once
+rather than each time. `/history` is the opposite, one per project under
+`~/.devcontainer-state/` on the host, so a shell history outlives its container
+without mixing with another project's. `/claude` is shared again: Claude Code
+keys its sessions and its prompt history by workspace path, so one store per
+person is right, and a store per project would mean a login and 153M of
+downloads each.
+
+`claude/` cannot stow its `settings.json`, because the config directory moves
+with that volume and stow only writes under `$HOME`. Its `.stow-local-ignore`
+keeps the package from linking the file into the wrong place, and `install.sh`
+links it into `CLAUDE_CONFIG_DIR` instead. That link is made with `ln -sfn`, so
+it also repairs itself: Claude Code writes settings with a temp file and a
+rename, which would otherwise replace the link with a plain file for good.
+
+The desktop never runs a dev container; deb-agent does. So `dcup/` is on the
+`server` profile alone. It wraps `devcontainer up` with the flags that put these
+files into a project whose image is not ours to change: a bind mount of the
+clone on that host, the three mounts above, and the `common-utils`
+feature, which is the only way to get zsh into such a project as the login
+shell. It mounts rather than using the CLI's own dotfiles hook, because that
+hook clones, and this repo is private, so it would need a Forgejo credential
+inside a project that is not ours. The mount cannot be read-only, because the
+CLI validates `--mount` against a regex that takes only type, source, target and
+external, so a container can write to the clone on that host. Anything after the
+folder argument is passed straight to `devcontainer up`, which is where a
+per-project difference goes.
+
+That mount is provisional. This repo is to become public, and `ssh/` is to come
+out of it, because that package is the only reason it must stay private: the
+file is a map of hosts, ports and accounts. Once it is public the hook needs no
+credential, and `--dotfiles-repository` replaces both the mount and the `exec`
+line, so `dcup/` gets smaller rather than larger.
 
 niri cannot be run here (no Wayland session), so review those edits rather than
 testing them. For the rest: `./install.sh container` must succeed, a package

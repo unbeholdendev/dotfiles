@@ -17,7 +17,7 @@ case $profile in
     packages=(zsh ssh niri nvim foot portal wireplumber yazi noctalia mise)
     pull=1 mise_tools=0 desktop_theme=1 ;;
   server)
-    packages=(zsh nvim herdr mise)
+    packages=(zsh nvim herdr dcup mise)
     pull=1 mise_tools=1 desktop_theme=0 ;;
   container)
     packages=(zsh nvim mise claude)
@@ -63,6 +63,13 @@ fi
 # writes its state here. Every stow call needs the flag, `-D` included, because
 # removing a package folds the folder it leaves behind.
 stow -R --no-folding --target="$HOME" "${packages[@]}"
+
+if [[ " ${packages[*]} " == *" claude "* ]]; then
+  [[ -z ${CLAUDE_CONFIG_DIR:-} && -d /claude ]] && export CLAUDE_CONFIG_DIR=/claude
+  cfg=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
+  mkdir -p "$cfg"
+  ln -sfn "$PWD/claude/.claude/settings.json" "$cfg/settings.json"
+fi
 
 if [[ $mise_tools == 1 ]]; then
   [[ -z ${MISE_DATA_DIR:-} && -d /mise ]] && export MISE_DATA_DIR=/mise

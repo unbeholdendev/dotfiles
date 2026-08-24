@@ -1,3 +1,4 @@
+[[ -z ${ZSH_HISTFILE:-} && -d /history ]] && ZSH_HISTFILE=/history/zsh_history
 HISTFILE=${ZSH_HISTFILE:-~/.zsh_history}
 HISTSIZE=50000
 SAVEHIST=50000

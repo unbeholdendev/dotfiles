@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+command -v devcontainer >/dev/null ||
+  { echo "no devcontainer CLI: npm i -g @devcontainers/cli" >&2; exit 1; }
+
+# The same trick the `dots` function uses, so the path is right on any host.
+f=$(readlink -f ~/.zshrc)
+dotfiles=${DOTFILES:-${f%/*/*}}
+
+folder=${1:-.}
+
+# Shell history outlives the container it was typed in, one store per project.
+state=$HOME/.devcontainer-state/$(basename "$(readlink -f "$folder")")
+mkdir -p "$state"
+
+# installOhMyZshConfig writes a ~/.zshrc, and stow will not link over a regular
+# file, so leaving it on makes the zsh package silently do nothing.
+devcontainer up --workspace-folder "$folder" \
+  --additional-features '{"ghcr.io/devcontainers/features/common-utils:2":{
+      "installZsh": true,
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": false,
+      "installOhMyZshConfig": false,
+      "upgradePackages": false }}' \
+  --mount "type=bind,source=$dotfiles,target=/dotfiles" \
+  --mount "type=volume,source=mise-store,target=/mise" \
+  --mount "type=bind,source=$state,target=/history" \
+  --mount "type=volume,source=claude-state,target=/claude" \
+  "${@:2}"
+
+devcontainer exec --workspace-folder "$folder" /dotfiles/install.sh container
