@@ -5,8 +5,5 @@
     "FORGEJO_URL": "https://git.home.unbeholden.dev",
     "IS_SANDBOX": "1"
   },
-  "mounts": [
-    "source=/root/.forgejo-token,target=/root/.forgejo-token,type=bind,readonly"
-  ],
   "postCreateCommand": ".devcontainer/post-create.sh"
 }

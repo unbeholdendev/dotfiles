@@ -96,11 +96,13 @@ project, which installs them in its own `postCreateCommand` from the workspace
 copy of the same clone: a second stow from `/dotfiles` finds links it does not
 own and aborts. `--no-lockfile` is there because the CLI otherwise writes
 `devcontainer-lock.json` into the project it starts, and that project's tree is
-not ours to dirty. `dcup --token` copies `~/.forgejo-token` into the container
-as well, because the MCP server runs in every project and the mount that serves
-this one is in a `devcontainer.json` no other project has. A flag and not the
-default: that credential is worth more to the other people in a shared project
-than the server is to us.
+not ours to dirty. `dcup --token` copies `~/.forgejo-token` into the container,
+for the MCP server and the git credential helper. A flag and not the default:
+that credential is worth more to the other people in a shared project than the
+server is to us. This project takes the same route as any other, so it is
+started with that flag and no `devcontainer.json` mounts the file. One way in
+rather than two, at the price of a container which has no token where the flag
+was forgotten.
 
 That mount is provisional. This repo is to become public, and `ssh/` is to come
 out of it, because that package is the only reason it must stay private: the
@@ -123,9 +125,9 @@ claude mcp add --scope user forgejo -- \
   sh -c 'exec forgejo-mcp --transport stdio --token "$(cat "$HOME/.forgejo-token")"'
 ```
 
-`~/.forgejo-token` is bind-mounted read-only into this project, copied into
-another project's container by `dcup --token` alone, and read at runtime by the
-git credential helper and that server. Never print or commit its value.
+`~/.forgejo-token` reaches a container through `dcup --token` alone, and is read
+there at runtime by the git credential helper and that server. Never print or
+commit its value.
 
 ## Rules
 

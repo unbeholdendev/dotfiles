@@ -43,17 +43,15 @@ devcontainer up --workspace-folder "$folder" --no-lockfile \
 # This project installs these files itself, in its postCreateCommand, from the
 # workspace copy of the same clone. A second stow from /dotfiles then finds links
 # it does not own and aborts, so only a project we do not control needs the exec.
-if [[ $(readlink -f "$folder") != "$dotfiles" ]]; then
+[[ $(readlink -f "$folder") == "$dotfiles" ]] ||
   devcontainer exec --workspace-folder "$folder" /dotfiles/install.sh container
 
-  # The forgejo MCP server is registered once per Claude Code store, so it runs
-  # in every project and reads the token in each. A copy and not a mount:
-  # `--mount` takes only type, source, target and external, so a read-only bind
-  # is not expressible and the file on this host would be writable from inside
-  # that container. The copy also follows `$HOME`, which is not /root in a
-  # project that runs as its own user.
-  if (( token )) && [[ -r ~/.forgejo-token ]]; then
-    devcontainer exec --workspace-folder "$folder" \
-      sh -c 'umask 077; cat > "$HOME/.forgejo-token"' < ~/.forgejo-token
-  fi
+# A copy and not a mount: `--mount` takes only type, source, target and
+# external, so a read-only bind is not expressible and the file on this host
+# would be writable from inside the container. The copy also follows `$HOME`,
+# which is not /root in a project that runs as its own user. This project takes
+# the same route as any other, so no `devcontainer.json` carries that file.
+if (( token )) && [[ -r ~/.forgejo-token ]]; then
+  devcontainer exec --workspace-folder "$folder" \
+    sh -c 'umask 077; cat > "$HOME/.forgejo-token"' < ~/.forgejo-token
 fi
