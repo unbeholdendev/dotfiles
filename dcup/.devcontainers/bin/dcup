@@ -8,9 +8,8 @@ command -v devcontainer >/dev/null ||
 f=$(readlink -f ~/.zshrc)
 dotfiles=${DOTFILES:-${f%/*/*}}
 
-# --token copies the Forgejo token in, for the MCP server. Off by default,
-# because that credential is worth more to the other people in a shared project
-# than the server is to you.
+# Off by default: that credential is worth more to the other people in a shared
+# project than the MCP server is to you.
 token=0
 if [[ ${1:-} == --token ]]; then token=1; shift; fi
 
@@ -24,9 +23,8 @@ mkdir -p "$state"
 # file, so leaving it on makes the zsh package silently do nothing.
 #
 # --no-lockfile because the CLI otherwise writes devcontainer-lock.json into the
-# project it starts, and an external project's tree is not ours to dirty. It
-# pins nothing here: the features are on this command line rather than in a
-# devcontainer.json, so the file the first run wrote held an empty feature set.
+# project it starts, and that tree is not ours to dirty. It pins nothing here:
+# the features are on this command line rather than in a devcontainer.json.
 devcontainer up --workspace-folder "$folder" --no-lockfile \
   --additional-features '{"ghcr.io/devcontainers/features/common-utils:2":{
       "installZsh": true,
@@ -43,13 +41,9 @@ devcontainer up --workspace-folder "$folder" --no-lockfile \
 devcontainer exec --workspace-folder "$folder" /dotfiles/install.sh container
 
 # A copy and not a mount: `--mount` takes only type, source, target and
-# external, so a read-only bind is not expressible and the file on this host
-# would be writable from inside the container. The copy also follows `$HOME`,
-# which is not /root in a project that runs as its own user.
-#
-# The identity and the helper travel with the token, because a project that
-# gets one wants the other, and a project that gets neither must keep the git
-# config it already has. This is the only place that names the forge.
+# external, so a read-only bind is not expressible, and a copy follows `$HOME`
+# in a project that runs as its own user. The identity travels with the token,
+# because a project that gets neither keeps the git config it already has.
 if (( token )) && [[ -r ~/.forgejo-token ]]; then
   devcontainer exec --workspace-folder "$folder" \
     sh -c 'umask 077; cat > "$HOME/.forgejo-token"' < ~/.forgejo-token

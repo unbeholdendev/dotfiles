@@ -2,10 +2,17 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+# A container sees this clone twice, as the workspace and as the /dotfiles
+# mount. stow owns the links under one name, so hand the run to that one.
+if [[ -d /dotfiles && $(stat -c '%d:%i' .) == $(stat -c '%d:%i' /dotfiles) \
+      && $PWD != /dotfiles ]]; then
+  exec /dotfiles/install.sh "$@"
+fi
+
 # Remember the profile per machine, so a bare `dots` on the agent host does not
-# fall back to the desktop set and link ssh/ onto a host that cannot use it.
-# The dev container dotfiles hook runs this file with no argument, and a fresh
-# container has no marker, so the last resort must not be desktop there either.
+# stow the desktop set and link ssh/ onto a host that cannot use it. A fresh
+# container has no marker and the dotfiles hook passes no argument, so the
+# fallback there must not be desktop either.
 marker=$HOME/.dots-profile
 default=desktop
 [[ -f /.dockerenv || -f /run/.containerenv ]] && default=container
@@ -14,7 +21,7 @@ profile=${1:-$(cat "$marker" 2>/dev/null || echo "$default")}
 # Every difference between the environments this repo serves is in this table.
 case $profile in
   desktop)
-    packages=(zsh ssh niri nvim foot portal wireplumber yazi noctalia mise)
+    packages=(zsh ssh niri nvim foot portal wireplumber yazi noctalia)
     pull=1 mise_tools=0 desktop_theme=1 ;;
   server)
     packages=(zsh nvim herdr dcup mise)
@@ -29,16 +36,14 @@ esac
 printf '%s\n' "$profile" > "$marker"
 
 # Re-exec after the pull so the pulled version of this file does the stow.
-# Without it a package added upstream is never linked. The container profile
-# skips it, because its clone is fresh and it must not touch a working tree.
+# The container profile skips it: that clone is somebody's working tree.
 if [[ $pull == 1 && -z ${DOTS_PULLED:-} ]]; then
   git pull --rebase --autostash
   DOTS_PULLED=1 exec "$0" "$profile"
 fi
 
-# A bare distro image has none of these, and an external project's image is not
-# ours to change, so install them here instead. A failure is not fatal: the stow
-# call below reports a missing stow, and `.zshrc` already skips a plugin it
+# A bare image has none of these and is not ours to change. A failure is not
+# fatal: stow below reports itself missing, and `.zshrc` skips a plugin it
 # cannot read.
 missing=()
 command -v git  >/dev/null || missing+=(git)
@@ -58,10 +63,9 @@ if (( ${#missing[@]} )); then
   fi
 fi
 
-# --no-folding keeps each folder real. Without it stow replaces a folder that
-# holds only one package's files with a link to this repo, and the tool then
-# writes its state here. Every stow call needs the flag, `-D` included, because
-# removing a package folds the folder it leaves behind.
+# --no-folding keeps each folder real. Without it stow replaces a folder holding
+# one package's files with a link to this repo, and tools then write in here.
+# Every stow call needs the flag, `-D` included.
 stow -R --no-folding --target="$HOME" "${packages[@]}"
 
 if [[ " ${packages[*]} " == *" claude "* ]]; then
