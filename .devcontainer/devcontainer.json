@@ -1,6 +1,6 @@
 {
   "name": "dotfiles",
-  "build": { "dockerfile": "Dockerfile", "context": ".." },
+  "image": "fedora:44",
   "containerEnv": {
     "FORGEJO_URL": "https://git.home.unbeholden.dev",
     "IS_SANDBOX": "1",
@@ -9,6 +9,7 @@
   },
   "mounts": [
     "source=claude-auth,target=/root/.claude,type=volume",
+    "source=mise-store,target=/mise,type=volume",
     "source=/root/.devcontainer-state/dotfiles,target=/root/.history,type=bind",
     "source=/root/.forgejo-token,target=/root/.forgejo-token,type=bind,readonly"
   ],
