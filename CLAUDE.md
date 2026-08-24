@@ -88,7 +88,10 @@ inside a project that is not ours. The mount cannot be read-only, because the
 CLI validates `--mount` against a regex that takes only type, source, target and
 external, so a container can write to the clone on that host. Anything after the
 folder argument is passed straight to `devcontainer up`, which is where a
-per-project difference goes.
+per-project difference goes. The `exec` that installs the files skips this
+project, which installs them in its own `postCreateCommand` from the workspace
+copy of the same clone: a second stow from `/dotfiles` finds links it does not
+own and aborts.
 
 That mount is provisional. This repo is to become public, and `ssh/` is to come
 out of it, because that package is the only reason it must stay private: the

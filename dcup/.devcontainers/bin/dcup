@@ -29,4 +29,8 @@ devcontainer up --workspace-folder "$folder" \
   --mount "type=volume,source=claude-state,target=/claude" \
   "${@:2}"
 
-devcontainer exec --workspace-folder "$folder" /dotfiles/install.sh container
+# This project installs these files itself, in its postCreateCommand, from the
+# workspace copy of the same clone. A second stow from /dotfiles then finds links
+# it does not own and aborts, so only a project we do not control needs the exec.
+[[ $(readlink -f "$folder") == "$dotfiles" ]] ||
+  devcontainer exec --workspace-folder "$folder" /dotfiles/install.sh container
