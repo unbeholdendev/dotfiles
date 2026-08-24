@@ -16,7 +16,12 @@ mkdir -p "$state"
 
 # installOhMyZshConfig writes a ~/.zshrc, and stow will not link over a regular
 # file, so leaving it on makes the zsh package silently do nothing.
-devcontainer up --workspace-folder "$folder" \
+#
+# --no-lockfile because the CLI otherwise writes devcontainer-lock.json into the
+# project it starts, and an external project's tree is not ours to dirty. It
+# pins nothing here: the features are on this command line rather than in a
+# devcontainer.json, so the file the first run wrote held an empty feature set.
+devcontainer up --workspace-folder "$folder" --no-lockfile \
   --additional-features '{"ghcr.io/devcontainers/features/common-utils:2":{
       "installZsh": true,
       "configureZshAsDefaultShell": true,

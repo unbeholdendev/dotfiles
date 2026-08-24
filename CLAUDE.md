@@ -49,8 +49,11 @@ stowed file stays correct on the host where that var is unset. That file has no
 Dockerfile behind it any more, only `image`, because everything the image used
 to carry now has somewhere better to be: git, zsh, stow and the zsh plugins are
 installed by `install.sh` when they are missing, the tools come from mise, and
-the git identity and credential helper are `GIT_CONFIG_*` variables, which keeps
-them in this project rather than in every container these files reach.
+the git identity and credential helper are three `git config --global` lines in
+`post-create.sh`, which keeps them in this project rather than in every container
+these files reach. That script and not a stowed file, because the identity is
+right here and wrong in a project shared with other people, and the helper is
+scoped to `$FORGEJO_URL`, so it answers for no other forge.
 
 `/mise`, `/history` and `/claude` are the exceptions to that env var rule.
 `dcup` mounts all three, and no `devcontainer.json` does, so they reach a
@@ -91,7 +94,9 @@ folder argument is passed straight to `devcontainer up`, which is where a
 per-project difference goes. The `exec` that installs the files skips this
 project, which installs them in its own `postCreateCommand` from the workspace
 copy of the same clone: a second stow from `/dotfiles` finds links it does not
-own and aborts.
+own and aborts. `--no-lockfile` is there because the CLI otherwise writes
+`devcontainer-lock.json` into the project it starts, and that project's tree is
+not ours to dirty.
 
 That mount is provisional. This repo is to become public, and `ssh/` is to come
 out of it, because that package is the only reason it must stay private: the
