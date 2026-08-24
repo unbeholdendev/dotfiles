@@ -17,7 +17,10 @@ outside any project, so a repo this one never sees still gets these files. Two
 things follow: the profile falls back to `container` when `/.dockerenv` or
 `/run/.containerenv` exists, and the script installs stow and the zsh plugins
 itself, because the base image of somebody else's project is not ours to
-change.
+change. In a container the clone answers to two names, the workspace and the
+`/dotfiles` mount, and stow owns the links under one of them, so a run started
+from the other name is handed to the mount rather than aborting on links it does
+not own.
 
 `deb-agent` is a headless Debian host, on the `server` profile. The work happens
 in the dev containers it runs, not on the host, so it wants herdr to manage the
@@ -25,22 +28,21 @@ sessions and none of the agent tools itself. `ssh/` is deliberately absent
 there: the file names the desktop's own key and every host it reaches, none of
 which that host can use.
 
-`mise/` pins the tools every environment needs, whose distro version is absent
-or too old: nvim, fzf and zoxide. All of them read the same file, so a version
-bump is one commit rather than a command retyped per host. A tool one profile
-alone needs is pinned by a package only that profile stows, in its own file
+`mise/` pins the tools whose distro version is absent or too old: nvim, fzf and
+zoxide. The `server` and `container` profiles stow it, install mise where it is
+missing and run `mise install`. The desktop takes those three from Fedora, whose
+builds are current, so it does not stow the package at all. A version bump is
+then one commit rather than a command retyped per host. A tool one profile alone
+needs is pinned by a package only that profile stows, in its own file
 under `.config/mise/conf.d/`, which mise merges with the shared one: `herdr/`
 for the server, `claude/` for the container, which is where claude and
 forgejo-mcp are wanted. Each file is named after its package, so two of them can
 never collide. forgejo-mcp needs an explicit `forgejo:` backend, whose default
 host is Codeberg, where it is released. `claude/` also holds
-`.claude/settings.json`, which a post-create script used to write into this
-container alone, so every container gets the same permissions and theme. The
-`.claude/` rule in `.gitignore` is anchored to the root, because the bare
+`.claude/settings.json`, so every container gets the same permissions and theme.
+The `.claude/` rule in `.gitignore` is anchored to the root, because the bare
 pattern also matched that file. `zsh/.zshenv` puts the mise shims ahead of
-`~/.local/bin`, so a pinned tool wins over one dropped there by hand. The
-`server` and `container` profiles install mise if it is missing and then run
-`mise install`; `desktop` does not, because Fedora's own builds are current.
+`~/.local/bin`, so a pinned tool wins over one dropped there by hand.
 
 The container runs as root, so `$HOME` is `/root`; on the real machine it is a
 normal user's home. Never hardcode `/root` or a username in a stowed file.

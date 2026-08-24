@@ -1,4 +1,2 @@
-# The pin lives with the herdr package, so only the server profile installs it.
-# mise reads every file in conf.d, so each package owns its own name.
 [tools]
 "github:herdrdev/herdr" = "0.8.2"
