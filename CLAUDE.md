@@ -96,7 +96,11 @@ project, which installs them in its own `postCreateCommand` from the workspace
 copy of the same clone: a second stow from `/dotfiles` finds links it does not
 own and aborts. `--no-lockfile` is there because the CLI otherwise writes
 `devcontainer-lock.json` into the project it starts, and that project's tree is
-not ours to dirty.
+not ours to dirty. `dcup --token` copies `~/.forgejo-token` into the container
+as well, because the MCP server runs in every project and the mount that serves
+this one is in a `devcontainer.json` no other project has. A flag and not the
+default: that credential is worth more to the other people in a shared project
+than the server is to us.
 
 That mount is provisional. This repo is to become public, and `ssh/` is to come
 out of it, because that package is the only reason it must stay private: the
@@ -109,8 +113,19 @@ testing them. For the rest: `./install.sh container` must succeed, a package
 added to the `desktop` profile must stow into an empty directory without
 conflicts, and `zsh -ic exit` must be silent.
 
-`~/.forgejo-token` is bind-mounted read-only and read at runtime by the git
-credential helper and the forgejo MCP server. Never print or commit its value.
+The forgejo MCP server is registered at user scope, in `.claude.json` inside the
+Claude store, so it loads in every project and no repository carries a
+`.mcp.json` for it. That file is state in the `/claude` volume rather than a
+stowed file, so a new store wants the entry once:
+
+```
+claude mcp add --scope user forgejo -- \
+  sh -c 'exec forgejo-mcp --transport stdio --token "$(cat "$HOME/.forgejo-token")"'
+```
+
+`~/.forgejo-token` is bind-mounted read-only into this project, copied into
+another project's container by `dcup --token` alone, and read at runtime by the
+git credential helper and that server. Never print or commit its value.
 
 ## Rules
 
