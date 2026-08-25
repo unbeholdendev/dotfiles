@@ -98,13 +98,18 @@ external, so a container can write to the clone on that host. Anything after the
 folder argument is passed straight to `devcontainer up`, which is where a
 per-project difference goes. `--no-lockfile` is there because the CLI otherwise
 writes `devcontainer-lock.json` into the project it starts, and that project's
-tree is not ours to dirty. `dcup --token` copies `~/.forgejo-token` in and sets
-the git identity and the credential helper, which is the one place that names
-the forge. A flag and not the default: that identity is wrong in a project
-shared with other people, and the credential is worth more to them than the MCP
-server is to us. A `postCreateCommand` is then for a project's own work alone,
-this one included, at the price of a container which has neither token nor
-identity where the flag was forgotten.
+tree is not ours to dirty. `dcup --token` copies in whichever of
+`~/.forgejo-token` and `~/.github-token` is there, and sets the git identity
+once either arrives. The forgejo token also gets a credential helper, which is
+the one place that names that forge. The github token gets none: a fine-grained
+token is issued per owner, and every owner is the same host, so the host a
+helper is keyed by cannot pick between two of them. That clone names its own
+file instead, in a `.git/config` which the host and the container both read. A
+flag and not the default: that identity is wrong in a project shared with other
+people, and the credential is worth more to them than the MCP server is to us. A
+`postCreateCommand` is then for a project's own work alone, this one included,
+at the price of a container which has neither token nor identity where the flag
+was forgotten.
 
 `dcclaude` is the other half of that pair: it starts claude in a container
 `dcup` brought up. herdr names a pane from the comm and the argv0 of the
@@ -148,6 +153,21 @@ stops with `Missing required configuration`.
 `~/.forgejo-token` reaches a container through `dcup --token` alone, and is read
 there at runtime by the git credential helper and that server. Never print or
 commit its value.
+
+`~/.github-token` is a fine-grained personal access token, and takes the same
+route. It is scoped to a list of repositories under one owner, so a second owner
+wants a second file. Nothing global names it: each clone points at its own file,
+on the host where the clone was made, and the line survives into the container
+because `.git/config` is inside the mounted tree and `$HOME` resolves on both
+sides.
+
+```
+git -C <clone> config credential.https://github.com.helper \
+  '!f() { echo username=<user>; echo "password=$(cat "$HOME/.github-token")"; }; f'
+```
+
+Never put the token in a remote URL. That writes it into `.git/config`, which
+the container reads and a push can leak.
 
 ## Rules
 
