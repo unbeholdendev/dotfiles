@@ -44,14 +44,34 @@ devcontainer exec --workspace-folder "$folder" /dotfiles/install.sh container
 # external, so a read-only bind is not expressible, and a copy follows `$HOME`
 # in a project that runs as its own user. The identity travels with the token,
 # because a project that gets neither keeps the git config it already has.
-if (( token )) && [[ -r ~/.forgejo-token ]]; then
-  devcontainer exec --workspace-folder "$folder" \
-    sh -c 'umask 077; cat > "$HOME/.forgejo-token"' < ~/.forgejo-token
+if (( token )); then
+  copied=0
 
-  devcontainer exec --workspace-folder "$folder" sh -s <<'EOF'
-git config --global user.name agent
-git config --global user.email 335420059+unbeholdendev@users.noreply.github.com
+  if [[ -r ~/.forgejo-token ]]; then
+    devcontainer exec --workspace-folder "$folder" \
+      sh -c 'umask 077; cat > "$HOME/.forgejo-token"' < ~/.forgejo-token
+    copied=1
+
+    devcontainer exec --workspace-folder "$folder" sh -s <<'EOF'
 git config --global credential.https://git.home.unbeholden.dev.helper \
   '!f() { echo username=agent; echo "password=$(cat "$HOME/.forgejo-token")"; }; f'
 EOF
+  fi
+
+  # No helper for this one. A fine-grained token is issued per owner, and every
+  # owner is github.com, so the host a helper is keyed by cannot choose between
+  # two of them. The clone names its own file instead, in a `.git/config` that
+  # both sides of the mount read and where `$HOME` resolves on each.
+  if [[ -r ~/.github-token ]]; then
+    devcontainer exec --workspace-folder "$folder" \
+      sh -c 'umask 077; cat > "$HOME/.github-token"' < ~/.github-token
+    copied=1
+  fi
+
+  if (( copied )); then
+    devcontainer exec --workspace-folder "$folder" sh -s <<'EOF'
+git config --global user.name agent
+git config --global user.email 335420059+unbeholdendev@users.noreply.github.com
+EOF
+  fi
 fi
