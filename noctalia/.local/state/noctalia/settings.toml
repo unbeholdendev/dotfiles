@@ -24,24 +24,6 @@ end = [
 ]
 start = [ "workspaces", "active_window" ]
 
-    [bar.default.monitor.eDP-1]
-    end = [
-        "media",
-        "privacy",
-        "keyboard_layout",
-        "power_profile",
-        "tray",
-        "notifications",
-        "clipboard",
-        "network",
-        "bluetooth",
-        "volume",
-        "brightness",
-        "battery",
-        "control-center",
-        "session"
-    ]
-
 [battery]
 warning_threshold = 15
 
