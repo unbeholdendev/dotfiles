@@ -1,37 +1,52 @@
-config_version = 8
+config_version = 13
+
+[backdrop]
+enabled = true
 
 [bar.default]
-start = [ "workspaces", "active_window" ]
 end = [
-    "media", "privacy", "cpu", "ram", "keyboard_layout", "power_profile",
-    "tray", "notifications", "clipboard", "network", "bluetooth",
-    "volume", "brightness", "battery", "control-center", "session",
+    "media",
+    "privacy",
+    "cpu",
+    "ram",
+    "keyboard_layout",
+    "power_profile",
+    "tray",
+    "notifications",
+    "clipboard",
+    "network",
+    "bluetooth",
+    "volume",
+    "brightness",
+    "battery",
+    "control-center",
+    "session"
 ]
+start = [ "workspaces", "active_window" ]
 
     [bar.default.monitor.eDP-1]
     end = [
-        "media", "privacy", "keyboard_layout", "power_profile", "tray",
-        "notifications", "clipboard", "network", "bluetooth", "volume",
-        "brightness", "battery", "control-center", "session",
+        "media",
+        "privacy",
+        "keyboard_layout",
+        "power_profile",
+        "tray",
+        "notifications",
+        "clipboard",
+        "network",
+        "bluetooth",
+        "volume",
+        "brightness",
+        "battery",
+        "control-center",
+        "session"
     ]
-
-[widget.privacy]
-hide_inactive = true
-
-[widget.clock]
-format = "{:%a %d %b  %H:%M}"
-tooltip_format = "{:%A %d %B %Y (week %V)}"
-font_family = "JetBrains Mono"
 
 [battery]
 warning_threshold = 15
 
 [brightness]
 enable_ddcutil = true
-
-[nightlight]
-enabled = true
-temperature_night = 3500
 
 [calendar]
 enabled = true
@@ -42,23 +57,41 @@ enabled = true
     type = "caldav"
     username = "fam"
 
+[control_center.calendar]
+show_week_numbers = true
+
+[hot_corners]
+delay_ms = 120
+enabled = true
+
+    [hot_corners.top_left]
+    action = "overview"
+
 [idle]
 pre_action_fade_seconds = 3.0
 
     [idle.behavior.lock]
+    action = "lock"
     enabled = true
     timeout = 300
-    action = "lock"
 
     [idle.behavior.screen-off]
+    action = "screen_off"
     enabled = true
     timeout = 360
-    action = "screen_off"
 
     [idle.behavior.suspend]
+    action = "lock_and_suspend"
     enabled = true
     timeout = 600
-    action = "lock_and_suspend"
+
+[location]
+auto_locate = true
+latitude = 49.724891
+longitude = 18.466190999999998
+
+[lockscreen]
+blurred_desktop = true
 
 [lockscreen_widgets]
 enabled = false
@@ -76,6 +109,8 @@ widget_order = [ "lockscreen-login-box@DP-1", "lockscreen-login-box@eDP-1" ]
     cx = 1280.0
     cy = 1258.0
     output = "DP-1"
+    placement_height = 0.0
+    placement_width = 0.0
     rotation = 0.0
     type = "login_box"
 
@@ -101,6 +136,8 @@ widget_order = [ "lockscreen-login-box@DP-1", "lockscreen-login-box@eDP-1" ]
     cx = 768.0
     cy = 778.0
     output = "eDP-1"
+    placement_height = 864.0
+    placement_width = 1536.0
     rotation = 0.0
     type = "login_box"
 
@@ -120,28 +157,13 @@ widget_order = [ "lockscreen-login-box@DP-1", "lockscreen-login-box@eDP-1" ]
         show_unlock_hint = true
         show_weather = true
 
-[backdrop]
+[nightlight]
 enabled = true
-
-[control_center.calendar]
-show_week_numbers = true
-
-[hot_corners]
-enabled = true
-delay_ms = 120
-
-    [hot_corners.top_left]
-    action = "overview"
-
-[lockscreen]
-blurred_desktop = true
+temperature_night = 3500
 
 [notification]
-monitors = [ "DP-1" ]
 history_retention_hours = 168
-
-[wallpaper.automation]
-enabled = true
+monitors = [ "DP-1" ]
 
 [shell]
 date_format = "%A, %d %B"
@@ -167,6 +189,9 @@ directory = "/home/pycan/Pictures/Wallpapers"
 directory_dark = "/home/pycan/Pictures/Wallpapers"
 directory_light = "/home/pycan/Pictures/Wallpapers"
 
+    [wallpaper.automation]
+    enabled = true
+
     [wallpaper.default]
     path = "/home/pycan/Pictures/Wallpapers/8207827.png"
 
@@ -179,7 +204,10 @@ directory_light = "/home/pycan/Pictures/Wallpapers"
     [wallpaper.monitors.eDP-1]
     path = "/home/pycan/Pictures/Wallpapers/8207827.png"
 
-[location]
-auto_locate = true
-latitude = 49.724891
-longitude = 18.466191
+[widget.clock]
+font_family = "JetBrains Mono"
+format = "{:%a %d %b  %H:%M}"
+tooltip_format = "{:%A %d %B %Y (week %V)}"
+
+[widget.privacy]
+hide_inactive = true
