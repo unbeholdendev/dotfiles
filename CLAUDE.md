@@ -130,6 +130,16 @@ file is a map of hosts, ports and accounts. Once it is public the hook needs no
 credential, and `--dotfiles-repository` replaces both the mount and the `exec`
 line, so `dcup/` gets smaller rather than larger.
 
+`flake.nix` starts the move to Nix, and nothing depends on it yet. Home-manager
+runs standalone, so Fedora stays Fedora and the Debian host stays Debian, and no
+machine has to be reinstalled to use it. Each package moves in its own commit:
+the stow package goes, a module under `home/` arrives, and the name leaves the
+profile table. `install.sh` is right until that table is empty, so both tools
+describe a machine in the meantime and neither is half done. The host is named
+in the output rather than remembered in a marker file, which is what
+`~/.dots-profile` does today. A flake reads tracked files alone, so a new module
+wants `git add` before the switch, committed or not.
+
 niri cannot be run here (no Wayland session), so review those edits rather than
 testing them. For the rest: `./install.sh container` must succeed, a package
 added to the `desktop` profile must stow into an empty directory without
