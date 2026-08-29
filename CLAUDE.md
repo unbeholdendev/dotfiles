@@ -138,7 +138,11 @@ profile table. `install.sh` is right until that table is empty, so both tools
 describe a machine in the meantime and neither is half done. The host is named
 in the output rather than remembered in a marker file, which is what
 `~/.dots-profile` does today. A flake reads tracked files alone, so a new module
-wants `git add` before the switch, committed or not.
+wants `git add` before the switch, committed or not. Home-manager stops rather
+than write over a file that is already there, and every file it wants is a stow
+link until its package moves, so the switch takes `-b hm-bak` until the table is
+empty. That is a flag and not an option: `backupFileExtension` belongs to the
+NixOS module, whose rebuild has no command line to put it on.
 
 niri cannot be run here (no Wayland session), so review those edits rather than
 testing them. For the rest: `./install.sh container` must succeed, a package
