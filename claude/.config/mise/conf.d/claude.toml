@@ -1,5 +1,0 @@
-# forgejo-mcp has no aqua entry, and Codeberg is the default host of mise's
-# forgejo backend, so that backend has to be explicit.
-[tools]
-claude = "2.1"
-"forgejo:goern/forgejo-mcp" = "2.30"

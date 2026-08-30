@@ -39,7 +39,8 @@ alias ..='cd ..'
 alias ...='cd ../..'
 
 # On a host home-manager installs `dots`, with the clone and the flake output
-# written into it. This is the container's, where install.sh is the whole of it.
+# written into it. A container cannot have that: the clone is at a path the
+# image and the mount decide, so install.sh works it out at run time.
 if ! command -v dots >/dev/null; then
   dots() {
     local d=${DOTFILES:-}

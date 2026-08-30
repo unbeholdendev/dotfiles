@@ -4,10 +4,10 @@ Config for a Fedora + niri machine. Authored in this dev container, then pulled
 onto the real machine. The container is for editing, not the target.
 
 Each top-level directory holds one program's files, laid out as they sit under
-`$HOME`. A `home/` module names them on a host that has nix, and stow links them
-in a container, which has none. One source, two ways of placing it, and the
-container is the only place that still stows anything, and `install.sh` is now
-its script alone. It names `desktop` and `server` only to refuse them. `dots` is
+`$HOME`. A `home/` module names every one of them, on a host and in a container
+alike, and nothing stows anything any more. `install.sh` is the container's
+script alone, and what it does now is get nix and run the switch. It names
+`desktop` and `server` only to refuse them. `dots` is
 the one command either way: in a container it is a function in `.zshrc` calling
 that script, and on a host it is a program home-manager installs, with the clone
 and the flake output written into it rather than worked out at run time. So
@@ -19,12 +19,19 @@ runs the first of `install.sh`, `install`, `bootstrap.sh`, `bootstrap`,
 `setup.sh` or `setup` it finds, with no argument. That hook is set per user,
 outside any project, so a repo this one never sees still gets these files. Two
 things follow: the profile falls back to `container` when `/.dockerenv` or
-`/run/.containerenv` exists, and the script installs stow and the zsh plugins
-itself, because the base image of somebody else's project is not ours to
-change. In a container the clone answers to two names, the workspace and the
-`/dotfiles` mount, and stow owns the links under one of them, so a run started
-from the other name is handed to the mount rather than aborting on links it does
-not own.
+`/run/.containerenv` exists, and the script installs nix itself, because the
+base image of somebody else's project is not ours to change. It installs zsh,
+git, curl and xz the same way and for the same reason: zsh has to come from the
+distro because it is the login shell, and the other three are what the nix
+installer needs to run at all. Everything else comes from the store.
+
+The nix installer wants two flags in a container. `--no-daemon`, because there
+is no systemd to run one, and `--no-modify-profile`, because it otherwise
+appends a line naming `/root` to the first shell file it finds, and while stow
+placed `~/.zshenv` that file was this repo's. It also stops before it starts
+unless `build-users-group` is empty, since a container has no `nixbld` group, so
+`install.sh` writes `~/.config/nix/nix.conf` first. `sandbox` is off in the same
+file, because a container is not given the privileges one wants.
 
 `deb-agent` is a headless Debian host, and `root@deb-agent` is its home
 configuration. The work happens in the dev containers it runs, not on the host,
@@ -33,24 +40,27 @@ ssh table is deliberately absent there: it names the desktop's own key and every
 host it reaches, none of which that host can use, and it is imported by the
 desktop's module alone.
 
-`mise/` pins the tools whose distro version is absent or too old: nvim, fzf and
-zoxide. Only the container has it now. `install.sh` stows it, installs mise
-where it is missing and runs `mise install`. The desktop takes those three from
-Fedora, whose builds are current, and deb-agent takes them from nixpkgs, so
-neither wants mise at all. A version bump is then one commit rather than a
-command retyped per container. A tool the container alone needs is pinned in its
-own file under `.config/mise/conf.d/`, which mise merges with the shared one.
-`claude/` is the last of those, and is where claude and forgejo-mcp are
-wanted. Each file is named after its package, so two of them can never
-collide. forgejo-mcp needs an explicit `forgejo:` backend, whose default
-host is Codeberg, where it is released. `claude/` also holds
-`.claude/settings.json`, so every container gets the same permissions and theme.
-The `.claude/` rule in `.gitignore` is anchored to the root, because the bare
-pattern also matched that file. `zsh/.zshenv` puts the mise shims ahead of
-`~/.local/bin`, so a pinned tool wins over one dropped there by hand.
+`container` is the third flake output, and it is one name for every container,
+because a container hostname is a random id. The two facts that do vary are read
+from the environment: the image chooses the user, so `install.sh` exports
+`HOME_USER` and builds with `--impure`. A build started any other way stops with
+a message saying so rather than guessing. `home/container.nix` is what `mise/`
+was: nvim, fzf, zoxide, claude and forgejo-mcp, at the versions the TOML named,
+pinned by `flake.lock` instead of by a version string. It carries nix itself as
+well, since `install.sh` points `~/.nix-profile` away from the one the installer
+made. claude-code is unfree, so the container's `pkgs` is a second import of
+nixpkgs with a predicate naming that one package, because `allowUnfree` on its
+own would let a second one arrive unnoticed.
+
+`claude/` is down to `.claude/settings.json`, so every container gets the same
+permissions and theme. The `.claude/` rule in `.gitignore` is anchored to the
+root, because the bare pattern also matched that file. `zsh/.zshenv` puts
+`~/.nix-profile/bin` ahead of `~/.local/bin`, so a pinned tool wins over one
+dropped there by hand.
 
 The container runs as root, so `$HOME` is `/root`; on the real machine it is a
-normal user's home. Never hardcode `/root` or a username in a stowed file.
+normal user's home. Never hardcode `/root` or a username in a file this repo
+places.
 Container-only behaviour is switched by a test, never by a variable a
 `devcontainer.json` sets, because these files must behave the same in a project
 whose file is not ours to edit. `IS_SANDBOX` shows why: Claude Code exits rather
@@ -58,35 +68,41 @@ than run as root without it, and `claude/.claude/settings.json` asks for
 `bypassPermissions` in every container these files reach, so `zsh/.zshenv`
 exports it where `/.dockerenv` or `/run/.containerenv` is present.
 
-`/mise`, `/history` and `/claude` follow the same rule. `dcup` mounts all three
+`/nix`, `/history` and `/claude` follow the same rule. `dcup` mounts all three
 and no `devcontainer.json` does, so they reach a project whose file is not ours
 and no container is ever handed one twice, and no variable announces them:
-`zsh/.zshenv` tests for each directory and sets `MISE_DATA_DIR`, `ZSH_HISTFILE`
-and `CLAUDE_CONFIG_DIR` itself, `zsh/.zshrc` reads the second, and `install.sh`
-repeats the first and third because it runs before any shell does. Each falls
-back to its old default where the directory is absent, and an explicitly set
-variable wins over the test.
+`zsh/.zshenv` tests for `/claude` and sets `CLAUDE_CONFIG_DIR`, `zsh/.zshrc`
+tests for `/history` and sets `ZSH_HISTFILE`, and `install.sh` repeats the first
+because it runs before any shell does. `/nix` wants no variable at all, since
+nix finds its store by absolute path. Each falls back to its old default where
+the directory is absent, and an explicitly set variable wins over the test.
 
 `devcontainer.json` has no Dockerfile behind it any more, only `image`, because
 everything the image used to carry now has somewhere better to be: git, zsh,
-stow and the zsh plugins are installed by `install.sh` when they are missing,
-the tools come from mise, and the git identity and credential helper are three
+curl and xz are installed by `install.sh` when they are missing, the tools come
+from the store, and the git identity and credential helper are three
 `git config --global` lines in `dcup`. It has no `postCreateCommand` either, so
 this project is started the same way as any other, and the file is down to a
 name and an image.
 
-`/mise` is one mise store shared by every container, so 385M is fetched once
-rather than each time. `/history` is the opposite, one per project under
+`/nix` is one store shared by every container, so it is fetched once rather
+than each time, which is what `/mise` was for. The profile is the opposite and
+must not be shared: `install.sh` points `~/.nix-profile` at
+`~/.local/state/nix/profiles/profile`, under a `$HOME` that dies with the
+container, or a switch in one container would replace the tools of another that
+is still running. The store itself takes a lock, so two switches at once are
+safe. The volume belongs to whichever container installed nix into it first, so
+a project that runs as its own user rather than as root cannot write to it. That
+wants the multi-user daemon, and no container these files reach needs it yet. `/history` is one per project under
 `~/.devcontainer-state/` on the host, so a shell history outlives its container
 without mixing with another project's. `/claude` is shared again: Claude Code
 keys its sessions and its prompt history by workspace path, so one store per
 person is right, and a store per project would mean a login and 153M of
 downloads each.
 
-`claude/` cannot stow its `settings.json`, because the config directory moves
-with that volume and stow only writes under `$HOME`. Its `.stow-local-ignore`
-keeps the package from linking the file into the wrong place, and `install.sh`
-links it into `CLAUDE_CONFIG_DIR` instead. That link is made with `ln -sfn`, so
+`claude/.claude/settings.json` is linked by `install.sh` and not by a module,
+because home-manager writes under `$HOME` alone and that config directory moves
+with a volume that is not under it. The link is made with `ln -sfn`, so
 it also repairs itself: Claude Code writes settings with a temp file and a
 rename, which would otherwise replace the link with a plain file for good.
 
@@ -148,20 +164,25 @@ credential, and `--dotfiles-repository` replaces both the mount and the `exec`
 line, so `dcup/` gets smaller rather than larger.
 
 `flake.nix` holds one output per host, `pycan@t460s` and `root@deb-agent`, and
-`flake.lock` is the pin that `mise/` used to be for them. Home-manager runs
-standalone, so Fedora stays Fedora and the Debian host stays Debian, and neither
-was reinstalled to get here. `extraSpecialArgs` gives each host its two facts,
-the path of the clone and the name of its own output, because a module cannot
-work either out and both are wanted in more than one file.
+one for every container. `flake.lock` is the pin that `mise/` used to be.
+Home-manager runs standalone, so Fedora stays Fedora and the Debian host stays
+Debian, and neither was reinstalled to get here. `extraSpecialArgs` gives each
+host its two facts, the path of the clone and the name of its own output,
+because a module cannot work either out and both are wanted in more than one
+file. The container is given `dotfiles = null`, since its clone is at a path the
+image and the mount decide, and a module that takes the path skips what it
+places there.
 
 A flake reads tracked files alone, so a new module wants `git add` before the
 switch, committed or not. Home-manager stops rather than write over a file that
 is already there, so anything left by hand at the path it wants is moved aside
 first; `-b hm-bak` survives that collision instead, and is for the run where it
 was forgotten. That is a flag and not an option, because `backupFileExtension`
-belongs to the NixOS module, whose rebuild has no command line to put it on. And
-`stow` wants `-d` given absolutely: with a relative one it walks `$HOME`, meets
-a link into `/nix`, and dies with `BUG in find_stowed_path?`.
+belongs to the NixOS module, whose rebuild has no command line to put it on. In
+a container the same job is done by `HOME_MANAGER_BACKUP_EXT`, which the
+activation script reads. `install.sh` builds the activation package and runs it,
+rather than calling the home-manager CLI, which is not there on a first run and
+which would pull its own copy of home-manager instead of the locked one.
 
 `foot/` was the first package across, and it shows the shape the others took.
 `foot.ini` is `programs.foot.settings`, which is typed, so a key that does not
@@ -208,21 +229,32 @@ because herdr set it so after the first run. `dcup/` is two scripts and stays
 two scripts, with `executable` set, because a shell script gains nothing from
 being expressed in Nix.
 
-`zsh/` and `nvim/` are placed by both tools rather than moved to one. Neither is
-worth writing twice: `programs.zsh` would express in Nix what `.zshrc` already
-says in zsh, and the container that still stows the file would then need the
-same lines a second time. So the module links the same file the container
-stows. What Nix does add there is the two plugins, from nixpkgs rather than
-`/usr/share`, and `.zshrc` tries the profile before the distro so one file
-suits both. `nvim-pack-lock.json` is a link out of the store, because nvim
-writes it on every plugin update.
+`zsh/` and `nvim/` are files a module names rather than options written in Nix.
+Neither is worth writing twice: `programs.zsh` would express in Nix what
+`.zshrc` already says in zsh. What Nix does add there is the two plugins, from
+nixpkgs rather than `/usr/share`, and `.zshrc` tries the profile before the
+distro so one file suits a nix host and a container that has not switched yet.
+`nvim-pack-lock.json` is a link out of the store on a host, because nvim writes
+it on every plugin update. A container gets no such link: it is thrown away, and
+a plugin update in one must not dirty the clone it was started from.
+
+`zsh/.zshenv` is what decides which build of a tool runs. The nix installer
+writes its profile into the files a login or an interactive shell reads, and a
+niri session is neither, and neither is `devcontainer exec`. So without the
+block at the end of that file the desktop spawns the distro build of a tool nix
+owns, and a container reached by `dcclaude` finds no claude at all.
+`XDG_DATA_DIRS` is set beside it, or a launcher sees no app nix installs. Both
+are behind a test for the profile directory, so a shell that starts before the
+first switch is untouched.
 
 `~/.dots-path` is what that costs. `dcup` and the `dots` function used to find
 the clone with `readlink -f ~/.zshrc`, which works only while stow placed that
 file; from the store it resolves into `/nix` and both would carry on quietly
-against the wrong tree. So whoever places the config names it: home-manager
-writes the file where it runs, `install.sh` writes it where home-manager does
-not, and `.zshenv` exports `DOTFILES` from it. Resolving `~/.zshrc` stays as
+against the wrong tree. So whoever places the config names it: `home/dots.nix`
+writes the file on a host, beside the program that holds the same path, and
+`install.sh` writes it in a container, where the clone is at a path the image
+and the mount decide. `.zshenv` exports `DOTFILES` from it. Resolving `~/.zshrc`
+stays as
 the fallback, for a shell that starts before either has run. `dots` needs none
 of it on a host, where the path is in the program, and `dcup` is the reader
 that keeps the file alive.
@@ -233,14 +265,15 @@ back at the next switch, and a host with no `gsettings` cannot be asked to run
 it, which is what `./install.sh desktop` on deb-agent did.
 
 niri cannot be run here (no Wayland session), so review those edits rather than
-testing them. For the rest: `./install.sh container` must succeed, a package
-added to the `desktop` profile must stow into an empty directory without
-conflicts, and `zsh -ic exit` must be silent.
+testing them. For the rest: `./install.sh container` must succeed, and must
+succeed again on a second run, and `zsh -ic exit` must be silent. A `zsh -ic`
+with no terminal reports `can't change option: zle` from `fzf --zsh`; that is
+the missing tty and not a fault, so test that one under a pty.
 
 The forgejo MCP server is registered at user scope, in `.claude.json` inside the
 Claude store, so it loads in every project and no repository carries a
-`.mcp.json` for it. That file is state in the `/claude` volume rather than a
-stowed file, so a new store wants the entry once:
+`.mcp.json` for it. That file is state in the `/claude` volume rather than one
+this repo places, so a new store wants the entry once:
 
 ```
 claude mcp add --scope user forgejo -- \

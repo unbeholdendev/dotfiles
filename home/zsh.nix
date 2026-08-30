@@ -1,4 +1,4 @@
-{ dotfiles, pkgs, ... }:
+{ pkgs, ... }:
 {
   home.file.".zshenv".source = ../zsh/.zshenv;
   home.file.".zshrc".source = ../zsh/.zshrc;
@@ -8,8 +8,4 @@
     zsh-autosuggestions
     zsh-syntax-highlighting
   ];
-
-  # `dcup` and the `dots` function found the clone by resolving `~/.zshrc`,
-  # which is a store path now. This names it instead.
-  home.file.".dots-path".text = "${dotfiles}\n";
 }

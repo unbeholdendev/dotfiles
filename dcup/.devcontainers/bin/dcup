@@ -50,7 +50,7 @@ devcontainer up --workspace-folder "$folder" --no-lockfile \
       "installOhMyZshConfig": false,
       "upgradePackages": false }}' \
   --mount "type=bind,source=$dotfiles,target=/dotfiles" \
-  --mount "type=volume,source=mise-store,target=/mise" \
+  --mount "type=volume,source=nix-store,target=/nix" \
   --mount "type=bind,source=$state,target=/history" \
   --mount "type=volume,source=claude-state,target=/claude" \
   "${@:2}"
