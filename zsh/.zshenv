@@ -12,7 +12,7 @@ typeset -U path PATH
 # install.sh links asks for bypassPermissions in every container it reaches.
 [[ -f /.dockerenv || -f /run/.containerenv ]] && export IS_SANDBOX=1
 
-path=(~/.local/bin ~/.devcontainers/bin $path)
+path=(~/.local/bin $path)
 
 # The nix installer writes its profile into the files a login or an interactive
 # shell reads. A niri session is neither, and neither is `devcontainer exec`,

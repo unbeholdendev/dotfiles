@@ -2,7 +2,7 @@
 HISTFILE=${ZSH_HISTFILE:-~/.zsh_history}
 HISTSIZE=50000
 SAVEHIST=50000
-setopt extended_history share_history hist_ignore_all_dups hist_verify hist_ignore_space interactive_comments 
+setopt extended_history share_history hist_ignore_all_dups hist_verify hist_ignore_space interactive_comments
 
 autoload -Uz compinit
 compinit
@@ -30,7 +30,7 @@ export VISUAL=nvim
 # dircolors has no TERM entry for foot, and an unknown TERM gives an empty
 # LS_COLORS, which turns off colour for ls and for the completion menu.
 eval "$(TERM=xterm-256color dircolors -b)"
-zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS} 
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'
 alias diff='diff --color=auto'
@@ -43,12 +43,11 @@ alias ...='cd ../..'
 # image and the mount decide, so install.sh works it out at run time.
 if ! command -v dots >/dev/null; then
   dots() {
-    local d=${DOTFILES:-}
-    if [[ -z $d ]]; then
-      local f=$(readlink -f ~/.zshrc)
-      d=${f:h:h}
+    if [[ -z ${DOTFILES:-} ]]; then
+      echo "no DOTFILES: run the clone's install.sh once to write ~/.dots-path" >&2
+      return 1
     fi
-    "$d/install.sh" "$@"
+    "$DOTFILES/install.sh" "$@"
   }
 fi
 
