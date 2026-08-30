@@ -4,7 +4,7 @@ Config for a Fedora + niri machine. Authored in this dev container, then pulled
 onto the real machine. The container is for editing, not the target.
 
 Each top-level directory is a stow package whose interior mirrors `$HOME`:
-`zsh/`, `ssh/`, `niri/`, `nvim/`. `install.sh` is the only entry point. It
+`zsh/` and `nvim/`. `install.sh` is the only entry point. It
 takes a profile, `desktop`, `server` or `container`, and the table at the top of
 it is the one place where the environments differ. Adding a package means adding
 it to the profiles whose environment runs its tool; anywhere else it is an inert
@@ -24,9 +24,10 @@ not own.
 
 `deb-agent` is a headless Debian host, on the `server` profile. The work happens
 in the dev containers it runs, not on the host, so it wants herdr to manage the
-sessions and none of the agent tools itself. `ssh/` is deliberately absent
-there: the file names the desktop's own key and every host it reaches, none of
-which that host can use.
+sessions and none of the agent tools itself. The ssh table is deliberately
+absent there: it names the desktop's own key and every host it reaches, none of
+which that host can use, and it is in the desktop's own module rather than a
+package a profile could stow by mistake.
 
 `mise/` pins the tools whose distro version is absent or too old: nvim, fzf and
 zoxide. The `server` and `container` profiles stow it, install mise where it is
@@ -124,9 +125,9 @@ where it would name every foreground process an agent. The pane is an agent
 while claude runs and a shell prompt after it ends, which is what the label must
 say.
 
-That mount is provisional. This repo is to become public, and `ssh/` is to come
-out of it, because that package is the only reason it must stay private: the
-file is a map of hosts, ports and accounts. Once it is public the hook needs no
+That mount is provisional. This repo is to become public, and `home/ssh.nix` is
+to come out of it, because that file is the only reason it must stay private: it
+is a map of hosts, ports and accounts. Once it is public the hook needs no
 credential, and `--dotfiles-repository` replaces both the mount and the `exec`
 line, so `dcup/` gets smaller rather than larger.
 
@@ -172,6 +173,15 @@ packages. They are where the files live, and the module in `home/` says which
 file goes where. `wireplumber/` is gone rather than moved. It held the HDMI
 profile WirePlumber took over the jack, and the script that read the jack
 itself, and no machine this repo now serves wants either.
+
+`ssh/` is the last of the desktop's own, and the one the type earns most.
+`programs.ssh.matchBlocks` is an attribute set of hosts, and the key and
+`IdentitiesOnly` every one of them repeated are written once and merged in, so
+fourteen blocks lose twenty-eight lines that had to agree. `enableDefaultConfig`
+is off, because the file it replaces has no `Host *` block, and the defaults
+that option adds would be new behaviour rather than the same behaviour in Nix.
+`programs.ssh` installs no package: the option is null by default and the system
+ssh is used.
 
 niri cannot be run here (no Wayland session), so review those edits rather than
 testing them. For the rest: `./install.sh container` must succeed, a package

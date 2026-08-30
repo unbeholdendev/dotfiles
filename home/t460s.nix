@@ -5,6 +5,7 @@
     ./niri.nix
     ./noctalia.nix
     ./portal.nix
+    ./ssh.nix
     ./yazi.nix
   ];
 
