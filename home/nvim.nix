@@ -1,7 +1,19 @@
-{ config, dotfiles, lib, ... }:
+{ config, dotfiles, lib, pkgs, ... }:
 {
+  # `init.lua` and fzf-lua call these by name, so they belong beside the config
+  # rather than in each profile that imports it.
+  home.packages = with pkgs; [
+    bash-language-server
+    fd
+    lua-language-server
+    nixd
+    ripgrep
+  ];
+
   xdg.configFile = {
     "nvim/init.lua".source = ../nvim/.config/nvim/init.lua;
+    "nvim/lua/config/keymaps.lua".source =
+      ../nvim/.config/nvim/lua/config/keymaps.lua;
     "nvim/lua/config/options.lua".source =
       ../nvim/.config/nvim/lua/config/options.lua;
   }

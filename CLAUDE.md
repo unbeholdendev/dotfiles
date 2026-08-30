@@ -242,6 +242,20 @@ distro so one file suits a nix host and a container that has not switched yet.
 it on every plugin update. A container gets no such link: it is thrown away, and
 a plugin update in one must not dirty the clone it was started from.
 
+nvim reads a repo it does not know with three plugins and the built-ins. fzf-lua
+is the picker, and it is the one that takes no new binary: `.zshrc` already
+wants `fzf` on every profile. oil.nvim is the file browser, and it is a buffer
+rather than a window mode, so a rename is an edit and `-` goes up a directory.
+nvim-lspconfig is the server definitions alone; `vim.lsp.enable` in `init.lua`
+is what starts one. The 0.11 defaults do the rest and are not remapped, so
+go-to-definition is `<C-]>` through `'tagfunc'`, and `grr`, `gri`, `grn`, `gra`
+and `gO` are already there. `home/nvim.nix` installs `ripgrep` and `fd`, which
+fzf-lua calls by name, and the three servers this repo itself wants: `nixd`,
+`lua-language-server` and `bash-language-server`. They are in that module and
+not in a profile, because every profile which takes the config needs what the
+config calls. A fourth language wants its server added there, next to
+`vim.lsp.enable`, and nothing else.
+
 `zsh/.zshenv` is what decides which build of a tool runs. The nix installer
 writes its profile into the files a login or an interactive shell reads, and a
 niri session is neither, and neither is `devcontainer exec`. So without the
