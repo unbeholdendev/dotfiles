@@ -13,6 +13,6 @@ folder=${1:-.}
 # process, because herdr reads it from /proc on the host and cannot see a copy
 # set in the container. It is a label alone: no agent is installed here.
 #
-# Through zsh, because the shims that hold claude reach PATH from .zshenv.
+# Through zsh, because the profile that holds claude reaches PATH from .zshenv.
 exec env HERDR_AGENT=claude devcontainer exec --workspace-folder "$folder" \
   zsh -c 'exec claude "$@"' claude "${@:2}"

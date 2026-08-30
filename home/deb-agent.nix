@@ -8,8 +8,7 @@
     ./zsh.nix
   ];
 
-  # What `mise/` pinned for this host. Its config stays stowed for the
-  # container, which still has no nix.
+  # What `mise/` pinned for this host.
   home.packages = with pkgs; [
     neovim
     fzf

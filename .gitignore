@@ -1,7 +1,7 @@
-# Written by the noctalia yazi template, which renders into the stowed folder.
+# Written by the noctalia yazi template, which renders into the folder here.
 yazi/.config/yazi/theme.toml
 yazi/.config/yazi/flavors/noctalia.yazi/
 
 # Local Claude Code state: machine permissions and agent worktrees. Anchored,
-# because the bare pattern also matched the stowed claude/.claude/.
+# because the bare pattern also matched claude/.claude/ in this repo.
 /.claude/
