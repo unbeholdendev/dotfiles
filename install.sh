@@ -21,14 +21,14 @@ profile=${1:-$(cat "$marker" 2>/dev/null || echo "$default")}
 # Every difference between the environments this repo serves is in this table.
 case $profile in
   desktop)
-    packages=(zsh nvim)
-    pull=1 mise_tools=0 desktop_theme=1 ;;
+    packages=()
+    pull=1 mise_tools=0 desktop_theme=1 home_manager=1 ;;
   server)
-    packages=(zsh nvim)
-    pull=1 mise_tools=0 desktop_theme=0 ;;
+    packages=()
+    pull=1 mise_tools=0 desktop_theme=0 home_manager=1 ;;
   container)
     packages=(zsh nvim mise claude)
-    pull=0 mise_tools=1 desktop_theme=0 ;;
+    pull=0 mise_tools=1 desktop_theme=0 home_manager=0 ;;
   *)
     echo "usage: ${0##*/} [desktop|server|container]" >&2; exit 1 ;;
 esac
@@ -48,11 +48,13 @@ fi
 missing=()
 command -v git  >/dev/null || missing+=(git)
 command -v zsh  >/dev/null || missing+=(zsh)
-command -v stow >/dev/null || missing+=(stow)
-[[ -r /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] \
-  || missing+=(zsh-autosuggestions)
-[[ -r /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] \
-  || missing+=(zsh-syntax-highlighting)
+if (( ! home_manager )); then
+  command -v stow >/dev/null || missing+=(stow)
+  [[ -r /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] \
+    || missing+=(zsh-autosuggestions)
+  [[ -r /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] \
+    || missing+=(zsh-syntax-highlighting)
+fi
 
 if (( ${#missing[@]} )); then
   sudo=; [[ $EUID == 0 ]] || sudo=sudo
@@ -65,8 +67,28 @@ fi
 
 # --no-folding keeps each folder real. Without it stow replaces a folder holding
 # one package's files with a link to this repo, and tools then write in here.
-# Every stow call needs the flag, `-D` included.
-stow -R --no-folding --target="$HOME" "${packages[@]}"
+# Every stow call needs the flag, `-D` included. `-d` takes the directory
+# absolutely: given a relative one, stow walks $HOME, meets a link into /nix,
+# and dies comparing an absolute path with a relative stow directory.
+if (( ${#packages[@]} )); then
+  stow -R --no-folding -d "$PWD" --target="$HOME" "${packages[@]}"
+fi
+
+# `.zshenv` reads this to find the clone, since resolving `~/.zshrc` stops
+# working the moment home-manager puts that file in the store. home-manager
+# writes it where it runs, so only the other case wants it written here.
+if (( home_manager )); then
+  target=".#$(id -un)@$(hostname -s)"
+  if command -v home-manager >/dev/null; then
+    home-manager switch --flake "$target"
+  elif command -v nix >/dev/null; then
+    nix run home-manager/master -- switch --flake "$target"
+  else
+    echo "no nix: $target cannot be built on this host" >&2; exit 1
+  fi
+else
+  printf '%s\n' "$PWD" > "$HOME/.dots-path"
+fi
 
 if [[ " ${packages[*]} " == *" claude "* ]]; then
   [[ -z ${CLAUDE_CONFIG_DIR:-} && -d /claude ]] && export CLAUDE_CONFIG_DIR=/claude

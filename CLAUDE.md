@@ -3,12 +3,15 @@
 Config for a Fedora + niri machine. Authored in this dev container, then pulled
 onto the real machine. The container is for editing, not the target.
 
-Each top-level directory is a stow package whose interior mirrors `$HOME`:
-`zsh/` and `nvim/`. `install.sh` is the only entry point. It
-takes a profile, `desktop`, `server` or `container`, and the table at the top of
-it is the one place where the environments differ. Adding a package means adding
-it to the profiles whose environment runs its tool; anywhere else it is an inert
-link. niri and foot cannot run in the container at all.
+Each top-level directory holds one program's files, laid out as they sit under
+`$HOME`. A `home/` module names them on a host that has nix, and stow links them
+in a container, which has none. One source, two ways of placing it, and the
+`container` profile is the only one that still stows anything. `install.sh` is
+the only entry point. It takes a profile, `desktop`, `server` or `container`,
+and the table at the top of it is the one place where the environments differ.
+On a profile with `home_manager` it runs the switch rather than stow, naming the
+output `$(id -un)@$(hostname -s)`, so `dots` stays the single command on every
+host.
 
 The name `install.sh` is not free choice. A dev container clones this repo and
 runs the first of `install.sh`, `install`, `bootstrap.sh`, `bootstrap`,
@@ -196,13 +199,22 @@ because herdr set it so after the first run. `dcup/` is two scripts and stays
 two scripts, with `executable` set, because a shell script gains nothing from
 being expressed in Nix.
 
-`zsh/` and `nvim/` cannot follow until the container can, because all three
-profiles stow them and one file cannot have two owners. There is a second reason
-in `dcup` and in the `dots` function: both find the clone with
-`readlink -f ~/.zshrc` and strip two names off the end. That works because
-`~/.zshrc` is a stow link into the clone. The day it is a store path instead,
-both break, and neither says so. So the clone has to be found another way before
-`zsh/` moves.
+`zsh/` and `nvim/` are placed by both tools rather than moved to one. Neither is
+worth writing twice: `programs.zsh` would express in Nix what `.zshrc` already
+says in zsh, and the container that still stows the file would then need the
+same lines a second time. So the module links the same file the container
+stows. What Nix does add there is the two plugins, from nixpkgs rather than
+`/usr/share`, and `.zshrc` tries the profile before the distro so one file
+suits both. `nvim-pack-lock.json` is a link out of the store, because nvim
+writes it on every plugin update.
+
+`~/.dots-path` is what that costs. `dcup` and the `dots` function used to find
+the clone with `readlink -f ~/.zshrc`, which works only while stow placed that
+file; from the store it resolves into `/nix` and both would carry on quietly
+against the wrong tree. So whoever places the config names it: home-manager
+writes the file where it runs, `install.sh` writes it where home-manager does
+not, and `.zshenv` exports `DOTFILES` from it. Resolving `~/.zshrc` stays as
+the fallback, for a shell that starts before either has run.
 
 niri cannot be run here (no Wayland session), so review those edits rather than
 testing them. For the rest: `./install.sh container` must succeed, a package

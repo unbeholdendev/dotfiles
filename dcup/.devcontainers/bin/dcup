@@ -4,9 +4,13 @@ set -euo pipefail
 command -v devcontainer >/dev/null ||
   { echo "no devcontainer CLI: npm i -g @devcontainers/cli" >&2; exit 1; }
 
-# The same trick the `dots` function uses, so the path is right on any host.
-f=$(readlink -f ~/.zshrc)
-dotfiles=${DOTFILES:-${f%/*/*}}
+# Set by .zshenv from ~/.dots-path, which home-manager or install.sh writes.
+# Resolving ~/.zshrc is the fallback, and works only where stow placed it.
+dotfiles=${DOTFILES:-}
+if [[ -z $dotfiles ]]; then
+  f=$(readlink -f ~/.zshrc)
+  dotfiles=${f%/*/*}
+fi
 
 # Off by default: that credential is worth more to the other people in a shared
 # project than the MCP server is to you.

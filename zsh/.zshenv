@@ -1,5 +1,9 @@
 typeset -U path PATH
 
+# The clone cannot be found by resolving this file any more: home-manager puts
+# it in the store. Whoever placed it names it here instead.
+[[ -z ${DOTFILES:-} && -r ~/.dots-path ]] && export DOTFILES=$(<~/.dots-path)
+
 # The mount is the signal rather than an env var, because an external project's
 # devcontainer.json is not ours to edit.
 [[ -z ${MISE_DATA_DIR:-} && -d /mise ]] && export MISE_DATA_DIR=/mise

@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, dotfiles, pkgs, ... }:
 {
   home.packages = [ (pkgs.callPackage ../pkgs/herdr.nix { }) ];
 
@@ -6,5 +6,5 @@
   # after the first run. The store holds nothing that is written.
   xdg.configFile."herdr/config.toml".source =
     config.lib.file.mkOutOfStoreSymlink
-      "${config.home.homeDirectory}/dotfiles/herdr/.config/herdr/config.toml";
+      "${dotfiles}/herdr/.config/herdr/config.toml";
 }

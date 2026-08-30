@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, dotfiles, ... }:
 {
   programs.foot = {
     enable = true;
@@ -20,5 +20,5 @@
   # written, so it stays a link out of the store and in the clone.
   xdg.configFile."foot/themes/noctalia".source =
     config.lib.file.mkOutOfStoreSymlink
-      "${config.home.homeDirectory}/Documents/dotfiles/foot/.config/foot/themes/noctalia";
+      "${dotfiles}/foot/.config/foot/themes/noctalia";
 }

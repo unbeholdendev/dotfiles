@@ -4,9 +4,11 @@
     ./foot.nix
     ./niri.nix
     ./noctalia.nix
+    ./nvim.nix
     ./portal.nix
     ./ssh.nix
     ./yazi.nix
+    ./zsh.nix
   ];
 
   home.username = "pycan";
