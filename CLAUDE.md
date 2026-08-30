@@ -30,9 +30,11 @@ which that host can use, and it is in the desktop's own module rather than a
 package a profile could stow by mistake.
 
 `mise/` pins the tools whose distro version is absent or too old: nvim, fzf and
-zoxide. The `server` and `container` profiles stow it, install mise where it is
-missing and run `mise install`. The desktop takes those three from Fedora, whose
-builds are current, so it does not stow the package at all. A version bump is
+zoxide. The `container` profile stows it, installs mise where it is missing and
+runs `mise install`. The desktop takes those three from Fedora, whose builds are
+current, and deb-agent takes them from nixpkgs, so neither stows the package at
+all. `mise_tools` is off for both, or `install.sh` would install mise on a host
+that wants none. A version bump is
 then one commit rather than a command retyped per host. A tool one profile alone
 needs is pinned by a package only that profile stows, in its own file
 under `.config/mise/conf.d/`, which mise merges with the shared one. `claude/`

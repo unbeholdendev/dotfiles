@@ -1,8 +1,16 @@
-{ ... }:
+{ pkgs, ... }:
 {
   imports = [
     ./dcup.nix
     ./herdr.nix
+  ];
+
+  # What `mise/` pinned for this host. Its config stays stowed for the
+  # container, which still has no nix.
+  home.packages = with pkgs; [
+    neovim
+    fzf
+    zoxide
   ];
 
   home.username = "root";
