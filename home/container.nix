@@ -30,5 +30,6 @@ in
   home.homeDirectory = fromEnv "HOME";
   home.stateVersion = "26.05";
 
-  programs.home-manager.enable = true;
+  # No programs.home-manager: install.sh builds the activation package itself,
+  # so the CLI is 57M of store paths nothing in a container calls.
 }

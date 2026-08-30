@@ -48,7 +48,8 @@ a message saying so rather than guessing. `home/container.nix` is what `mise/`
 was: nvim, fzf, zoxide, claude and forgejo-mcp, at the versions the TOML named,
 pinned by `flake.lock` instead of by a version string. It carries nix itself as
 well, since `install.sh` points `~/.nix-profile` away from the one the installer
-made. claude-code is unfree, so the container's `pkgs` is a second import of
+made. It carries no `programs.home-manager`: that CLI is 57M of store paths, and
+a container calls the activation package directly. claude-code is unfree, so the container's `pkgs` is a second import of
 nixpkgs with a predicate naming that one package, because `allowUnfree` on its
 own would let a second one arrive unnoticed.
 
@@ -227,7 +228,10 @@ patched into it and the derivation is a fetch and an install. Its `config.toml`
 is a link out of the store, because herdr writes it: `onboarding` is false there
 because herdr set it so after the first run. `dcup/` is two scripts and stays
 two scripts, with `executable` set, because a shell script gains nothing from
-being expressed in Nix.
+being expressed in Nix. They go to `~/.local/bin`, which `.zshenv` already puts
+on the path, and `dcup/` holds them at that path. The `~/.devcontainers/bin`
+they had was the shape of a stow package, and it put a directory on the path of
+every host and every container to serve one host.
 
 `zsh/` and `nvim/` are files a module names rather than options written in Nix.
 Neither is worth writing twice: `programs.zsh` would express in Nix what
@@ -249,15 +253,16 @@ first switch is untouched.
 
 `~/.dots-path` is what that costs. `dcup` and the `dots` function used to find
 the clone with `readlink -f ~/.zshrc`, which works only while stow placed that
-file; from the store it resolves into `/nix` and both would carry on quietly
-against the wrong tree. So whoever places the config names it: `home/dots.nix`
-writes the file on a host, beside the program that holds the same path, and
-`install.sh` writes it in a container, where the clone is at a path the image
-and the mount decide. `.zshenv` exports `DOTFILES` from it. Resolving `~/.zshrc`
-stays as
-the fallback, for a shell that starts before either has run. `dots` needs none
-of it on a host, where the path is in the program, and `dcup` is the reader
-that keeps the file alive.
+file; from the store it resolves into `/nix`, so the fallback answered `/nix`
+rather than nothing and both would carry on quietly against the wrong tree.
+`dcup` was the worse of the two, since it bind-mounted the whole store at
+`/dotfiles` before it failed. Neither has a fallback any more: whoever places
+the config names it, and a missing name is an error. `home/dots.nix` writes the
+file on a host, beside the program that holds the same path, and `install.sh`
+writes it in a container, where the clone is at a path the image and the mount
+decide. `.zshenv` exports `DOTFILES` from it. `dots` needs none of it on a host,
+where the path is in the program, and `dcup` is the reader that keeps the file
+alive.
 
 The dark theme is `dconf.settings` in `home/theme.nix` and not two `gsettings`
 lines in a script. Declared rather than set once, so a change made by hand goes

@@ -1,12 +1,12 @@
 { ... }:
 {
-  home.file.".devcontainers/bin/dcup" = {
-    source = ../dcup/.devcontainers/bin/dcup;
+  home.file.".local/bin/dcup" = {
+    source = ../dcup/.local/bin/dcup;
     executable = true;
   };
 
-  home.file.".devcontainers/bin/dcclaude" = {
-    source = ../dcup/.devcontainers/bin/dcclaude;
+  home.file.".local/bin/dcclaude" = {
+    source = ../dcup/.local/bin/dcclaude;
     executable = true;
   };
 }

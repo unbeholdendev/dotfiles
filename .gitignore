@@ -2,6 +2,10 @@
 yazi/.config/yazi/theme.toml
 yazi/.config/yazi/flavors/noctalia.yazi/
 
+# The clone is bind-mounted into every container, so a hand-run `nix build` here
+# dirties a tree the others read.
+/result
+
 # Local Claude Code state: machine permissions and agent worktrees. Anchored,
 # because the bare pattern also matched claude/.claude/ in this repo.
 /.claude/

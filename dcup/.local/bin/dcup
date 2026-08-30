@@ -4,13 +4,10 @@ set -euo pipefail
 command -v devcontainer >/dev/null ||
   { echo "no devcontainer CLI: npm i -g @devcontainers/cli" >&2; exit 1; }
 
-# Set by .zshenv from ~/.dots-path, which home-manager or install.sh writes.
-# Resolving ~/.zshrc is the fallback, and works only where stow placed it.
+# Set by .zshenv from ~/.dots-path, which home-manager writes on this host.
 dotfiles=${DOTFILES:-}
-if [[ -z $dotfiles ]]; then
-  f=$(readlink -f ~/.zshrc)
-  dotfiles=${f%/*/*}
-fi
+[[ -n $dotfiles ]] ||
+  { echo "no DOTFILES: run dots on this host to write ~/.dots-path" >&2; exit 1; }
 
 # Asked every time, and none is the first answer: that credential is worth more
 # to the other people in a shared project than the MCP server is to you. One
@@ -33,11 +30,15 @@ fi
 folder=${1:-.}
 
 # Shell history outlives the container it was typed in, one store per project.
-state=$HOME/.devcontainer-state/$(basename "$(readlink -f "$folder")")
+# The basename alone is not one name per project: two clones of the same name in
+# different parents would share a history.
+resolved=$(readlink -f "$folder")
+stamp=$(printf %s "$resolved" | md5sum | cut -c1-8)
+state=$HOME/.devcontainer-state/$(basename "$resolved")-$stamp
 mkdir -p "$state"
 
-# installOhMyZshConfig writes a ~/.zshrc, and stow will not link over a regular
-# file, so leaving it on makes the zsh package silently do nothing.
+# installOhMyZshConfig writes a ~/.zshrc, and home-manager stops rather than
+# write over a file that is already at the path it wants.
 #
 # --no-lockfile because the CLI otherwise writes devcontainer-lock.json into the
 # project it starts, and that tree is not ours to dirty. It pins nothing here:

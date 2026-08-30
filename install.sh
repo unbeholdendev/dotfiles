@@ -34,7 +34,7 @@ if (( ${#missing[@]} )); then
     $sudo apt-get install -y "${missing[@]/#xz/xz-utils}"
   elif command -v dnf >/dev/null; then $sudo dnf install -y "${missing[@]}"
   elif command -v apk >/dev/null; then $sudo apk add "${missing[@]}"
-  else echo "cannot install ${missing[*]}: no known package manager" >&2
+  else echo "cannot install ${missing[*]}: no known package manager" >&2; exit 1
   fi
 fi
 
