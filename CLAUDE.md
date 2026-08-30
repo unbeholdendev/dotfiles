@@ -175,7 +175,7 @@ profile WirePlumber took over the jack, and the script that read the jack
 itself, and no machine this repo now serves wants either.
 
 `ssh/` is the last of the desktop's own, and the one the type earns most.
-`programs.ssh.matchBlocks` is an attribute set of hosts, and the key and
+`programs.ssh.settings` is an attribute set of hosts, and the key and
 `IdentitiesOnly` every one of them repeated are written once and merged in, so
 fourteen blocks lose twenty-eight lines that had to agree. `enableDefaultConfig`
 is off, because the file it replaces has no `Host *` block, and the defaults
