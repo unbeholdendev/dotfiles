@@ -38,14 +38,18 @@ alias ll='ls -lah'
 alias ..='cd ..'
 alias ...='cd ../..'
 
-dots() {
-  local d=${DOTFILES:-}
-  if [[ -z $d ]]; then
-    local f=$(readlink -f ~/.zshrc)
-    d=${f:h:h}
-  fi
-  "$d/install.sh" "$@"
-}
+# On a host home-manager installs `dots`, with the clone and the flake output
+# written into it. This is the container's, where install.sh is the whole of it.
+if ! command -v dots >/dev/null; then
+  dots() {
+    local d=${DOTFILES:-}
+    if [[ -z $d ]]; then
+      local f=$(readlink -f ~/.zshrc)
+      d=${f:h:h}
+    fi
+    "$d/install.sh" "$@"
+  }
+fi
 
 autoload -Uz vcs_info add-zsh-hook
 zstyle ':vcs_info:*' enable git

@@ -1,12 +1,14 @@
 { ... }:
 {
   imports = [
+    ./dots.nix
     ./foot.nix
     ./niri.nix
     ./noctalia.nix
     ./nvim.nix
     ./portal.nix
     ./ssh.nix
+    ./theme.nix
     ./yazi.nix
     ./zsh.nix
   ];

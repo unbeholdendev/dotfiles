@@ -6,12 +6,13 @@ onto the real machine. The container is for editing, not the target.
 Each top-level directory holds one program's files, laid out as they sit under
 `$HOME`. A `home/` module names them on a host that has nix, and stow links them
 in a container, which has none. One source, two ways of placing it, and the
-`container` profile is the only one that still stows anything. `install.sh` is
-the only entry point. It takes a profile, `desktop`, `server` or `container`,
-and the table at the top of it is the one place where the environments differ.
-On a profile with `home_manager` it runs the switch rather than stow, naming the
-output `$(id -un)@$(hostname -s)`, so `dots` stays the single command on every
-host.
+container is the only place that still stows anything, and `install.sh` is now
+its script alone. It names `desktop` and `server` only to refuse them. `dots` is
+the one command either way: in a container it is a function in `.zshrc` calling
+that script, and on a host it is a program home-manager installs, with the clone
+and the flake output written into it rather than worked out at run time. So
+nothing on a host has to find the clone by resolving a file, and the profile
+marker is gone with the profiles.
 
 The name `install.sh` is not free choice. A dev container clones this repo and
 runs the first of `install.sh`, `install`, `bootstrap.sh`, `bootstrap`,
@@ -143,7 +144,7 @@ the stow package goes, a module under `home/` arrives, and the name leaves the
 profile table. `install.sh` is right until that table is empty, so both tools
 describe a machine in the meantime and neither is half done. The host is named
 in the output rather than remembered in a marker file, which is what
-`~/.dots-profile` does today. A flake reads tracked files alone, so a new module
+`~/.dots-profile` used to. A flake reads tracked files alone, so a new module
 wants `git add` before the switch, committed or not. Home-manager stops rather
 than write over a file that is already there, and every file it wants is a stow
 link until its package moves, so the package is unstowed before its switch and
@@ -214,7 +215,14 @@ file; from the store it resolves into `/nix` and both would carry on quietly
 against the wrong tree. So whoever places the config names it: home-manager
 writes the file where it runs, `install.sh` writes it where home-manager does
 not, and `.zshenv` exports `DOTFILES` from it. Resolving `~/.zshrc` stays as
-the fallback, for a shell that starts before either has run.
+the fallback, for a shell that starts before either has run. `dots` needs none
+of it on a host, where the path is in the program, and `dcup` is the reader
+that keeps the file alive.
+
+The dark theme is `dconf.settings` in `home/theme.nix` and not two `gsettings`
+lines in a script. Declared rather than set once, so a change made by hand goes
+back at the next switch, and a host with no `gsettings` cannot be asked to run
+it, which is what `./install.sh desktop` on deb-agent did.
 
 niri cannot be run here (no Wayland session), so review those edits rather than
 testing them. For the rest: `./install.sh container` must succeed, a package
