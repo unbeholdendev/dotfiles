@@ -1,5 +1,7 @@
 { ... }:
 {
+  imports = [ ./foot.nix ];
+
   home.username = "pycan";
   home.homeDirectory = "/home/pycan";
   home.stateVersion = "26.05";
