@@ -103,18 +103,30 @@ external, so a container can write to the clone on that host. Anything after the
 folder argument is passed straight to `devcontainer up`, which is where a
 per-project difference goes. `--no-lockfile` is there because the CLI otherwise
 writes `devcontainer-lock.json` into the project it starts, and that project's
-tree is not ours to dirty. `dcup --token` copies in whichever of
-`~/.forgejo-token` and `~/.github-token` is there, and sets the git identity
-once either arrives. The forgejo token also gets a credential helper, which is
-the one place that names that forge. The github token gets none: a fine-grained
-token is issued per owner, and every owner is the same host, so the host a
-helper is keyed by cannot pick between two of them. That clone names its own
-file instead, in a `.git/config` which the host and the container both read. A
-flag and not the default: that identity is wrong in a project shared with other
-people, and the credential is worth more to them than the MCP server is to us. A
-`postCreateCommand` is then for a project's own work alone, this one included,
-at the price of a container which has neither token nor identity where the flag
-was forgotten.
+tree is not ours to dirty. `dcup` asks which token this container gets, and
+`none` is the first answer: one forge and not both, because a container that can
+reach the other one is a container that leaks it there. A question and not a
+flag, because a flag is remembered only by the person who already knows to want
+it, and the answer that matters is the one nobody would have typed. With no
+terminal there is nobody to answer, so nothing is copied, which is where a flag
+left off. The missing file is checked before `devcontainer up`, so an hour of
+image pull does not end in a container that cannot push. The forgejo token
+carries the identity and a credential helper, which is the one place that names
+that forge. The
+github token gets neither: a fine-grained token is issued per owner, and every
+owner is the same host, so the host a helper is keyed by cannot pick between two
+of them, and `335420059+unbeholdendev@users.noreply.github.com` is the wrong author for somebody else's repo.
+That clone names its own file and its own author instead, in a `.git/config`
+which the host and the container both read, and a clone that names neither fails
+its first commit, which is the right end there. A `postCreateCommand` is then
+for a project's own work alone, this one included, at the price of a container
+which has neither token nor identity where `none` was the answer.
+
+The forgejo MCP server is the visible cost. It is registered at user scope in
+the shared `/claude` store, so it is configured in every container, and one
+started with `--token github` has no `~/.forgejo-token` for it to read and the
+server does not start. That is the leak being closed, showing itself, and not a
+fault to fix.
 
 `dcclaude` is the other half of that pair: it starts claude in a container
 `dcup` brought up. herdr names a pane from the comm and the argv0 of the
@@ -240,8 +252,9 @@ The `--url` is in that entry rather than an env var, because the entry serves
 every project and only this one used to set `FORGEJO_URL`. Without it the server
 stops with `Missing required configuration`.
 
-`~/.forgejo-token` reaches a container through `dcup --token` alone, and is read
-there at runtime by the git credential helper and that server. Never print or
+`~/.forgejo-token` reaches a container by answering `forgejo` to `dcup` and no
+other way, and is read there at runtime by the git credential helper and that
+server. Never print or
 commit its value.
 
 `~/.github-token` is a fine-grained personal access token, and takes the same
