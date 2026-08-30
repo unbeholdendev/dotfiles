@@ -144,6 +144,16 @@ link until its package moves, so the switch takes `-b hm-bak` until the table is
 empty. That is a flag and not an option: `backupFileExtension` belongs to the
 NixOS module, whose rebuild has no command line to put it on.
 
+`foot/` is the first package across, and it shows the shape the rest will take.
+`foot.ini` is `programs.foot.settings`, which is typed, so a key that does not
+exist is an error at build rather than a line foot ignores at start. The package
+comes from nixpkgs as well, because the module gives no way to take the config
+alone, and a config without its package is stow with more syntax. What is left
+in `foot/` is the theme noctalia renders. That one stays a link out of the store
+and into the clone: the store is read only, and a file something writes cannot
+live there. Every package with a rendered theme ends the same way, `yazi/` and
+`noctalia/` included.
+
 niri cannot be run here (no Wayland session), so review those edits rather than
 testing them. For the rest: `./install.sh container` must succeed, a package
 added to the `desktop` profile must stow into an empty directory without
