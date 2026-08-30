@@ -3,6 +3,8 @@
   imports = [
     ./dcup.nix
     ./herdr.nix
+    ./nvim.nix
+    ./zsh.nix
   ];
 
   # What `mise/` pinned for this host. Its config stays stowed for the

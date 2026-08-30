@@ -9,9 +9,12 @@ compinit
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 
-if [[ -r /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
-  source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-fi
+for d in ~/.nix-profile/share /usr/share; do
+  if [[ -r $d/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+    source $d/zsh-autosuggestions/zsh-autosuggestions.zsh
+    break
+  fi
+done
 
 bindkey '^[[A' history-beginning-search-backward    # ↑
 bindkey '^[[B' history-beginning-search-forward     # ↓
@@ -36,8 +39,12 @@ alias ..='cd ..'
 alias ...='cd ../..'
 
 dots() {
-  local f=$(readlink -f ~/.zshrc)
-  "${DOTFILES:-${f:h:h}}/install.sh" "$@"
+  local d=${DOTFILES:-}
+  if [[ -z $d ]]; then
+    local f=$(readlink -f ~/.zshrc)
+    d=${f:h:h}
+  fi
+  "$d/install.sh" "$@"
 }
 
 autoload -Uz vcs_info add-zsh-hook
@@ -53,6 +60,9 @@ PROMPT=''
 [[ -n ${SSH_CONNECTION:-} ]] && PROMPT='%F{109}%m%f '
 PROMPT+='%F{180}%~%f%F{244}${vcs_info_msg_0_}%f %(?.%F{71}.%F{167})❯%f '
 
-if [[ -r /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
-  source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-fi
+for d in ~/.nix-profile/share /usr/share; do
+  if [[ -r $d/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+    source $d/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+    break
+  fi
+done

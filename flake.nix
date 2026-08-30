@@ -16,11 +16,13 @@
       homeConfigurations = {
         "pycan@t460s" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
+          extraSpecialArgs.dotfiles = "/home/pycan/Documents/dotfiles";
           modules = [ ./home/t460s.nix ];
         };
 
         "root@deb-agent" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
+          extraSpecialArgs.dotfiles = "/root/dotfiles";
           modules = [ ./home/deb-agent.nix ];
         };
       };
