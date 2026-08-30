@@ -35,10 +35,10 @@ missing and run `mise install`. The desktop takes those three from Fedora, whose
 builds are current, so it does not stow the package at all. A version bump is
 then one commit rather than a command retyped per host. A tool one profile alone
 needs is pinned by a package only that profile stows, in its own file
-under `.config/mise/conf.d/`, which mise merges with the shared one: `herdr/`
-for the server, `claude/` for the container, which is where claude and
-forgejo-mcp are wanted. Each file is named after its package, so two of them can
-never collide. forgejo-mcp needs an explicit `forgejo:` backend, whose default
+under `.config/mise/conf.d/`, which mise merges with the shared one. `claude/`
+is the last of those, for the container, which is where claude and forgejo-mcp
+are wanted. Each file is named after its package, so two of them can never
+collide. forgejo-mcp needs an explicit `forgejo:` backend, whose default
 host is Codeberg, where it is released. `claude/` also holds
 `.claude/settings.json`, so every container gets the same permissions and theme.
 The `.claude/` rule in `.gitignore` is anchored to the root, because the bare
@@ -182,6 +182,25 @@ is off, because the file it replaces has no `Host *` block, and the defaults
 that option adds would be new behaviour rather than the same behaviour in Nix.
 `programs.ssh` installs no package: the option is null by default and the system
 ssh is used.
+
+`deb-agent` has a home configuration of its own, `root@deb-agent`, holding the
+two packages the server profile alone stowed. `herdr/` is the first thing in
+this repo that Nix has to package, since it is released as a binary on GitHub
+and is in no channel. `pkgs/herdr.nix` fetches that one file by hash. It is a
+static PIE, with no interpreter and no NEEDED entry, so nothing has to be
+patched into it and the derivation is a fetch and an install. Its `config.toml`
+is a link out of the store, because herdr writes it: `onboarding` is false there
+because herdr set it so after the first run. `dcup/` is two scripts and stays
+two scripts, with `executable` set, because a shell script gains nothing from
+being expressed in Nix.
+
+`zsh/` and `nvim/` cannot follow until the container can, because all three
+profiles stow them and one file cannot have two owners. There is a second reason
+in `dcup` and in the `dots` function: both find the clone with
+`readlink -f ~/.zshrc` and strip two names off the end. That works because
+`~/.zshrc` is a stow link into the clone. The day it is a store path instead,
+both break, and neither says so. So the clone has to be found another way before
+`zsh/` moves.
 
 niri cannot be run here (no Wayland session), so review those edits rather than
 testing them. For the rest: `./install.sh container` must succeed, a package

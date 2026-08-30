@@ -24,7 +24,7 @@ case $profile in
     packages=(zsh nvim)
     pull=1 mise_tools=0 desktop_theme=1 ;;
   server)
-    packages=(zsh nvim herdr dcup mise)
+    packages=(zsh nvim mise)
     pull=1 mise_tools=1 desktop_theme=0 ;;
   container)
     packages=(zsh nvim mise claude)

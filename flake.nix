@@ -13,9 +13,16 @@
       pkgs = nixpkgs.legacyPackages.${system};
     in
     {
-      homeConfigurations."pycan@t460s" = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = [ ./home/t460s.nix ];
+      homeConfigurations = {
+        "pycan@t460s" = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          modules = [ ./home/t460s.nix ];
+        };
+
+        "root@deb-agent" = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          modules = [ ./home/deb-agent.nix ];
+        };
       };
     };
 }
