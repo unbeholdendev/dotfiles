@@ -140,9 +140,12 @@ in the output rather than remembered in a marker file, which is what
 `~/.dots-profile` does today. A flake reads tracked files alone, so a new module
 wants `git add` before the switch, committed or not. Home-manager stops rather
 than write over a file that is already there, and every file it wants is a stow
-link until its package moves, so the switch takes `-b hm-bak` until the table is
-empty. That is a flag and not an option: `backupFileExtension` belongs to the
-NixOS module, whose rebuild has no command line to put it on.
+link until its package moves, so the package is unstowed before its switch and
+not after. `-b hm-bak` survives the collision instead, and is for the run where
+that was forgotten: it renames the file and carries on, where stopping names the
+file and changes nothing. That is a flag and not an option, because
+`backupFileExtension` belongs to the NixOS module, whose rebuild has no command
+line to put it on.
 
 `foot/` is the first package across, and it shows the shape the rest will take.
 `foot.ini` is `programs.foot.settings`, which is typed, so a key that does not
