@@ -9,38 +9,22 @@ if [[ -d /dotfiles && $(stat -c '%d:%i' .) == $(stat -c '%d:%i' /dotfiles) \
   exec /dotfiles/install.sh "$@"
 fi
 
-# Remember the profile per machine, so a bare `dots` on the agent host does not
-# stow the desktop set and link ssh/ onto a host that cannot use it. A fresh
-# container has no marker and the dotfiles hook passes no argument, so the
-# fallback there must not be desktop either.
-marker=$HOME/.dots-profile
-default=desktop
-[[ -f /.dockerenv || -f /run/.containerenv ]] && default=container
-profile=${1:-$(cat "$marker" 2>/dev/null || echo "$default")}
-
-# Every difference between the environments this repo serves is in this table.
-case $profile in
-  desktop)
-    packages=()
-    pull=1 mise_tools=0 desktop_theme=1 home_manager=1 ;;
-  server)
-    packages=()
-    pull=1 mise_tools=0 desktop_theme=0 home_manager=1 ;;
-  container)
-    packages=(zsh nvim mise claude)
-    pull=0 mise_tools=1 desktop_theme=0 home_manager=0 ;;
-  *)
-    echo "usage: ${0##*/} [desktop|server|container]" >&2; exit 1 ;;
-esac
-
-printf '%s\n' "$profile" > "$marker"
-
-# Re-exec after the pull so the pulled version of this file does the stow.
-# The container profile skips it: that clone is somebody's working tree.
-if [[ $pull == 1 && -z ${DOTS_PULLED:-} ]]; then
-  git pull --rebase --autostash
-  DOTS_PULLED=1 exec "$0" "$profile"
+# The dotfiles hook passes no argument, so a container has to name itself. A
+# host does not reach this script at all: `dots` there is a program home-manager
+# installs, holding the clone and the flake output it switches.
+profile=${1:-}
+if [[ -z $profile ]]; then
+  [[ -f /.dockerenv || -f /run/.containerenv ]] && profile=container
 fi
+
+case $profile in
+  container)
+    packages=(zsh nvim mise claude) ;;
+  desktop|server)
+    echo "$profile is a home-manager host: run dots" >&2; exit 1 ;;
+  *)
+    echo "usage: ${0##*/} container" >&2; exit 1 ;;
+esac
 
 # A bare image has none of these and is not ours to change. A failure is not
 # fatal: stow below reports itself missing, and `.zshrc` skips a plugin it
@@ -48,13 +32,11 @@ fi
 missing=()
 command -v git  >/dev/null || missing+=(git)
 command -v zsh  >/dev/null || missing+=(zsh)
-if (( ! home_manager )); then
-  command -v stow >/dev/null || missing+=(stow)
-  [[ -r /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] \
-    || missing+=(zsh-autosuggestions)
-  [[ -r /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] \
-    || missing+=(zsh-syntax-highlighting)
-fi
+command -v stow >/dev/null || missing+=(stow)
+[[ -r /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] \
+  || missing+=(zsh-autosuggestions)
+[[ -r /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] \
+  || missing+=(zsh-syntax-highlighting)
 
 if (( ${#missing[@]} )); then
   sudo=; [[ $EUID == 0 ]] || sudo=sudo
@@ -70,51 +52,26 @@ fi
 # Every stow call needs the flag, `-D` included. `-d` takes the directory
 # absolutely: given a relative one, stow walks $HOME, meets a link into /nix,
 # and dies comparing an absolute path with a relative stow directory.
-if (( ${#packages[@]} )); then
-  stow -R --no-folding -d "$PWD" --target="$HOME" "${packages[@]}"
-fi
+stow -R --no-folding -d "$PWD" --target="$HOME" "${packages[@]}"
 
-# `.zshenv` reads this to find the clone, since resolving `~/.zshrc` stops
-# working the moment home-manager puts that file in the store. home-manager
-# writes it where it runs, so only the other case wants it written here.
-if (( home_manager )); then
-  target=".#$(id -un)@$(hostname -s)"
-  if command -v home-manager >/dev/null; then
-    home-manager switch --flake "$target"
-  elif command -v nix >/dev/null; then
-    nix run home-manager/master -- switch --flake "$target"
-  else
-    echo "no nix: $target cannot be built on this host" >&2; exit 1
-  fi
-else
-  printf '%s\n' "$PWD" > "$HOME/.dots-path"
-fi
+# `.zshenv` reads this to find the clone, since resolving `~/.zshrc` says
+# nothing on a host, where home-manager puts that file in the store.
+printf '%s\n' "$PWD" > "$HOME/.dots-path"
 
-if [[ " ${packages[*]} " == *" claude "* ]]; then
-  [[ -z ${CLAUDE_CONFIG_DIR:-} && -d /claude ]] && export CLAUDE_CONFIG_DIR=/claude
-  cfg=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
-  mkdir -p "$cfg"
-  ln -sfn "$PWD/claude/.claude/settings.json" "$cfg/settings.json"
-fi
+[[ -z ${CLAUDE_CONFIG_DIR:-} && -d /claude ]] && export CLAUDE_CONFIG_DIR=/claude
+cfg=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
+mkdir -p "$cfg"
+ln -sfn "$PWD/claude/.claude/settings.json" "$cfg/settings.json"
 
-if [[ $mise_tools == 1 ]]; then
-  [[ -z ${MISE_DATA_DIR:-} && -d /mise ]] && export MISE_DATA_DIR=/mise
-  shims=${MISE_DATA_DIR:-$HOME/.local/share/mise}/shims
-  PATH="$shims:$HOME/.local/bin:$PATH"
-  command -v mise >/dev/null || curl -fsSL https://mise.run | sh
-  mise install
+[[ -z ${MISE_DATA_DIR:-} && -d /mise ]] && export MISE_DATA_DIR=/mise
+shims=${MISE_DATA_DIR:-$HOME/.local/share/mise}/shims
+PATH="$shims:$HOME/.local/bin:$PATH"
+command -v mise >/dev/null || curl -fsSL https://mise.run | sh
+mise install
 
-  # A mise shim falls through to the system binary when no version is selected,
-  # so a link that did not happen would give the wrong build and no error.
-  if [[ $(command -v nvim) != "$shims/"* ]]; then
-    echo "nvim is not the mise build; the mise package did not link" >&2
-    exit 1
-  fi
-fi
-
-if [[ $desktop_theme == 1 ]]; then
-  # color-scheme drives the settings portal; GTK3 does not read it, so it also
-  # needs gtk-theme.
-  gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
-  gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
+# A mise shim falls through to the system binary when no version is selected,
+# so a link that did not happen would give the wrong build and no error.
+if [[ $(command -v nvim) != "$shims/"* ]]; then
+  echo "nvim is not the mise build; the mise package did not link" >&2
+  exit 1
 fi
