@@ -26,24 +26,22 @@ change. In a container the clone answers to two names, the workspace and the
 from the other name is handed to the mount rather than aborting on links it does
 not own.
 
-`deb-agent` is a headless Debian host, on the `server` profile. The work happens
-in the dev containers it runs, not on the host, so it wants herdr to manage the
-sessions and none of the agent tools itself. The ssh table is deliberately
-absent there: it names the desktop's own key and every host it reaches, none of
-which that host can use, and it is in the desktop's own module rather than a
-package a profile could stow by mistake.
+`deb-agent` is a headless Debian host, and `root@deb-agent` is its home
+configuration. The work happens in the dev containers it runs, not on the host,
+so it wants herdr to manage the sessions and none of the agent tools itself. The
+ssh table is deliberately absent there: it names the desktop's own key and every
+host it reaches, none of which that host can use, and it is imported by the
+desktop's module alone.
 
 `mise/` pins the tools whose distro version is absent or too old: nvim, fzf and
-zoxide. The `container` profile stows it, installs mise where it is missing and
-runs `mise install`. The desktop takes those three from Fedora, whose builds are
-current, and deb-agent takes them from nixpkgs, so neither stows the package at
-all. `mise_tools` is off for both, or `install.sh` would install mise on a host
-that wants none. A version bump is
-then one commit rather than a command retyped per host. A tool one profile alone
-needs is pinned by a package only that profile stows, in its own file
-under `.config/mise/conf.d/`, which mise merges with the shared one. `claude/`
-is the last of those, for the container, which is where claude and forgejo-mcp
-are wanted. Each file is named after its package, so two of them can never
+zoxide. Only the container has it now. `install.sh` stows it, installs mise
+where it is missing and runs `mise install`. The desktop takes those three from
+Fedora, whose builds are current, and deb-agent takes them from nixpkgs, so
+neither wants mise at all. A version bump is then one commit rather than a
+command retyped per container. A tool the container alone needs is pinned in its
+own file under `.config/mise/conf.d/`, which mise merges with the shared one.
+`claude/` is the last of those, and is where claude and forgejo-mcp are
+wanted. Each file is named after its package, so two of them can never
 collide. forgejo-mcp needs an explicit `forgejo:` backend, whose default
 host is Codeberg, where it is released. `claude/` also holds
 `.claude/settings.json`, so every container gets the same permissions and theme.
@@ -137,24 +135,23 @@ is a map of hosts, ports and accounts. Once it is public the hook needs no
 credential, and `--dotfiles-repository` replaces both the mount and the `exec`
 line, so `dcup/` gets smaller rather than larger.
 
-`flake.nix` starts the move to Nix, and nothing depends on it yet. Home-manager
-runs standalone, so Fedora stays Fedora and the Debian host stays Debian, and no
-machine has to be reinstalled to use it. Each package moves in its own commit:
-the stow package goes, a module under `home/` arrives, and the name leaves the
-profile table. `install.sh` is right until that table is empty, so both tools
-describe a machine in the meantime and neither is half done. The host is named
-in the output rather than remembered in a marker file, which is what
-`~/.dots-profile` used to. A flake reads tracked files alone, so a new module
-wants `git add` before the switch, committed or not. Home-manager stops rather
-than write over a file that is already there, and every file it wants is a stow
-link until its package moves, so the package is unstowed before its switch and
-not after. `-b hm-bak` survives the collision instead, and is for the run where
-that was forgotten: it renames the file and carries on, where stopping names the
-file and changes nothing. That is a flag and not an option, because
-`backupFileExtension` belongs to the NixOS module, whose rebuild has no command
-line to put it on.
+`flake.nix` holds one output per host, `pycan@t460s` and `root@deb-agent`, and
+`flake.lock` is the pin that `mise/` used to be for them. Home-manager runs
+standalone, so Fedora stays Fedora and the Debian host stays Debian, and neither
+was reinstalled to get here. `extraSpecialArgs` gives each host its two facts,
+the path of the clone and the name of its own output, because a module cannot
+work either out and both are wanted in more than one file.
 
-`foot/` is the first package across, and it shows the shape the rest will take.
+A flake reads tracked files alone, so a new module wants `git add` before the
+switch, committed or not. Home-manager stops rather than write over a file that
+is already there, so anything left by hand at the path it wants is moved aside
+first; `-b hm-bak` survives that collision instead, and is for the run where it
+was forgotten. That is a flag and not an option, because `backupFileExtension`
+belongs to the NixOS module, whose rebuild has no command line to put it on. And
+`stow` wants `-d` given absolutely: with a relative one it walks `$HOME`, meets
+a link into `/nix`, and dies with `BUG in find_stowed_path?`.
+
+`foot/` was the first package across, and it shows the shape the others took.
 `foot.ini` is `programs.foot.settings`, which is typed, so a key that does not
 exist is an error at build rather than a line foot ignores at start. The package
 comes from nixpkgs as well, because the module gives no way to take the config
@@ -189,9 +186,8 @@ that option adds would be new behaviour rather than the same behaviour in Nix.
 `programs.ssh` installs no package: the option is null by default and the system
 ssh is used.
 
-`deb-agent` has a home configuration of its own, `root@deb-agent`, holding the
-two packages the server profile alone stowed. `herdr/` is the first thing in
-this repo that Nix has to package, since it is released as a binary on GitHub
+`herdr/` and `dcup/` are deb-agent's own, and `herdr/` is the one thing in this
+repo that Nix has to package itself, since it is released as a binary on GitHub
 and is in no channel. `pkgs/herdr.nix` fetches that one file by hash. It is a
 static PIE, with no interpreter and no NEEDED entry, so nothing has to be
 patched into it and the derivation is a fetch and an install. Its `config.toml`
