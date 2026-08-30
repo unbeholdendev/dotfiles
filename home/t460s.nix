@@ -1,6 +1,12 @@
 { ... }:
 {
-  imports = [ ./foot.nix ];
+  imports = [
+    ./foot.nix
+    ./niri.nix
+    ./noctalia.nix
+    ./portal.nix
+    ./yazi.nix
+  ];
 
   home.username = "pycan";
   home.homeDirectory = "/home/pycan";

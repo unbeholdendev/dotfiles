@@ -157,6 +157,22 @@ and into the clone: the store is read only, and a file something writes cannot
 live there. Every package with a rendered theme ends the same way, `yazi/` and
 `noctalia/` included.
 
+`niri/`, `portal/`, `yazi/` and `noctalia/` follow foot. Of the four, `yazi/`
+alone is typed, as `programs.yazi`: its two TOML files are short, and the module
+installs the tool as well, which Fedora has no package for. The rest stay files
+that a module names. A 664 line `config.kdl` gains nothing from being written
+twice, once in KDL and once in Nix, and a rendered theme cannot be written in
+Nix at all. `portal/` is a file for a third reason: `xdg.portal` would install
+the portals from nixpkgs beside Fedora's, and a portal is reached over D-Bus,
+where two implementations of one interface answer at random. A file in the store
+is read as it was at the switch, so an edit now wants a switch before anything
+sees it, where a stow link was live. That is the price of the store, and it is
+why nothing an app writes is put in it. These directories are no longer stow
+packages. They are where the files live, and the module in `home/` says which
+file goes where. `wireplumber/` is gone rather than moved. It held the HDMI
+profile WirePlumber took over the jack, and the script that read the jack
+itself, and no machine this repo now serves wants either.
+
 niri cannot be run here (no Wayland session), so review those edits rather than
 testing them. For the rest: `./install.sh container` must succeed, a package
 added to the `desktop` profile must stow into an empty directory without

@@ -21,7 +21,7 @@ profile=${1:-$(cat "$marker" 2>/dev/null || echo "$default")}
 # Every difference between the environments this repo serves is in this table.
 case $profile in
   desktop)
-    packages=(zsh ssh niri nvim portal wireplumber yazi noctalia)
+    packages=(zsh ssh nvim)
     pull=1 mise_tools=0 desktop_theme=1 ;;
   server)
     packages=(zsh nvim herdr dcup mise)
