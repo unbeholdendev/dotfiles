@@ -11,7 +11,7 @@ vim.pack.add({
 
 vim.cmd.colorscheme("gruvbox")
 
-require("oil").setup()
+require("oil").setup({ view_options = { show_hidden = true } })
 require("config.keymaps")
 
 -- nvim-lspconfig carries the server definitions alone. This is what starts one,
