@@ -20,6 +20,8 @@ in
     zoxide
   ];
 
+  home.file.".config/git/ignore".text = ".claude/worktrees/\n";
+
   home.username = fromEnv "HOME_USER";
   home.homeDirectory = fromEnv "HOME";
   home.stateVersion = "26.05";

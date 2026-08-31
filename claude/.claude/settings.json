@@ -1,5 +1,6 @@
 {
   "permissions": { "defaultMode": "bypassPermissions" },
   "skipDangerousModePermissionPrompt": true,
-  "theme": "dark"
+  "theme": "dark",
+  "worktree": { "baseRef": "head" }
 }
