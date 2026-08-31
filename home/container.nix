@@ -25,5 +25,6 @@ in
   home.username = fromEnv "HOME_USER";
   home.homeDirectory = fromEnv "HOME";
   home.stateVersion = "26.05";
+  news.display = "silent";
 
 }
