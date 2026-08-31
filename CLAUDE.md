@@ -88,8 +88,13 @@ which is the missing tty and not a fault.
 
 ## Rules
 
-Do not write comments. Write a comment only if the code is unclear without it,
-or if it gives the reason for a setting that looks wrong or arbitrary.
+Do not write comments. A line earns one only when it looks wrong, arbitrary, or
+redundant, and then the comment gives that reason and nothing else, in one or
+two lines. Never write what the code does, what a thing used to be, or a design
+reason a section above already holds.
+
+Hold this file to the same measure. It carries what an agent must not get wrong,
+and no history, because git holds that.
 
 Make the smallest change that achieves the goal. Change nothing else. Do not add
 improvements, extra files, or refactors that nobody asked for.
