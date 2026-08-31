@@ -6,13 +6,7 @@ command -v devcontainer >/dev/null ||
 
 folder=${1:-.}
 
-# herdr names a pane from the comm and the argv0 of the foreground process group
-# on this host. That is the devcontainer CLI, which is node, and the agent runs
-# in the container, out of that process tree, so nothing identifies it.
-# HERDR_AGENT is the hint for a wrapper that hides the agent. It goes on this
-# process, because herdr reads it from /proc on the host and cannot see a copy
-# set in the container. It is a label alone: no agent is installed here.
-#
-# Through zsh, because the profile that holds claude reaches PATH from .zshenv.
+# The agent runs out of the process tree herdr reads, so HERDR_AGENT labels it
+# here. Through zsh, because .zshenv is what puts the profile on PATH.
 exec env HERDR_AGENT=claude devcontainer exec --workspace-folder "$folder" \
   zsh -c 'exec claude "$@"' claude "${@:2}"

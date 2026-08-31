@@ -12,9 +12,7 @@
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
 
-      # claude-code is the one unfree package this repo wants, and the
-      # container is the one output that wants it. Named rather than
-      # allowUnfree, so a second one cannot arrive unnoticed.
+      # Named rather than allowUnfree, so a second one cannot arrive unseen.
       containerPkgs = import nixpkgs {
         inherit system;
         config.allowUnfreePredicate =
@@ -32,9 +30,6 @@
           modules = [ ./home/t460s.nix ];
         };
 
-        # One output for every container, because a container hostname is a
-        # random id. `dotfiles` is null: the clone is at a path the image and
-        # the mount decide, so install.sh names it at run time instead.
         container = home-manager.lib.homeManagerConfiguration {
           pkgs = containerPkgs;
           extraSpecialArgs = {

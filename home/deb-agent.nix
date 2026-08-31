@@ -8,7 +8,6 @@
     ./zsh.nix
   ];
 
-  # What `mise/` pinned for this host.
   home.packages = with pkgs; [
     neovim
     fzf

@@ -14,6 +14,4 @@ vim.cmd.colorscheme("gruvbox")
 require("oil").setup({ view_options = { show_hidden = true } })
 require("config.keymaps")
 
--- nvim-lspconfig carries the server definitions alone. This is what starts one,
--- when a file the server claims is opened.
 vim.lsp.enable({ "bashls", "lua_ls", "nixd" })

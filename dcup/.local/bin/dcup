@@ -4,16 +4,10 @@ set -euo pipefail
 command -v devcontainer >/dev/null ||
   { echo "no devcontainer CLI: npm i -g @devcontainers/cli" >&2; exit 1; }
 
-# Set by .zshenv from ~/.dots-path, which home-manager writes on this host.
 dotfiles=${DOTFILES:-}
 [[ -n $dotfiles ]] ||
   { echo "no DOTFILES: run dots on this host to write ~/.dots-path" >&2; exit 1; }
 
-# Asked every time, and none is the first answer: that credential is worth more
-# to the other people in a shared project than the MCP server is to you. One
-# forge and not both, because a container that can reach the other one is a
-# container that leaks it there. With no terminal there is nobody to answer, so
-# nothing is copied, which is the same end as answering none.
 forge=
 if [[ -t 0 ]]; then
   PS3='which token for this container? '
@@ -21,28 +15,21 @@ if [[ -t 0 ]]; then
   case ${forge:-none} in none) forge= ;; esac
 fi
 
-# Before the container starts, so an hour of image pull does not end in a
-# container that cannot push.
+# Before the pull, so an hour of it does not end in a container that cannot push.
 if [[ -n $forge && ! -r ~/.$forge-token ]]; then
   echo "no ~/.$forge-token on this host" >&2; exit 1
 fi
 
 folder=${1:-.}
 
-# Shell history outlives the container it was typed in, one store per project.
-# The basename alone is not one name per project: two clones of the same name in
-# different parents would share a history.
+# The basename alone is not unique: two clones of one name would share a history.
 resolved=$(readlink -f "$folder")
 stamp=$(printf %s "$resolved" | md5sum | cut -c1-8)
 state=$HOME/.devcontainer-state/$(basename "$resolved")-$stamp
 mkdir -p "$state"
 
-# installOhMyZshConfig writes a ~/.zshrc, and home-manager stops rather than
-# write over a file that is already at the path it wants.
-#
-# --no-lockfile because the CLI otherwise writes devcontainer-lock.json into the
-# project it starts, and that tree is not ours to dirty. It pins nothing here:
-# the features are on this command line rather than in a devcontainer.json.
+# installOhMyZshConfig writes a ~/.zshrc, which home-manager then refuses to
+# replace. --no-lockfile, or the CLI dirties the project with a lock file.
 devcontainer up --workspace-folder "$folder" --no-lockfile \
   --additional-features '{"ghcr.io/devcontainers/features/common-utils:2":{
       "installZsh": true,
@@ -58,17 +45,7 @@ devcontainer up --workspace-folder "$folder" --no-lockfile \
 
 devcontainer exec --workspace-folder "$folder" /dotfiles/install.sh container
 
-# A copy and not a mount: `--mount` takes only type, source, target and
-# external, so a read-only bind is not expressible, and a copy follows `$HOME`
-# in a project that runs as its own user.
-#
-# The identity travels with the forgejo token, because that identity is the
-# forgejo agent. The github side gets neither identity nor helper: a
-# fine-grained token is issued per owner, and every owner is the same host, so
-# the host a helper is keyed by cannot choose between two of them. That clone
-# names its own file and its own author, in a `.git/config` both sides of the
-# mount read and where `$HOME` resolves on each. A clone that names neither
-# fails its first commit, which is the right end for somebody else's repo.
+# A copy, because `--mount` cannot express a read-only bind.
 case $forge in
   forgejo)
     devcontainer exec --workspace-folder "$folder" \

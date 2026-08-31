@@ -16,8 +16,6 @@
     };
   };
 
-  # noctalia renders this theme, and the store cannot hold a file that is
-  # written, so it stays a link out of the store and in the clone.
   xdg.configFile."foot/themes/noctalia".source =
     config.lib.file.mkOutOfStoreSymlink
       "${dotfiles}/foot/.config/foot/themes/noctalia";
