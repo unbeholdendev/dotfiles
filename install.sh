@@ -63,3 +63,4 @@ printf '%s\n' "$PWD" > "$HOME/.dots-path"
 cfg=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
 mkdir -p "$cfg"
 ln -sfn "$PWD/claude/.claude/settings.json" "$cfg/settings.json"
+ln -sfn "$PWD/claude/.claude/CLAUDE.md" "$cfg/CLAUDE.md"
