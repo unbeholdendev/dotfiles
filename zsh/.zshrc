@@ -27,8 +27,7 @@ eval "$(zoxide init zsh)"
 export EDITOR=nvim
 export VISUAL=nvim
 
-# dircolors has no TERM entry for foot, and an unknown TERM gives an empty
-# LS_COLORS, which turns off colour for ls and for the completion menu.
+# dircolors has no entry for foot, and an unknown TERM gives an empty LS_COLORS.
 eval "$(TERM=xterm-256color dircolors -b)"
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 alias ls='ls --color=auto'
@@ -38,9 +37,6 @@ alias ll='ls -lah'
 alias ..='cd ..'
 alias ...='cd ../..'
 
-# On a host home-manager installs `dots`, with the clone and the flake output
-# written into it. A container cannot have that: the clone is at a path the
-# image and the mount decide, so install.sh works it out at run time.
 if ! command -v dots >/dev/null; then
   dots() {
     if [[ -z ${DOTFILES:-} ]]; then

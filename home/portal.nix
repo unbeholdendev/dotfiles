@@ -1,8 +1,7 @@
 { ... }:
 {
-  # The file alone, and not xdg.portal: that installs the portal packages from
-  # nixpkgs beside Fedora's, and a portal is reached over D-Bus, where two
-  # implementations of one interface answer at random.
+  # Not xdg.portal: that adds nixpkgs' portals beside Fedora's, and two
+  # answers to one D-Bus interface race.
   xdg.configFile."xdg-desktop-portal/niri-portals.conf".source =
     ../portal/.config/xdg-desktop-portal/niri-portals.conf;
 }

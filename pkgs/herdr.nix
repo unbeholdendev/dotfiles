@@ -11,8 +11,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
   dontUnpack = true;
 
-  # A static PIE: no interpreter and no NEEDED entry, so there is nothing for
-  # autoPatchelfHook to rewrite.
+  # A static PIE, so autoPatchelfHook has nothing to rewrite.
   installPhase = ''
     runHook preInstall
     install -Dm755 $src $out/bin/herdr

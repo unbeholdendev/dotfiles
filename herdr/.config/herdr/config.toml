@@ -4,8 +4,7 @@ onboarding = false
 name = "gruvbox"
 
 [ui]
-# The default accent is cyan. This is the colour noctalia paints the niri focus
-# ring, so a selected pane matches a focused window.
+# The colour noctalia paints the niri focus ring, so a pane matches a window.
 accent = "#b8bb26"
 agent_panel_sort = "priority"
 show_agent_labels_on_pane_borders = true
@@ -18,6 +17,5 @@ rows = [["state_icon", "workspace", "tab"], ["terminal_title_stripped"], ["agent
 [ui.toast]
 delivery = "terminal"
 
-# The client runs on a headless host, so there is no audio device.
 [ui.sound]
 enabled = false
