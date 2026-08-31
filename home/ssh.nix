@@ -18,6 +18,12 @@ in
 
 
 
+    }
+    // {
+      "*" = {
+        ServerAliveInterval = 15;
+        ServerAliveCountMax = 3;
+      };
     };
   };
 }
