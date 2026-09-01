@@ -4,6 +4,8 @@
   home.file.".zshrc".source = ../zsh/.zshrc;
 
   home.packages = with pkgs; [
+    fzf
+    zoxide
     zsh-autosuggestions
     zsh-syntax-highlighting
   ];

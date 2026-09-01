@@ -1,6 +1,7 @@
 { ... }:
 {
   imports = [
+    ./common.nix
     ./dots.nix
     ./foot.nix
     ./niri.nix
@@ -15,8 +16,6 @@
 
   home.username = "pycan";
   home.homeDirectory = "/home/pycan";
-  home.stateVersion = "26.05";
-  news.display = "silent";
 
   programs.home-manager.enable = true;
 }

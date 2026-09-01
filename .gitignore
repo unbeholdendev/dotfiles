@@ -1,6 +1,3 @@
-yazi/.config/yazi/theme.toml
-yazi/.config/yazi/flavors/noctalia.yazi/
-
 /result
 
 # Anchored, or the bare pattern also matches claude/.claude/ in this repo.

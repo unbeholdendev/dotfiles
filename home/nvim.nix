@@ -4,6 +4,7 @@
     bash-language-server
     fd
     lua-language-server
+    neovim
     nixd
     ripgrep
   ];

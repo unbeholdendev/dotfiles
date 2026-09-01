@@ -10,7 +10,6 @@
   outputs = { nixpkgs, home-manager, ... }:
     let
       system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
 
       # Named rather than allowUnfree, so a second one cannot arrive unseen.
       containerPkgs = import nixpkgs {
@@ -18,33 +17,33 @@
         config.allowUnfreePredicate =
           p: builtins.elem (nixpkgs.lib.getName p) [ "claude-code" ];
       };
+
+      hosts = {
+        "pycan@t460s" = {
+          dotfiles = "/home/pycan/Documents/dotfiles";
+          module = ./home/t460s.nix;
+        };
+        "root@deb-agent" = {
+          dotfiles = "/root/dotfiles";
+          module = ./home/deb-agent.nix;
+        };
+      };
+
+      host = target: { dotfiles, module }:
+        home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.${system};
+          extraSpecialArgs = { inherit dotfiles target; };
+          modules = [ module ];
+        };
     in
     {
-      homeConfigurations = {
-        "pycan@t460s" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs;
-          extraSpecialArgs = {
-            dotfiles = "/home/pycan/Documents/dotfiles";
-            target = "pycan@t460s";
-          };
-          modules = [ ./home/t460s.nix ];
-        };
-
+      homeConfigurations = nixpkgs.lib.mapAttrs host hosts // {
         container = home-manager.lib.homeManagerConfiguration {
           pkgs = containerPkgs;
           extraSpecialArgs = {
             dotfiles = null;
           };
           modules = [ ./home/container.nix ];
-        };
-
-        "root@deb-agent" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs;
-          extraSpecialArgs = {
-            dotfiles = "/root/dotfiles";
-            target = "root@deb-agent";
-          };
-          modules = [ ./home/deb-agent.nix ];
         };
       };
     };

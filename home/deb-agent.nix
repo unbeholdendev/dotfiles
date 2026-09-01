@@ -1,6 +1,7 @@
-{ pkgs, ... }:
+{ ... }:
 {
   imports = [
+    ./common.nix
     ./dcup.nix
     ./dots.nix
     ./herdr.nix
@@ -8,16 +9,8 @@
     ./zsh.nix
   ];
 
-  home.packages = with pkgs; [
-    neovim
-    fzf
-    zoxide
-  ];
-
   home.username = "root";
   home.homeDirectory = "/root";
-  home.stateVersion = "26.05";
-  news.display = "silent";
 
   programs.home-manager.enable = true;
 }

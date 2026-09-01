@@ -6,6 +6,7 @@ let
 in
 {
   imports = [
+    ./common.nix
     ./nvim.nix
     ./zsh.nix
   ];
@@ -14,17 +15,16 @@ in
   home.packages = with pkgs; [
     claude-code
     forgejo-mcp
-    fzf
-    neovim
     nix
-    zoxide
   ];
 
-  home.file.".config/git/ignore".text = ".claude/worktrees/\n";
+  xdg.configFile."git/ignore".text = ".claude/worktrees/\n";
+
+  # A container has no user systemd, and nobody reads a man page in one.
+  systemd.user.enable = false;
+  programs.man.enable = false;
+  manual.manpages.enable = false;
 
   home.username = fromEnv "HOME_USER";
   home.homeDirectory = fromEnv "HOME";
-  home.stateVersion = "26.05";
-  news.display = "silent";
-
 }
