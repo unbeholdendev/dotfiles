@@ -14,4 +14,19 @@ vim.cmd.colorscheme("gruvbox")
 require("oil").setup({ view_options = { show_hidden = true } })
 require("config.keymaps")
 
-vim.lsp.enable({ "bashls", "lua_ls", "nixd" })
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "astro", "css", "html", "javascript", "json", "typescript", "typescriptreact" },
+  callback = function(ev) vim.treesitter.start(ev.buf) end,
+})
+
+vim.lsp.enable({
+  "astro",
+  "bashls",
+  "cssls",
+  "html",
+  "jsonls",
+  "lua_ls",
+  "nixd",
+  "tailwindcss",
+  "ts_ls",
+})
