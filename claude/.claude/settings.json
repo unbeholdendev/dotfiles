@@ -2,5 +2,6 @@
   "permissions": { "defaultMode": "bypassPermissions" },
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark",
-  "worktree": { "baseRef": "head" }
+  "worktree": { "baseRef": "head" },
+  "enabledPlugins": { "mattpocock-skills@claude-plugins-official": true }
 }
