@@ -85,10 +85,3 @@ testing them. For the rest: `./install.sh container` must succeed, and must
 succeed again on a second run, and `zsh -ic exit` must be silent. Test that one
 under a pty; with no terminal `fzf --zsh` reports `can't change option: zle`,
 which is the missing tty and not a fault.
-
-## Rules
-
-Make the smallest change that achieves the goal. Change nothing else. Do not add
-improvements, extra files, or refactors that nobody asked for.
-
-Write every reply to the user in ASD-STE100 Simplified Technical English.
