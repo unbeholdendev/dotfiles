@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 {
   imports = [
     ./common.nix
@@ -13,6 +13,8 @@
     ./yazi.nix
     ./zsh.nix
   ];
+
+  home.packages = [ pkgs.ansible ];
 
   home.username = "pycan";
   home.homeDirectory = "/home/pycan";
