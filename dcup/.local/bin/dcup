@@ -8,8 +8,16 @@ dotfiles=${DOTFILES:-}
 [[ -n $dotfiles ]] ||
   { echo "no DOTFILES: run dots on this host to write ~/.dots-path" >&2; exit 1; }
 
+folder=${1:-.}
+
+# The basename alone is not unique: two clones of one name would share a history.
+resolved=$(readlink -f "$folder")
+
+# A container that exists already holds the token it was built with.
 forge=
-if [[ -t 0 ]]; then
+if [[ -t 0 ]] &&
+  ! docker ps -aq --filter "label=devcontainer.local_folder=$resolved" | grep -q .
+then
   PS3='which token for this container? '
   select forge in none forgejo github; do [[ -n $forge ]] && break; done
   case ${forge:-none} in none) forge= ;; esac
@@ -20,10 +28,6 @@ if [[ -n $forge && ! -r ~/.$forge-token ]]; then
   echo "no ~/.$forge-token on this host" >&2; exit 1
 fi
 
-folder=${1:-.}
-
-# The basename alone is not unique: two clones of one name would share a history.
-resolved=$(readlink -f "$folder")
 stamp=$(printf %s "$resolved" | md5sum | cut -c1-8)
 state=$HOME/.devcontainer-state/$(basename "$resolved")-$stamp
 mkdir -p "$state"
