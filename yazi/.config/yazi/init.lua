@@ -21,5 +21,5 @@ function Linemode:full()
     local folder = cx.active:history(self._file.url)
     size = folder and tostring(#folder.files) or ""
   end
-  return string.format("%s %s %9s", stamp(self._file.cha.btime), stamp(self._file.cha.mtime), size)
+  return string.format("%s %9s", stamp(self._file.cha.mtime), size)
 end
