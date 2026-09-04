@@ -7,7 +7,7 @@ typeset -U path PATH
 # Claude Code exits rather than run as root without this.
 [[ -f /.dockerenv || -f /run/.containerenv ]] && export IS_SANDBOX=1
 
-path=(~/.local/bin $path)
+path=(~/.local/bin ~/.devcontainers/bin $path)
 
 # A niri session and `devcontainer exec` read none of the installer's own files.
 if [[ -d ~/.nix-profile/bin ]]; then
