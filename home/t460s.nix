@@ -14,7 +14,11 @@
     ./zsh.nix
   ];
 
-  home.packages = [ pkgs.ansible ];
+  home.packages = with pkgs; [
+    ansible
+    signal-desktop
+    ungoogled-chromium
+  ];
 
   home.username = "pycan";
   home.homeDirectory = "/home/pycan";
