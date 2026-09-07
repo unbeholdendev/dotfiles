@@ -1,8 +1,7 @@
 # dotfiles
 
-Config for a niri machine, Fedora now and NixOS after the reinstall, authored in
-this dev container and pulled onto the real machine. The container is for
-editing, not the target.
+Config for a NixOS + niri machine, authored in this dev container and pulled
+onto the real machine. The container is for editing, not the target.
 
 Each top-level directory holds one program's files, laid out as they sit under
 `$HOME`, and a module in `home/` names every one of them. Nothing stows
@@ -12,8 +11,8 @@ anything.
 headless host whose work happens in the dev containers it runs; and `container`,
 which is one name for every container, since a container hostname is a random
 id. `nixosConfigurations.t460s` is the system half of that desktop.
-`flake.lock` is the pin. Home-manager runs standalone, so Fedora stays Fedora
-and Debian stays Debian.
+`flake.lock` is the pin. Home-manager runs standalone on the other two, so
+Debian stays Debian.
 
 `dots` is the one command. On a host it is a program home-manager installs, with
 the clone and the flake output written into it. In a container it is a function
