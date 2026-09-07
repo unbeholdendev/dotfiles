@@ -1,6 +1,6 @@
 { config, dotfiles, ... }:
 {
-  xdg.configFile."com.pais.handy/settings_store.json".source =
+  xdg.dataFile."com.pais.handy/settings_store.json".source =
     config.lib.file.mkOutOfStoreSymlink
-      "${dotfiles}/handy/.config/com.pais.handy/settings_store.json";
+      "${dotfiles}/handy/.local/share/com.pais.handy/settings_store.json";
 }

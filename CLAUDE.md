@@ -73,7 +73,9 @@ claude in a container `dcup` brought up.
   Take it away and dictation records and transcribes and types nothing. Handy
   rewrites `settings_store.json` whole on every change, through the symlink, so
   it is a `mkOutOfStoreSymlink` like noctalia's and its window dirties the
-  clone. The repo seeds `push_to_talk` alone, because Mod+D is a toggle and the
+  clone. That file is under `~/.local/share`, not `~/.config`: tauri-plugin-store
+  resolves a relative name against `BaseDirectory::AppData`, which on Linux is
+  `dirs::data_dir()`. It sits with the models handy downloads. The repo seeds `push_to_talk` alone, because Mod+D is a toggle and the
   default is hold; everything else in that file is what a real run wrote. Do not
   hand-write a key there, since one enum spelt wrong loses the lot.
 
