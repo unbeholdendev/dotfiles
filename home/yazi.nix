@@ -1,5 +1,7 @@
-{ ... }:
+{ pkgs, ... }:
 {
+  home.packages = [ pkgs.zathura ];
+
   programs.yazi = {
     enable = true;
 

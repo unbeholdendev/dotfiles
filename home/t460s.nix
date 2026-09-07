@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   imports = [
     ./common.nix
@@ -16,12 +16,25 @@
 
   home.packages = with pkgs; [
     ansible
+    ddcutil
+    firefox
+    git
+    grim
+    jq
+    libnotify
+    playerctl
     signal-desktop
+    swappy
     ungoogled-chromium
+    unzip
+    wl-clipboard
+    zip
   ];
 
   home.username = "pycan";
   home.homeDirectory = "/home/pycan";
+
+  home.file."nas".source = config.lib.file.mkOutOfStoreSymlink "/mnt/nas";
 
   programs.home-manager.enable = true;
 }
