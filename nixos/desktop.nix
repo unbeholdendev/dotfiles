@@ -2,7 +2,10 @@
 {
   programs.niri.enable = true;
 
-  environment.systemPackages = [ noctalia ];
+  environment.systemPackages = [
+    noctalia
+    pkgs.xwayland-satellite
+  ];
 
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";

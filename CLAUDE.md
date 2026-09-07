@@ -64,6 +64,12 @@ claude in a container `dcup` brought up.
   nixpkgs package is older and its binary answers to another name.
   `nix.settings` reaches the installed system alone, so `nixos-install` wants
   that cache and key as `--option` flags.
+- `xwayland-satellite` is there for handy, not for any X11 app. niri strips
+  `DISPLAY` from what it spawns when no X server is up, handy's enigo then fails
+  to construct, and handy 0.9.1 reads that handle before it dispatches, so every
+  paste dies on `Enigo state not initialized` and never reaches the wtype it
+  would have used. Upstream moved the read in v0.9.6; when nixpkgs carries that,
+  this stops holding handy up and is only an X11 convenience.
 - `nixos/disk.nix` is disko and owns every local `fileSystems` entry. The NAS
   mount in `nixos/t460s.nix` is the one that is not local. Confirm the disk at
   the top of `disk.nix` with `lsblk`, since disko erases what it is given.
