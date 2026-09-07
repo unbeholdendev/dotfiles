@@ -1,7 +1,8 @@
 # dotfiles
 
-Config for a Fedora + niri machine, authored in this dev container and pulled
-onto the real machine. The container is for editing, not the target.
+Config for a niri machine, Fedora now and NixOS after the reinstall, authored in
+this dev container and pulled onto the real machine. The container is for
+editing, not the target.
 
 Each top-level directory holds one program's files, laid out as they sit under
 `$HOME`, and a module in `home/` names every one of them. Nothing stows
@@ -10,8 +11,9 @@ anything.
 `flake.nix` has three outputs: `pycan@t460s`, the desktop; `root@deb-agent`, a
 headless host whose work happens in the dev containers it runs; and `container`,
 which is one name for every container, since a container hostname is a random
-id. `flake.lock` is the pin. Home-manager runs standalone, so Fedora stays
-Fedora and Debian stays Debian.
+id. `nixosConfigurations.t460s` is the system half of that desktop.
+`flake.lock` is the pin. Home-manager runs standalone, so Fedora stays Fedora
+and Debian stays Debian.
 
 `dots` is the one command. On a host it is a program home-manager installs, with
 the clone and the flake output written into it. In a container it is a function
@@ -46,12 +48,28 @@ claude in a container `dcup` brought up.
 - A store file is read as it was at the switch, so an edit wants a switch before
   anything sees it.
 - Home-manager stops rather than write over a file already at the path it wants.
-  `-b hm-bak` is the flag for a host, `HOME_MANAGER_BACKUP_EXT` for a container.
+  `-b hm-bak` is the flag for a host, `HOME_MANAGER_BACKUP_EXT` for a container,
+  and `home-manager.backupFileExtension` on NixOS, where there is no flag.
 - `container` is built with `--impure` and reads `HOME_USER` and `HOME` from the
   environment, because the image chooses the user.
 - `~/.dots-path` names the clone, since `~/.zshrc` now resolves into the store.
   `home/dots.nix` writes it on a host and `install.sh` in a container; `.zshenv`
   exports `DOTFILES` from it, and `dcup` is the reader.
+- `home/t460s.nix` is the standalone home and the NixOS module both, so
+  `home.username` and `home.homeDirectory` stay in it: the NixOS module sets the
+  same values, and equal definitions merge.
+- `nixos` is the third `extraSpecialArgs` fact, and `home/dots.nix` is the one
+  reader. On NixOS one rebuild applies both, so `dots` runs `nixos-rebuild`.
+- The noctalia input is pinned to the `cachix` branch and takes no `nixpkgs`
+  follows. Either change is a cache miss, which is 40 minutes of C++. The
+  nixpkgs package is older and its binary answers to another name.
+  `nix.settings` reaches the installed system alone, so `nixos-install` wants
+  that cache and key as `--option` flags.
+- `nixos/disk.nix` is disko and owns every local `fileSystems` entry. The NAS
+  mount in `nixos/t460s.nix` is the one that is not local. Confirm the disk at
+  the top of `disk.nix` with `lsblk`, since disko erases what it is given.
+  `hardware-configuration.nix` is not committed: the initrd list is in
+  `nixos/t460s.nix`.
 
 ## Secrets
 
@@ -59,6 +77,12 @@ claude in a container `dcup` brought up.
 and no other way, and one container gets one of them, never both. Never print
 or commit either value, and never put a token in a remote URL: that writes it
 into `.git/config`, which the container reads and a push can leak.
+
+`/etc/nm-secrets.env` holds `WIFI_PSK`, mode 600, and is written by hand on the
+desktop. Never put the value in `nixos/t460s.nix`: `ensureProfiles` renders each
+profile into the store, which is world readable. `EnvironmentFile` has no `-`
+prefix, so a missing file fails `NetworkManager-ensure-profiles.service` and the
+profile is never written.
 
 The forgejo MCP server is registered at user scope in `.claude.json` inside the
 `/claude` volume, so it loads in every project and a new store wants the entry
@@ -81,7 +105,13 @@ git -C <clone> config credential.https://github.com.helper \
 ## Testing
 
 niri cannot be run here (no Wayland session), so review those edits rather than
-testing them. For the rest: `./install.sh container` must succeed, and must
-succeed again on a second run, and `zsh -ic exit` must be silent. Test that one
-under a pty; with no terminal `fzf --zsh` reports `can't change option: zle`,
-which is the missing tty and not a fault.
+testing them. The NixOS half is checked by evaluation:
+
+```
+nix eval .#nixosConfigurations.t460s.config.system.build.toplevel.drvPath
+```
+
+For the rest: `./install.sh container` must succeed, and must succeed again on a
+second run, and `zsh -ic exit` must be silent. Test that one under a pty; with
+no terminal `fzf --zsh` reports `can't change option: zle`, which is the missing
+tty and not a fault.

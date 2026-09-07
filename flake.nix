@@ -5,9 +5,14 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    noctalia.url = "github:noctalia-dev/noctalia-shell/cachix";
   };
 
-  outputs = { nixpkgs, home-manager, ... }:
+  outputs = { nixpkgs, home-manager, disko, noctalia, ... }:
     let
       system = "x86_64-linux";
 
@@ -32,7 +37,7 @@
       host = target: { dotfiles, module }:
         home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages.${system};
-          extraSpecialArgs = { inherit dotfiles target; };
+          extraSpecialArgs = { inherit dotfiles target; nixos = false; };
           modules = [ module ];
         };
     in
@@ -45,6 +50,31 @@
           };
           modules = [ ./home/container.nix ];
         };
+      };
+
+      nixosConfigurations.t460s = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = {
+          noctalia = noctalia.packages.${system}.default;
+        };
+        modules = [
+          disko.nixosModules.disko
+          home-manager.nixosModules.home-manager
+          ./nixos/t460s.nix
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              backupFileExtension = "hm-bak";
+              extraSpecialArgs = {
+                dotfiles = hosts."pycan@t460s".dotfiles;
+                target = "t460s";
+                nixos = true;
+              };
+              users.pycan = import ./home/t460s.nix;
+            };
+          }
+        ];
       };
     };
 }

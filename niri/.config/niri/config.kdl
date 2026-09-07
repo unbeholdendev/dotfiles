@@ -280,7 +280,6 @@ layout {
 spawn-at-startup "foot" "--server"
 spawn-at-startup "noctalia"
 spawn-at-startup "handy" "--start-hidden"
-spawn-sh-at-startup "$HOME/.local/bin/headphone-profile"
 
 // To run a shell command (with variables, pipes, etc.), use spawn-sh-at-startup:
 // spawn-sh-at-startup "qs -c ~/source/qs/MyAwesomeShell"

@@ -1,4 +1,4 @@
-{ dotfiles, pkgs, target, ... }:
+{ dotfiles, nixos, pkgs, target, ... }:
 {
   home.packages = [
     (pkgs.writeShellApplication {
@@ -6,7 +6,8 @@
       text = ''
         git -C ${dotfiles} switch main
         git -C ${dotfiles} pull --rebase --autostash
-        home-manager switch --flake ${dotfiles}#${target}
+        ${if nixos then "sudo nixos-rebuild" else "home-manager"} \
+          switch --flake ${dotfiles}#${target}
       '';
     })
   ];
