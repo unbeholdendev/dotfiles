@@ -69,6 +69,13 @@ claude in a container `dcup` brought up.
   the top of `disk.nix` with `lsblk`, since disko erases what it is given.
   `hardware-configuration.nix` is not committed: the initrd list is in
   `nixos/t460s.nix`.
+- `wtype` is there for handy, which finds it on PATH and declares it nowhere.
+  Take it away and dictation records and transcribes and types nothing. Handy
+  rewrites `settings_store.json` whole on every change, through the symlink, so
+  it is a `mkOutOfStoreSymlink` like noctalia's and its window dirties the
+  clone. The repo seeds `push_to_talk` alone, because Mod+D is a toggle and the
+  default is hold; everything else in that file is what a real run wrote. Do not
+  hand-write a key there, since one enum spelt wrong loses the lot.
 
 ## Secrets
 
