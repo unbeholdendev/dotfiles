@@ -7,7 +7,6 @@
     ./niri.nix
     ./noctalia.nix
     ./nvim.nix
-    ./portal.nix
     ./ssh.nix
     ./theme.nix
     ./yazi.nix
@@ -25,7 +24,9 @@
     playerctl
     signal-desktop
     swappy
-    ungoogled-chromium
+    (ungoogled-chromium.override {
+      commandLineArgs = "--ozone-platform-hint=wayland";
+    })
     unzip
     wl-clipboard
     zip
@@ -35,7 +36,6 @@
     enable = true;
     package = pkgs.adwaita-icon-theme;
     name = "Adwaita";
-    size = 24;
   };
 
   home.username = "pycan";

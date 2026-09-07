@@ -64,7 +64,7 @@
           {
             home-manager = {
               useGlobalPkgs = true;
-              useUserPackages = true;
+              useUserPackages = false;
               backupFileExtension = "hm-bak";
               extraSpecialArgs = {
                 dotfiles = hosts."pycan@t460s".dotfiles;
