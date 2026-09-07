@@ -4,6 +4,11 @@
 
   environment.systemPackages = [ noctalia ];
 
+  environment.sessionVariables = {
+    NIXOS_OZONE_WL = "1";
+    ELECTRON_OZONE_PLATFORM_HINT = "auto";
+  };
+
   services.pipewire = {
     enable = true;
     alsa.enable = true;
@@ -11,5 +16,13 @@
   };
   security.rtkit.enable = true;
 
-  fonts.packages = [ pkgs.nerd-fonts.jetbrains-mono ];
+  fonts.packages = with pkgs; [
+    nerd-fonts.jetbrains-mono
+    noto-fonts
+  ];
+
+  fonts.fontconfig.defaultFonts = {
+    sansSerif = [ "Noto Sans" ];
+    serif = [ "Noto Serif" ];
+  };
 }

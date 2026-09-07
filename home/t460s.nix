@@ -31,6 +31,13 @@
     zip
   ];
 
+  home.pointerCursor = {
+    enable = true;
+    package = pkgs.adwaita-icon-theme;
+    name = "Adwaita";
+    size = 24;
+  };
+
   home.username = "pycan";
   home.homeDirectory = "/home/pycan";
 
