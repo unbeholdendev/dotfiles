@@ -24,9 +24,7 @@
     playerctl
     signal-desktop
     swappy
-    (ungoogled-chromium.override {
-      commandLineArgs = "--ozone-platform-hint=wayland";
-    })
+    ungoogled-chromium
     unzip
     wl-clipboard
     zip
