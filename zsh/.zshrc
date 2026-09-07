@@ -9,7 +9,7 @@ compinit
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 
-for d in ~/.nix-profile/share /usr/share; do
+for d in ${(s.:.)XDG_DATA_DIRS}; do
   if [[ -r $d/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
     source $d/zsh-autosuggestions/zsh-autosuggestions.zsh
     break
@@ -60,7 +60,7 @@ PROMPT=''
 [[ -n ${SSH_CONNECTION:-} ]] && PROMPT='%F{109}%m%f '
 PROMPT+='%F{180}%~%f%F{244}${vcs_info_msg_0_}%f %(?.%F{71}.%F{167})❯%f '
 
-for d in ~/.nix-profile/share /usr/share; do
+for d in ${(s.:.)XDG_DATA_DIRS}; do
   if [[ -r $d/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
     source $d/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
     break
