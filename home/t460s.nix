@@ -4,6 +4,7 @@
     ./common.nix
     ./dots.nix
     ./foot.nix
+    ./handy.nix
     ./niri.nix
     ./noctalia.nix
     ./nvim.nix
@@ -19,6 +20,7 @@
     firefox
     git
     grim
+    handy
     jq
     libnotify
     playerctl
@@ -27,6 +29,7 @@
     ungoogled-chromium
     unzip
     wl-clipboard
+    wtype
     zip
   ];
 
