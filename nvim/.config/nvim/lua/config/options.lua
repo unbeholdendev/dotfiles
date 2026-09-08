@@ -37,6 +37,6 @@ o.laststatus = 3
 
 o.autocomplete = true
 o.autocompletedelay = 100
-o.complete = ".,w,b,u,t,o"
+o.complete = ".,w,b,u"
 o.completeopt = "menu,menuone,popup,fuzzy"
 o.pumheight = 10
