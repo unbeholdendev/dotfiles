@@ -24,8 +24,7 @@ in
         ];
         pdf = [
           {
-            # A probe, not a fix: record what the opener is handed.
-            run = ''printf '0=%s\n' "$0" >/tmp/yazi-args.txt; printf '@=%s\n' "$@" >>/tmp/yazi-args.txt'';
+            run = ''zathura "$@"'';
             orphan = true;
             desc = "zathura";
           }
