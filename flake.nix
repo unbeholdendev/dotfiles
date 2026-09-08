@@ -9,7 +9,7 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    noctalia.url = "github:noctalia-dev/noctalia-shell/cachix";
+    noctalia.url = "github:noctalia-dev/noctalia/cachix";
   };
 
   outputs = { nixpkgs, home-manager, disko, noctalia, ... }:
