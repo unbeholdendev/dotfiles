@@ -16,7 +16,7 @@ in
       opener = {
         edit = [
           {
-            run = ''nvim "$@"'';
+            run = ''nvim %s'';
             desc = "nvim";
             block = true;
             for = "unix";
@@ -24,7 +24,7 @@ in
         ];
         pdf = [
           {
-            run = ''zathura "$@"'';
+            run = ''zathura %s1'';
             orphan = true;
             desc = "zathura";
           }
