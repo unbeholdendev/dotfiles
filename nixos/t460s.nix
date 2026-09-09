@@ -68,6 +68,10 @@ in
   hardware.cpu.intel.updateMicrocode = true;
   hardware.enableRedistributableFirmware = true;
 
+  # Mesa carries no VAAPI for this Gen9 chip, so gpu-screen-recorder finds no
+  # h264 encoder and quits on vaInitialize.
+  hardware.graphics.extraPackages = [ pkgs.intel-media-driver ];
+
   # ddcutil, which is how the bar reaches the external monitor's brightness.
   hardware.i2c.enable = true;
 
