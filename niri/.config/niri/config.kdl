@@ -391,6 +391,15 @@ binds {
     // For example, this is a standard bind to toggle the screen reader (orca).
     Super+Alt+S allow-when-locked=true hotkey-overlay-title=null { spawn-sh "pkill orca || exec orca"; }
 
+    Mod+Alt+R repeat=false hotkey-overlay-title="Record: focused output" {
+        spawn-sh "noctalia msg plugin noctalia/screen_recorder:service all toggle focused"; }
+    Mod+Alt+P repeat=false hotkey-overlay-title="Record: pick with portal" {
+        spawn-sh "noctalia msg plugin noctalia/screen_recorder:service all start portal"; }
+    Mod+Alt+C repeat=false hotkey-overlay-title="On camera" {
+        spawn-sh "noctalia msg caffeine-toggle; noctalia msg notification-dnd-toggle; noctalia msg osd-toggle"; }
+
+    Mod+Alt+A repeat=false hotkey-overlay-title="Annotate the live screen" { spawn-sh "noctalia msg annotate"; }
+
     // Example volume keys mappings for PipeWire & WirePlumber.
     // The allow-when-locked=true property makes them work even when the session is locked.
     // Using spawn-sh allows to pass multiple arguments together with the command.
