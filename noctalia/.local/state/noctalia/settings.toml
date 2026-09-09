@@ -6,6 +6,7 @@ enabled = true
 [bar.default]
 end = [
     "media",
+    "recorder",
     "privacy",
     "cpu",
     "ram",
@@ -147,6 +148,12 @@ temperature_night = 3500
 history_retention_hours = 168
 monitors = [ "DP-1" ]
 
+[plugin_settings."noctalia/screen_recorder"]
+color_range = "full"
+glyph_recording = "video-filled"
+hide_inactive = true
+video_qp = 20
+
 [plugins]
 enabled = [ "noctalia/screen_recorder" ]
 
@@ -196,3 +203,6 @@ tooltip_format = "{:%A %d %B %Y (week %V)}"
 
 [widget.privacy]
 hide_inactive = true
+
+[widget.recorder]
+type = "noctalia/screen_recorder:recorder"
