@@ -25,6 +25,9 @@ end = [
 ]
 start = [ "workspaces", "active_window" ]
 
+    [bar.default.monitor."eDP-1"]
+    margin_ends = 0
+
 [battery]
 warning_threshold = 15
 
