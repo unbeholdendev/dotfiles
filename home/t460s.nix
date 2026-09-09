@@ -24,6 +24,7 @@
     grim
     handy
     jq
+    kdePackages.kdenlive
     libnotify
     playerctl
     signal-desktop
