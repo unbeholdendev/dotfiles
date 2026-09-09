@@ -84,6 +84,13 @@ claude in a container `dcup` brought up.
   `dirs::data_dir()`. It sits with the models handy downloads. The repo seeds `push_to_talk` alone, because Mod+D is a toggle and the
   default is hold; everything else in that file is what a real run wrote. Do not
   hand-write a key there, since one enum spelt wrong loses the lot.
+- The `Mod+Alt` recording binds go through `noctalia/screen_recorder`, a plugin
+  noctalia fetches from github and no part of the flake. It is enabled by
+  `noctalia msg plugins enable noctalia/screen_recorder`, which writes
+  `[plugins].enabled` into the tracked `settings.toml`, and its own options
+  (codec, folder, replay buffer) live in noctalia's state, not here.
+  `programs.gpu-screen-recorder.enable` is the other half: the plain package
+  captures nothing without the wrapper that option installs.
 
 ## Secrets
 

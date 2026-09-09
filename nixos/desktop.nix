@@ -2,6 +2,8 @@
 {
   programs.niri.enable = true;
 
+  programs.gpu-screen-recorder.enable = true;
+
   environment.systemPackages = [
     noctalia
     pkgs.xwayland-satellite
