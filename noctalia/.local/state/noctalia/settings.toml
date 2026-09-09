@@ -147,6 +147,9 @@ temperature_night = 3500
 history_retention_hours = 168
 monitors = [ "DP-1" ]
 
+[plugins]
+enabled = [ "noctalia/screen_recorder" ]
+
 [shell]
 date_format = "%A, %d %B"
 polkit_agent = true
