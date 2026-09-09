@@ -5,6 +5,7 @@
     ./dots.nix
     ./foot.nix
     ./handy.nix
+    ./mpv.nix
     ./niri.nix
     ./noctalia.nix
     ./nvim.nix
