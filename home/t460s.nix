@@ -26,6 +26,7 @@
     jq
     kdePackages.kdenlive
     libnotify
+    pangolin-cli
     playerctl
     signal-desktop
     swappy
