@@ -1,6 +1,6 @@
 { config, dotfiles, pkgs, ... }:
 {
-  home.packages = [ (pkgs.callPackage ../pkgs/herdr.nix { }) ];
+  home.packages = [ pkgs.herdr ];
 
   xdg.configFile."herdr/config.toml".source =
     config.lib.file.mkOutOfStoreSymlink
