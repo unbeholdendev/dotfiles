@@ -9,10 +9,9 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    noctalia.url = "github:noctalia-dev/noctalia/cachix";
   };
 
-  outputs = { nixpkgs, home-manager, disko, noctalia, ... }:
+  outputs = { nixpkgs, home-manager, disko, ... }:
     let
       system = "x86_64-linux";
 
@@ -54,9 +53,6 @@
 
       nixosConfigurations.t460s = nixpkgs.lib.nixosSystem {
         inherit system;
-        specialArgs = {
-          noctalia = noctalia.packages.${system}.default;
-        };
         modules = [
           disko.nixosModules.disko
           home-manager.nixosModules.home-manager
