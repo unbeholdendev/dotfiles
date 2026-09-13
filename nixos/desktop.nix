@@ -1,12 +1,12 @@
-{ noctalia, pkgs, ... }:
+{ pkgs, ... }:
 {
   programs.niri.enable = true;
 
   programs.gpu-screen-recorder.enable = true;
 
-  environment.systemPackages = [
+  environment.systemPackages = with pkgs; [
     noctalia
-    pkgs.xwayland-satellite
+    xwayland-satellite
   ];
 
   environment.sessionVariables = {

@@ -59,11 +59,8 @@ claude in a container `dcup` brought up.
   same values, and equal definitions merge.
 - `nixos` is the third `extraSpecialArgs` fact, and `home/dots.nix` is the one
   reader. On NixOS one rebuild applies both, so `dots` runs `nixos-rebuild`.
-- The noctalia input is pinned to the `cachix` branch and takes no `nixpkgs`
-  follows. Either change is a cache miss, which is 40 minutes of C++. The
-  nixpkgs package is older and its binary answers to another name.
-  `nix.settings` reaches the installed system alone, so `nixos-install` wants
-  that cache and key as `--option` flags.
+- `noctalia` is the nixpkgs attribute, not `noctalia-shell`, which is the old
+  name, left behind at 4.7.7.
 - `xwayland-satellite` is there for handy, not for any X11 app. niri strips
   `DISPLAY` from what it spawns when no X server is up, handy's enigo then fails
   to construct, and handy 0.9.1 reads that handle before it dispatches, so every
