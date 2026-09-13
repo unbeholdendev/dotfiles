@@ -26,6 +26,7 @@
     jq
     kdePackages.kdenlive
     libnotify
+    libreoffice
     pangolin-cli
     playerctl
     signal-desktop
