@@ -88,6 +88,10 @@ in
   services.upower.enable = true;
   services.power-profiles-daemon.enable = true;
 
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="power_supply", KERNEL=="BAT*", ATTR{charge_control_end_threshold}="80"
+  '';
+
   time.timeZone = "Europe/Prague";
   i18n.defaultLocale = "en_US.UTF-8";
   console.keyMap = "us";
