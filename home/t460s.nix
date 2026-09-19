@@ -21,7 +21,6 @@
     ddcutil
     firefox
     git
-    grim
     handy
     jq
     kdePackages.kdenlive
@@ -30,7 +29,6 @@
     pangolin-cli
     playerctl
     signal-desktop
-    swappy
     thunderbird
     ungoogled-chromium
     unzip
