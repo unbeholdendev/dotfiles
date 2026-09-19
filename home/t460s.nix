@@ -31,6 +31,7 @@
     playerctl
     signal-desktop
     swappy
+    thunderbird
     ungoogled-chromium
     unzip
     wl-clipboard
