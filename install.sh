@@ -57,10 +57,14 @@ out=$(nix build --no-link --print-out-paths --impure \
   "$PWD#homeConfigurations.container.activationPackage")
 HOME_MANAGER_BACKUP_EXT=hm-bak "$out/activate"
 
-printf '%s\n' "$PWD" > "$HOME/.dots-path"
+repo=$(git rev-parse --path-format=absolute --git-common-dir)
+repo=${repo%/.git}
+# /claude is one volume in every container, and /dotfiles is the one clone path they all share.
+[[ -e /dotfiles/claude/.claude/CLAUDE.md ]] && repo=/dotfiles
+printf '%s\n' "$repo" > "$HOME/.dots-path"
 
 [[ -z ${CLAUDE_CONFIG_DIR:-} && -d /claude ]] && export CLAUDE_CONFIG_DIR=/claude
 cfg=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
 mkdir -p "$cfg"
-ln -sfn "$PWD/claude/.claude/settings.json" "$cfg/settings.json"
-ln -sfn "$PWD/claude/.claude/CLAUDE.md" "$cfg/CLAUDE.md"
+ln -sfn "$repo/claude/.claude/settings.json" "$cfg/settings.json"
+ln -sfn "$repo/claude/.claude/CLAUDE.md" "$cfg/CLAUDE.md"

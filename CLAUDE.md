@@ -39,7 +39,9 @@ claude in a container `dcup` brought up.
 - A flake reads tracked files alone, so a new module wants `git add` before a
   switch, committed or not.
 - `install.sh` cds to its own directory, so a run from a worktree switches the
-  container from that worktree and rewrites `~/.dots-path`.
+  container from that worktree, but `~/.dots-path` and the claude links name
+  the main clone, `/dotfiles` where it exists: `/claude` is shared by every
+  container, and a worktree is deleted.
 - The store is read only, so nothing an app writes can live there. A rendered
   theme, or a lock file an app rewrites, stays a `mkOutOfStoreSymlink` into the
   clone; a container gets no such link, or an update there dirties the clone it
