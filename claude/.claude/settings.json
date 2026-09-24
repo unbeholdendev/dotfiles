@@ -1,7 +1,13 @@
 {
-  "permissions": { "defaultMode": "bypassPermissions" },
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  },
+  "worktree": {
+    "baseRef": "head"
+  },
+  "enabledPlugins": {
+    "mattpocock-skills@claude-plugins-official": true
+  },
   "skipDangerousModePermissionPrompt": true,
-  "theme": "dark",
-  "worktree": { "baseRef": "head" },
-  "enabledPlugins": { "mattpocock-skills@claude-plugins-official": true }
+  "theme": "dark"
 }
