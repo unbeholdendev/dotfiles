@@ -81,6 +81,18 @@ in
     powerOnBoot = false;
   };
 
+  services.printing.enable = true;
+  hardware.printers = {
+    # `everywhere` asks the printer for its PPD, so ensure-printers fails
+    # whenever the printer is off or the laptop is off this LAN.
+    ensurePrinters = [{
+      name = "hp";
+      deviceUri = "ipp://192.168.3.181/ipp/print";
+      model = "everywhere";
+    }];
+    ensureDefaultPrinter = "hp";
+  };
+
   services.fwupd.enable = true;
   services.thermald.enable = true;
 
