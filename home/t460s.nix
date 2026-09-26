@@ -30,6 +30,7 @@
     playerctl
     signal-desktop
     thunderbird
+    tor-browser
     ungoogled-chromium
     unzip
     wl-clipboard
