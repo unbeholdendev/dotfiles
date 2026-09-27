@@ -93,6 +93,8 @@ in
     ensureDefaultPrinter = "hp";
   };
 
+  services.tailscale.enable = true;
+
   services.fwupd.enable = true;
   services.thermald.enable = true;
 
