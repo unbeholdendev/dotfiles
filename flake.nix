@@ -27,9 +27,9 @@
           dotfiles = "/home/pycan/Documents/dotfiles";
           module = ./home/t460s.nix;
         };
-        "root@deb-agent" = {
+        "root@oren" = {
           dotfiles = "/root/dotfiles";
-          module = ./home/deb-agent.nix;
+          module = ./home/oren.nix;
         };
       };
 

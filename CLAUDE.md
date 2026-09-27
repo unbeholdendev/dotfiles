@@ -7,7 +7,7 @@ Each top-level directory holds one program's files, laid out as they sit under
 `$HOME`, and a module in `home/` names every one of them. Nothing stows
 anything.
 
-`flake.nix` has three outputs: `pycan@t460s`, the desktop; `root@deb-agent`, a
+`flake.nix` has three outputs: `pycan@t460s`, the desktop; `root@oren`, a
 headless host whose work happens in the dev containers it runs; and `container`,
 which is one name for every container, since a container hostname is a random
 id. `nixosConfigurations.t460s` is the system half of that desktop.
@@ -22,7 +22,7 @@ dev container dotfiles hook runs the first of `install.sh`, `install`,
 `bootstrap.sh`, `bootstrap`, `setup.sh` or `setup` it finds, with no argument,
 in a project this repo never sees.
 
-`dcup` and `dcclaude` are deb-agent's own. `dcup` wraps `devcontainer up` with
+`dcup` and `dcclaude` are oren's own. `dcup` wraps `devcontainer up` with
 a bind mount of the clone at `/dotfiles`, the three mounts below, and the
 `common-utils` feature, then runs `install.sh container`. `dcclaude` starts
 claude in a container `dcup` brought up.
