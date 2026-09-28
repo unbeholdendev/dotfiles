@@ -16,7 +16,7 @@
 
   programs.git = {
     enable = true;
-    settings.credential."https://git.home.unbeholden.dev".helper =
+    settings.credential."https://git.unbeholden.dev".helper =
       ''!f() { echo username=agent; echo "password=$(cat "$HOME/.forgejo-token")"; }; f'';
   };
 }

@@ -13,7 +13,7 @@ in
     enableDefaultConfig = false;
 
     settings = builtins.mapAttrs (_: block: identity // block) {
-      # Cloudflare proxies this name and drops port 222, so ssh hangs on it.
+      "git.unbeholden.dev" = { User = "git"; Port = 222; };
 
 
 

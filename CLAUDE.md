@@ -110,7 +110,7 @@ once:
 
 ```
 claude mcp add --scope user forgejo -- \
-  sh -c 'exec forgejo-mcp --transport stdio --url https://git.home.unbeholden.dev \
+  sh -c 'exec forgejo-mcp --transport stdio --url https://git.unbeholden.dev \
     --token "$(cat "$HOME/.forgejo-token")"'
 ```
 
