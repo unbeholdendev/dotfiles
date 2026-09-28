@@ -13,4 +13,10 @@
   home.homeDirectory = "/root";
 
   programs.home-manager.enable = true;
+
+  programs.git = {
+    enable = true;
+    settings.credential."https://git.home.unbeholden.dev".helper =
+      ''!f() { echo username=agent; echo "password=$(cat "$HOME/.forgejo-token")"; }; f'';
+  };
 }
