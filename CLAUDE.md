@@ -114,13 +114,9 @@ claude mcp add --scope user forgejo -- \
     --token "$(cat "$HOME/.forgejo-token")"'
 ```
 
-A github clone names its own token file and its own author, because a
-fine-grained token is issued per owner and every owner is the same host:
-
-```
-git -C <clone> config credential.https://github.com.helper \
-  '!f() { echo username=<user>; echo "password=$(cat "$HOME/.github-token")"; }; f'
-```
+A fine-grained github token is issued per owner and every owner is the same
+host, so the host keeps one file per owner in `~/.github-tokens/<owner>`, and
+`dcup` asks which one and scopes the helper to `https://github.com/<owner>`.
 
 ## Testing
 
