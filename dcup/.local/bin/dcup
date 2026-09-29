@@ -23,9 +23,17 @@ then
   case ${forge:-none} in none) forge= ;; esac
 fi
 
+owner=
+token=~/.$forge-token
+if [[ $forge == github ]]; then
+  PS3='which github owner? '
+  select owner in $(ls ~/.github-tokens 2>/dev/null); do [[ -n $owner ]] && break; done
+  token=~/.github-tokens/$owner
+fi
+
 # Before the pull, so an hour of it does not end in a container that cannot push.
-if [[ -n $forge && ! -r ~/.$forge-token ]]; then
-  echo "no ~/.$forge-token on this host" >&2; exit 1
+if [[ -n $forge && ! -f $token ]]; then
+  echo "no $token on this host" >&2; exit 1
 fi
 
 stamp=$(printf %s "$resolved" | md5sum | cut -c1-8)
@@ -64,6 +72,12 @@ EOF
     ;;
   github)
     devcontainer exec --workspace-folder "$folder" \
-      sh -c 'umask 077; cat > "$HOME/.github-token"' < ~/.github-token
+      sh -c 'umask 077; cat > "$HOME/.github-token"' < "$token"
+
+    devcontainer exec --workspace-folder "$folder" sh -s "$owner" <<'EOF'
+git config --global credential.https://github.com.useHttpPath true
+git config --global "credential.https://github.com/$1.helper" \
+  '!f() { echo username=x-access-token; echo "password=$(cat "$HOME/.github-token")"; }; f'
+EOF
     ;;
 esac
