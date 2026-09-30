@@ -25,6 +25,8 @@ description means it started, and it stays after the review is posted, so the
 signal that it is done is a review newer than your last push or tag. Poll for
 that, and after 10 minutes stop and say so. Then weigh each comment: fix what is
 right and worth the change, push, and reply to every comment with what you
-changed or why you did not, tagging @reviewer. A push or a tag starts another
-review; wait for it the same way, with the same 10 minutes, and repeat until a
-review asks for nothing you would change.
+changed or why you did not. Forgejo sends no webhook for a thread reply, so if
+you left any unchanged, also post one PR comment, tagging @reviewer, that says
+why for each. A push or a tag starts another review; wait for it the same way,
+with the same 10 minutes, and repeat until a review asks for nothing you would
+change.
