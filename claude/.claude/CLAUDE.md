@@ -19,3 +19,9 @@ not comments in this sense, and a project convention for them wins.
 
 A CLAUDE.md answers to the same measure. It carries what an agent must not get
 wrong, and no history, because git holds that.
+
+After opening a PR, wait for the automated review. While it runs, the PR
+description carries an 👀 reaction; poll until that is gone and the review is
+posted, and after 10 minutes stop and say so. Then weigh each comment: fix what
+is right and worth the change, push, and reply to every comment with what you
+changed or why you did not.
