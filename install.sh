@@ -68,3 +68,5 @@ cfg=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
 mkdir -p "$cfg"
 ln -sfn "$repo/claude/.claude/settings.json" "$cfg/settings.json"
 ln -sfn "$repo/claude/.claude/CLAUDE.md" "$cfg/CLAUDE.md"
+mkdir -p "$cfg/skills"
+ln -sfn "$repo/claude/.claude/skills/natural-voice" "$cfg/skills/natural-voice"
