@@ -20,8 +20,11 @@ not comments in this sense, and a project convention for them wins.
 A CLAUDE.md answers to the same measure. It carries what an agent must not get
 wrong, and no history, because git holds that.
 
-After opening a PR, wait for the automated review. While it runs, the PR
-description carries an 👀 reaction; poll until that is gone and the review is
-posted, and after 10 minutes stop and say so. Then weigh each comment: fix what
-is right and worth the change, push, and reply to every comment with what you
-changed or why you did not.
+After opening a PR, wait for the automated review: an 👀 reaction on the PR
+description means it started, and it stays after the review is posted, so the
+signal that it is done is a review newer than your last push or tag. Poll for
+that, and after 10 minutes stop and say so. Then weigh each comment: fix what is
+right and worth the change, push, and reply to every comment with what you
+changed or why you did not, tagging @reviewer. A push or a tag starts another
+review; wait for it the same way, with the same 10 minutes, and repeat until a
+review asks for nothing you would change.
