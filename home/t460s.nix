@@ -2,9 +2,9 @@
 {
   imports = [
     ./common.nix
+    ./dictate.nix
     ./dots.nix
     ./foot.nix
-    ./handy.nix
     ./mime.nix
     ./mpv.nix
     ./niri.nix
@@ -21,7 +21,6 @@
     ddcutil
     firefox
     git
-    handy
     jq
     kdePackages.kdenlive
     libnotify
@@ -34,7 +33,6 @@
     ungoogled-chromium
     unzip
     wl-clipboard
-    wtype
     zip
   ];
 
