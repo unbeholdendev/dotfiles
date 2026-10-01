@@ -18,11 +18,6 @@ vim.api.nvim_create_autocmd("FileType", {
   callback = function(ev) pcall(vim.treesitter.start, ev.buf) end,
 })
 
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "astro", "css", "html", "scss" },
-  callback = function() vim.opt_local.iskeyword:append("-") end,
-})
-
 vim.api.nvim_create_autocmd("TextYankPost", {
   callback = function() vim.hl.on_yank() end,
 })
@@ -35,16 +30,6 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 
 vim.diagnostic.config({ virtual_text = true })
 
-vim.lsp.enable({
-  "astro",
-  "bashls",
-  "cssls",
-  "html",
-  "jsonls",
-  "lua_ls",
-  "nixd",
-  "tailwindcss",
-  "ts_ls",
-})
+vim.lsp.enable({ "bashls", "lua_ls", "nixd" })
 
 require("vim._core.ui2").enable({})
