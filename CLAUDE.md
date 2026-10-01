@@ -63,26 +63,11 @@ claude in a container `dcup` brought up.
   reader. On NixOS one rebuild applies both, so `dots` runs `nixos-rebuild`.
 - `noctalia` is the nixpkgs attribute, not `noctalia-shell`, which is the old
   name, left behind at 4.7.7.
-- `xwayland-satellite` is there for handy, not for any X11 app. niri strips
-  `DISPLAY` from what it spawns when no X server is up, handy's enigo then fails
-  to construct, and handy 0.9.1 reads that handle before it dispatches, so every
-  paste dies on `Enigo state not initialized` and never reaches the wtype it
-  would have used. Upstream moved the read in v0.9.6; when nixpkgs carries that,
-  this stops holding handy up and is only an X11 convenience.
 - `nixos/disk.nix` is disko and owns every local `fileSystems` entry. The NAS
   mount in `nixos/t460s.nix` is the one that is not local. Confirm the disk at
   the top of `disk.nix` with `lsblk`, since disko erases what it is given.
   `hardware-configuration.nix` is not committed: the initrd list is in
   `nixos/t460s.nix`.
-- `wtype` is there for handy, which finds it on PATH and declares it nowhere.
-  Take it away and dictation records and transcribes and types nothing. Handy
-  rewrites `settings_store.json` whole on every change, through the symlink, so
-  it is a `mkOutOfStoreSymlink` like noctalia's and its window dirties the
-  clone. That file is under `~/.local/share`, not `~/.config`: tauri-plugin-store
-  resolves a relative name against `BaseDirectory::AppData`, which on Linux is
-  `dirs::data_dir()`. It sits with the models handy downloads. The repo seeds `push_to_talk` alone, because Mod+D is a toggle and the
-  default is hold; everything else in that file is what a real run wrote. Do not
-  hand-write a key there, since one enum spelt wrong loses the lot.
 - The `Mod+Alt` recording binds go through `noctalia/screen_recorder`, a plugin
   noctalia fetches from github and no part of the flake. It is enabled by
   `noctalia msg plugins enable noctalia/screen_recorder`, which writes
@@ -117,6 +102,10 @@ claude mcp add --scope user forgejo -- \
 A fine-grained github token is issued per owner and every owner is the same
 host, so the host keeps one file per owner in `~/.github-tokens/<owner>`, and
 `dcup` asks which one and scopes the helper to `https://github.com/<owner>`.
+
+`~/.gemini-token` is `dictate`'s key, mode 600, written by hand on the desktop
+and never in the store: the script reads it at call time. A container has no
+use for it, so `dcup` does not offer it.
 
 ## Testing
 
