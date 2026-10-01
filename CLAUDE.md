@@ -103,7 +103,7 @@ A fine-grained github token is issued per owner and every owner is the same
 host, so the host keeps one file per owner in `~/.github-tokens/<owner>`, and
 `dcup` asks which one and scopes the helper to `https://github.com/<owner>`.
 
-`~/.gemini-token` is `dictate`'s key, mode 600, written by hand on the desktop
+`~/.groq-token` is `dictate`'s key, mode 600, written by hand on the desktop
 and never in the store: the script reads it at call time. A container has no
 use for it, so `dcup` does not offer it.
 

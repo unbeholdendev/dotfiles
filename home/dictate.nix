@@ -1,12 +1,6 @@
 { pkgs, ... }:
 let
-  prompt = ''
-    Transcribe this dictation. Fix punctuation, capitalisation and false
-    starts, and use British English. Do not paraphrase, summarise, answer or
-    add anything. Words that may appear: niri, noctalia, nixpkgs, NixOS,
-    home-manager, disko, forgejo, yazi, foot, zsh.
-    Return only the corrected text.
-  '';
+  prompt = "niri, noctalia, nixpkgs, NixOS, home-manager, disko, forgejo, yazi, foot, zsh.";
 
   dictate = pkgs.writeShellApplication {
     name = "dictate";
@@ -14,12 +8,11 @@ let
       coreutils
       curl
       ffmpeg
-      jq
       libnotify
       wl-clipboard
+      wtype
     ];
     text = ''
-      prompt=${pkgs.lib.escapeShellArg prompt}
       clip="$XDG_RUNTIME_DIR/dictate.wav"
       pidfile="$XDG_RUNTIME_DIR/dictate.pid"
       log="$XDG_RUNTIME_DIR/dictate.log"
@@ -36,22 +29,14 @@ let
         exit 0
       fi
 
-      payload=$(jq -n \
-        --arg prompt "$prompt" \
-        --arg audio "$(base64 -w0 "$clip")" \
-        '{model: "gemini-3.8-flash", input: [
-           {type: "text", text: $prompt},
-           {type: "audio", data: $audio, mime_type: "audio/wav"}
-         ]}')
-
-      text=$(curl -sS --fail-with-body -X POST \
-        https://generativelanguage.googleapis.com/v1beta/interactions \
-        -H "x-goog-api-key: $(cat "$HOME/.gemini-token")" \
-        -H 'Content-Type: application/json' \
-        -d "$payload" | tee "$log" |
-        jq -r --arg prompt "$prompt" \
-          '[.. | objects | .text? | strings] - [$prompt] | first // empty' \
-        || true)
+      text=$(curl -sS --fail-with-body \
+        https://api.groq.com/openai/v1/audio/transcriptions \
+        -H "Authorization: Bearer $(cat "$HOME/.groq-token")" \
+        -F model=whisper-large-v3-turbo \
+        -F response_format=text \
+        -F language=en \
+        -F prompt=${pkgs.lib.escapeShellArg prompt} \
+        -F file=@"$clip" | tee "$log") || text=
 
       rm -f "$clip"
 
@@ -61,6 +46,7 @@ let
       fi
 
       printf '%s' "$text" | wl-copy
+      printf '%s' "$text" | wtype -
       notify-send -t 2000 "Dictated" "$text" || true
     '';
   };
