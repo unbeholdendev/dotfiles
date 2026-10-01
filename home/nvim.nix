@@ -2,15 +2,8 @@
 let
   treesitter = pkgs.vimPlugins.nvim-treesitter;
   languages = [
-    "astro"
     "bash"
-    "css"
-    "html"
-    "javascript"
-    "json"
     "nix"
-    "tsx"
-    "typescript"
   ];
 
   treesitterWithParsers = pkgs.symlinkJoin {
@@ -21,16 +14,12 @@ let
 in
 {
   home.packages = with pkgs; [
-    astro-language-server
     bash-language-server
     fd
     lua-language-server
     neovim
     nixd
     ripgrep
-    tailwindcss-language-server
-    typescript-language-server
-    vscode-langservers-extracted
   ];
 
   xdg.configFile = {
