@@ -3,10 +3,12 @@ let
   treesitter = pkgs.vimPlugins.nvim-treesitter;
   languages = [
     "astro"
+    "bash"
     "css"
     "html"
     "javascript"
     "json"
+    "nix"
     "tsx"
     "typescript"
   ];
