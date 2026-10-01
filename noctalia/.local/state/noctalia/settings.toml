@@ -1,4 +1,4 @@
-config_version = 13
+config_version = 14
 
 [backdrop]
 enabled = true
@@ -25,7 +25,7 @@ end = [
 ]
 start = [ "workspaces", "active_window" ]
 
-    [bar.default.monitor."eDP-1"]
+    [bar.default.monitor.eDP-1]
     margin_ends = 0
 
 [battery]
