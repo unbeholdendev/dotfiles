@@ -15,9 +15,25 @@ require("oil").setup({ view_options = { show_hidden = true } })
 require("config.keymaps")
 
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "astro", "css", "html", "javascript", "json", "typescript", "typescriptreact" },
-  callback = function(ev) vim.treesitter.start(ev.buf) end,
+  callback = function(ev) pcall(vim.treesitter.start, ev.buf) end,
 })
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "astro", "css", "html", "scss" },
+  callback = function() vim.opt_local.iskeyword:append("-") end,
+})
+
+vim.api.nvim_create_autocmd("TextYankPost", {
+  callback = function() vim.hl.on_yank() end,
+})
+
+vim.api.nvim_create_autocmd("BufReadPost", {
+  callback = function(ev)
+    if vim.bo[ev.buf].filetype ~= "gitcommit" then vim.cmd('silent! normal! g`"') end
+  end,
+})
+
+vim.diagnostic.config({ virtual_text = true })
 
 vim.lsp.enable({
   "astro",
@@ -30,3 +46,5 @@ vim.lsp.enable({
   "tailwindcss",
   "ts_ls",
 })
+
+require("vim._core.ui2").enable({})

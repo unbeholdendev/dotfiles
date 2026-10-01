@@ -35,6 +35,10 @@ o.colorcolumn = "100"
 o.virtualedit = "block"
 o.laststatus = 3
 
+o.foldmethod = "expr"
+o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+o.foldlevel = 99
+
 o.autocomplete = true
 o.autocompletedelay = 100
 o.complete = ".,w,b,u"
