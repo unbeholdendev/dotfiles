@@ -178,7 +178,7 @@ builtin = "Gruvbox"
 
     [theme.templates]
     builtin_ids = [ "foot", "niri", "gtk3", "gtk4", "qt", "btop" ]
-    community_ids = [ "zathura", "yazi" ]
+    community_ids = [ "yazi" ]
 
 [wallpaper]
 directory = "/home/pycan/Pictures/Wallpapers"
