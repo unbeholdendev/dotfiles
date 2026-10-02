@@ -7,7 +7,7 @@ let
   tail = { bg = "gray"; fg = "black"; };
 in
 {
-  home.packages = [ pkgs.zathura ];
+  home.packages = [ pkgs.kdePackages.okular ];
 
   programs.yazi = {
     enable = true;
@@ -24,9 +24,9 @@ in
         ];
         pdf = [
           {
-            run = ''zathura %s1'';
+            run = ''okular %s1'';
             orphan = true;
-            desc = "zathura";
+            desc = "okular";
           }
         ];
       };
