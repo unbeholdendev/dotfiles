@@ -4,6 +4,12 @@
 
   programs.gpu-screen-recorder.enable = true;
 
+  # qt6ct answers to qt5ct too, the one name this option offers.
+  qt = {
+    enable = true;
+    platformTheme = "qt5ct";
+  };
+
   environment.systemPackages = with pkgs; [
     noctalia
   ];
