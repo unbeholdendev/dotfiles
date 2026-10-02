@@ -22,7 +22,6 @@
     firefox
     git
     jq
-    kdePackages.kdenlive
     libnotify
     libreoffice
     pangolin-cli

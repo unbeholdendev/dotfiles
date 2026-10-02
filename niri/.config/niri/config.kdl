@@ -394,8 +394,6 @@ binds {
         spawn-sh "noctalia msg plugin noctalia/screen_recorder:service all toggle focused"; }
     Mod+Alt+P repeat=false hotkey-overlay-title="Record: pick with portal" {
         spawn-sh "noctalia msg plugin noctalia/screen_recorder:service all start portal"; }
-    Mod+Alt+C repeat=false hotkey-overlay-title="On camera" {
-        spawn-sh "noctalia msg caffeine-toggle; noctalia msg notification-dnd-toggle; noctalia msg osd-toggle"; }
 
     Mod+Alt+A repeat=false hotkey-overlay-title="Annotate the live screen" { spawn-sh "noctalia msg annotate"; }
 
