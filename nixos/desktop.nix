@@ -4,20 +4,20 @@
 
   programs.gpu-screen-recorder.enable = true;
 
-  # qt6ct answers to qt5ct too, the one name this option offers.
-  qt = {
-    enable = true;
-    platformTheme = "qt5ct";
-  };
-
   environment.systemPackages = with pkgs; [
     noctalia
+    qt6Packages.qt6ct
   ];
 
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
     ELECTRON_OZONE_PLATFORM_HINT = "wayland";
+    QT_QPA_PLATFORMTHEME = "qt6ct";
   };
+
+  # qt.enable would set this too, but its qt5ct theme brings in Qt 5.
+  environment.profileRelativeSessionVariables.QT_PLUGIN_PATH =
+    [ "/${pkgs.qt6.qtbase.qtPluginPrefix}" ];
 
   services.pipewire = {
     enable = true;
