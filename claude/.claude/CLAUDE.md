@@ -20,8 +20,9 @@ not comments in this sense, and a project convention for them wins.
 A CLAUDE.md answers to the same measure. It carries what an agent must not get
 wrong, and no history, because git holds that.
 
-After opening a PR, wait for the automated review: an 👀 reaction on the PR
-description means it started, and it stays after the review is posted, so the
+After opening a PR on the self-hosted Forgejo, wait for the automated review.
+Other hosts, such as GitHub, usually have none, so do not wait there. An 👀
+reaction on the PR description means it started, and it stays after the review is posted, so the
 signal that it is done is a review newer than your last push or tag. Poll for
 that, and after 10 minutes stop and say so. Then weigh each comment: fix what is
 right and worth the change, push, and reply to every comment with what you
