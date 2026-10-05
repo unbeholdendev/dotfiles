@@ -33,7 +33,6 @@ in
       };
       wifi = {
         ssid = "unbeholden";
-        cloned-mac-address = "permanent";
       };
       wifi-security = {
         key-mgmt = "wpa-psk";
