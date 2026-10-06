@@ -82,8 +82,8 @@ in
 
   services.printing.enable = true;
   hardware.printers = {
-    # `everywhere` asks the printer for its PPD, so ensure-printers fails
-    # whenever the printer is off or the laptop is off this LAN.
+    # `everywhere` asks the printer for its PPD in cups' postStart, so cups
+    # fails to start whenever the printer is off or the laptop is off this LAN.
     ensurePrinters = [{
       name = "hp";
       deviceUri = "ipp://192.168.3.181/ipp/print";
