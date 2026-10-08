@@ -22,26 +22,6 @@ in
 
   networking.networkmanager.enable = true;
 
-  networking.networkmanager.ensureProfiles = {
-    environmentFiles = [ "/etc/nm-secrets.env" ];
-
-    profiles.unbeholden = {
-      connection = {
-        id = "unbeholden";
-        type = "wifi";
-      };
-      wifi = {
-        ssid = "unbeholden";
-      };
-      wifi-security = {
-        key-mgmt = "wpa-psk";
-        psk = "$WIFI_PSK";
-      };
-      ipv4.method = "auto";
-      ipv6.method = "auto";
-    };
-  };
-
   fileSystems."/mnt/nas/pycan" = nas "pycan";
   fileSystems."/mnt/nas/media" = nas "media";
 

@@ -84,12 +84,6 @@ and no other way, and one container gets one of them, never both. Never print
 or commit either value, and never put a token in a remote URL: that writes it
 into `.git/config`, which the container reads and a push can leak.
 
-`/etc/nm-secrets.env` holds `WIFI_PSK`, mode 600, and is written by hand on the
-desktop. Never put the value in `nixos/laptop.nix`: `ensureProfiles` renders each
-profile into the store, which is world readable. `EnvironmentFile` has no `-`
-prefix, so a missing file fails `NetworkManager-ensure-profiles.service` and the
-profile is never written.
-
 The forgejo MCP server is registered at user scope in `.claude.json` inside the
 `/claude` volume, so it loads in every project and a new store wants the entry
 once. The token goes in `FORGEJO_ACCESS_TOKEN`, never `--token`: argv is
