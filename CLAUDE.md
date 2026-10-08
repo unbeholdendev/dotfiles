@@ -91,12 +91,13 @@ profile is never written.
 
 The forgejo MCP server is registered at user scope in `.claude.json` inside the
 `/claude` volume, so it loads in every project and a new store wants the entry
-once:
+once. The token goes in `FORGEJO_ACCESS_TOKEN`, never `--token`: argv is
+world readable in `ps`.
 
 ```
 claude mcp add --scope user forgejo -- \
-  sh -c 'exec forgejo-mcp --transport stdio --url https://git.unbeholden.dev \
-    --token "$(cat "$HOME/.forgejo-token")"'
+  sh -c 'FORGEJO_ACCESS_TOKEN="$(cat "$HOME/.forgejo-token")" \
+    exec forgejo-mcp --transport stdio --url https://git.unbeholden.dev'
 ```
 
 A fine-grained github token is issued per owner and every owner is the same
