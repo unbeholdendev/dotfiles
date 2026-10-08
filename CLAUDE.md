@@ -11,6 +11,7 @@ anything.
 headless host whose work happens in the dev containers it runs; and `container`,
 which is one name for every container, since a container hostname is a random
 id. `nixosConfigurations.t460s` is the system half of that desktop.
+`nixosConfigurations.t14` is a second laptop on the same home.
 `flake.lock` is the pin. Home-manager runs standalone on the other two, so
 Debian stays Debian.
 
@@ -56,7 +57,7 @@ claude in a container `dcup` brought up.
 - `~/.dots-path` names the clone, since `~/.zshrc` now resolves into the store.
   `home/dots.nix` writes it on a host and `install.sh` in a container; `.zshenv`
   exports `DOTFILES` from it, and `dcup` is the reader.
-- `home/t460s.nix` is the standalone home and the NixOS module both, so
+- `home/laptop.nix` is the standalone home and the NixOS module both, so
   `home.username` and `home.homeDirectory` stay in it: the NixOS module sets the
   same values, and equal definitions merge.
 - `nixos` is the third `extraSpecialArgs` fact, and `home/dots.nix` is the one
@@ -64,10 +65,10 @@ claude in a container `dcup` brought up.
 - `noctalia` is the nixpkgs attribute, not `noctalia-shell`, which is the old
   name, left behind at 4.7.7.
 - `nixos/disk.nix` is disko and owns every local `fileSystems` entry. The NAS
-  mount in `nixos/t460s.nix` is the one that is not local. Confirm the disk at
-  the top of `disk.nix` with `lsblk`, since disko erases what it is given.
-  `hardware-configuration.nix` is not committed: the initrd list is in
-  `nixos/t460s.nix`.
+  mount in `nixos/laptop.nix` is the one that is not local. Confirm the disk in
+  the host file, `nixos/t460s.nix` or `nixos/t14.nix`, with `lsblk`, since
+  disko erases what it is given. `hardware-configuration.nix` is not
+  committed: the initrd list is in `nixos/laptop.nix` and the host file.
 - The `Mod+Alt` recording binds go through `noctalia/screen_recorder`, a plugin
   noctalia fetches from github and no part of the flake. It is enabled by
   `noctalia msg plugins enable noctalia/screen_recorder`, which writes
@@ -84,7 +85,7 @@ or commit either value, and never put a token in a remote URL: that writes it
 into `.git/config`, which the container reads and a push can leak.
 
 `/etc/nm-secrets.env` holds `WIFI_PSK`, mode 600, and is written by hand on the
-desktop. Never put the value in `nixos/t460s.nix`: `ensureProfiles` renders each
+desktop. Never put the value in `nixos/laptop.nix`: `ensureProfiles` renders each
 profile into the store, which is world readable. `EnvironmentFile` has no `-`
 prefix, so a missing file fails `NetworkManager-ensure-profiles.service` and the
 profile is never written.
@@ -115,6 +116,7 @@ testing them. The NixOS half is checked by evaluation:
 
 ```
 nix eval .#nixosConfigurations.t460s.config.system.build.toplevel.drvPath
+nix eval .#nixosConfigurations.t14.config.system.build.toplevel.drvPath
 ```
 
 For the rest: `./install.sh container` must succeed, and must succeed again on a
