@@ -1,11 +1,6 @@
 { ... }:
-let
-  # An NVMe drive is /dev/nvme0n1.
-  disk = "/dev/sda";
-in
 {
   disko.devices.disk.main = {
-    device = disk;
     type = "disk";
     content = {
       type = "gpt";

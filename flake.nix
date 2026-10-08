@@ -22,10 +22,12 @@
           p: builtins.elem (nixpkgs.lib.getName p) [ "claude-code" ];
       };
 
+      laptopDotfiles = "/home/pycan/Documents/dotfiles";
+
       hosts = {
         "pycan@t460s" = {
-          dotfiles = "/home/pycan/Documents/dotfiles";
-          module = ./home/t460s.nix;
+          dotfiles = laptopDotfiles;
+          module = ./home/laptop.nix;
         };
         "root@oren" = {
           dotfiles = "/root/dotfiles";
@@ -51,26 +53,27 @@
         };
       };
 
-      nixosConfigurations.t460s = nixpkgs.lib.nixosSystem {
-        inherit system;
-        modules = [
-          disko.nixosModules.disko
-          home-manager.nixosModules.home-manager
-          ./nixos/t460s.nix
-          {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = false;
-              backupFileExtension = "hm-bak";
-              extraSpecialArgs = {
-                dotfiles = hosts."pycan@t460s".dotfiles;
-                target = "t460s";
-                nixos = true;
+      nixosConfigurations = nixpkgs.lib.genAttrs [ "t460s" "t14" ] (name:
+        nixpkgs.lib.nixosSystem {
+          inherit system;
+          modules = [
+            disko.nixosModules.disko
+            home-manager.nixosModules.home-manager
+            ./nixos/${name}.nix
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = false;
+                backupFileExtension = "hm-bak";
+                extraSpecialArgs = {
+                  dotfiles = laptopDotfiles;
+                  target = name;
+                  nixos = true;
+                };
+                users.pycan = import ./home/laptop.nix;
               };
-              users.pycan = import ./home/t460s.nix;
-            };
-          }
-        ];
-      };
+            }
+          ];
+        });
     };
 }
