@@ -7,4 +7,8 @@
   disko.devices.disk.main.device = "/dev/nvme0n1";
 
   boot.initrd.availableKernelModules = [ "thunderbolt" ];
+
+  # The firmware's ACPI errors are KERN_ERR, which 4 prints over the login
+  # prompt. A BIOS update does not fix them.
+  boot.consoleLogLevel = 3;
 }
