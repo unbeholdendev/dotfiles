@@ -1,4 +1,4 @@
-{ config, dotfiles, ... }:
+{ ... }:
 {
   programs.foot = {
     enable = true;
@@ -15,8 +15,4 @@
       };
     };
   };
-
-  xdg.configFile."foot/themes/noctalia".source =
-    config.lib.file.mkOutOfStoreSymlink
-      "${dotfiles}/foot/.config/foot/themes/noctalia";
 }

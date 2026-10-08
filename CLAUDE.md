@@ -43,10 +43,11 @@ claude in a container `dcup` brought up.
   container from that worktree, but `~/.dots-path` and the claude links name
   the main clone, `/dotfiles` where it exists: `/claude` is shared by every
   container, and a worktree is deleted.
-- The store is read only, so nothing an app writes can live there. A rendered
-  theme, or a lock file an app rewrites, stays a `mkOutOfStoreSymlink` into the
-  clone; a container gets no such link, or an update there dirties the clone it
-  was started from.
+- The store is read only, so nothing an app writes can live there. A settings
+  or lock file an app rewrites stays a `mkOutOfStoreSymlink` into the clone; a
+  container gets no such link, or an update there dirties the clone it was
+  started from. A theme noctalia renders is no file of ours: it renders every
+  template at start, and a link into a clone not yet made breaks a fresh install.
 - A store file is read as it was at the switch, so an edit wants a switch before
   anything sees it.
 - Home-manager stops rather than write over a file already at the path it wants.
