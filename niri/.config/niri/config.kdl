@@ -102,8 +102,9 @@ input {
 }
 
 // Positions are in logical pixels, so they depend on the scales set here.
-// DP-1 sits above eDP-1, horizontally centred over it.
-output "DP-1" {
+// The Dell sits above eDP-1, horizontally centred over it. It is named by
+// make, model and serial, since it is DP-1 on the t460s and DP-2 on the t14.
+output "Dell Inc. DELL S2721DGF 16LCP83" {
     // The EDID prefers 60 Hz, so the panel's 165 Hz has to be named here.
     mode "2560x1440@165.080"
     scale 1
