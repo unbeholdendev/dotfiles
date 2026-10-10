@@ -5,11 +5,8 @@ enabled = true
 
 [bar.default]
 end = [
-    "media",
     "recorder",
     "privacy",
-    "cpu",
-    "ram",
     "keyboard_layout",
     "power_profile",
     "tray",
@@ -24,7 +21,7 @@ end = [
     "control-center",
     "session"
 ]
-start = [ "workspaces", "active_window" ]
+start = [ "workspaces", "cpu", "ram", "active_window", "media" ]
 
     [bar.default.monitor.eDP-1]
     margin_ends = 0
