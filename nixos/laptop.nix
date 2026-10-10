@@ -71,7 +71,11 @@ in
     ensureDefaultPrinter = "hp";
   };
 
-  services.tailscale.enable = true;
+  services.tailscale = {
+    enable = true;
+    # The bar widget's panel runs `tailscale up`, `down` and `set` unprivileged.
+    extraSetFlags = [ "--operator=pycan" ];
+  };
 
   services.fwupd.enable = true;
   services.thermald.enable = true;
