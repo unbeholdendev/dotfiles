@@ -9,3 +9,4 @@ map("n", "<leader>h", "<cmd>FzfLua helptags<cr>", { desc = "Help" })
 map("n", "<leader>r", "<cmd>FzfLua resume<cr>", { desc = "Last picker" })
 
 map("n", "-", "<cmd>Oil<cr>", { desc = "Parent directory" })
+map("n", "<leader>e", "<cmd>NvimTreeFindFileToggle<cr>", { desc = "File tree" })
