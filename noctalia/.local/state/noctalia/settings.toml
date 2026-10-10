@@ -16,6 +16,7 @@ end = [
     "notifications",
     "clipboard",
     "network",
+    "tailscale",
     "bluetooth",
     "volume",
     "brightness",
@@ -184,7 +185,7 @@ hide_inactive = true
 video_qp = 20
 
 [plugins]
-enabled = [ "noctalia/screen_recorder" ]
+enabled = [ "noctalia/screen_recorder", "davemhammer/tailscale" ]
 
 [shell]
 date_format = "%A, %d %B"
@@ -235,3 +236,7 @@ hide_inactive = true
 
 [widget.recorder]
 type = "noctalia/screen_recorder:recorder"
+
+[widget.tailscale]
+type = "davemhammer/tailscale:status"
+flag_problem = true
