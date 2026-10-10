@@ -20,6 +20,10 @@ not comments in this sense, and a project convention for them wins.
 A CLAUDE.md answers to the same measure. It carries what an agent must not get
 wrong, and no history, because git holds that.
 
+When work that changes files is done and checked, commit it, push the branch
+and open a PR without being asked. A question answered with a command is not
+such work.
+
 After opening a PR on the self-hosted Forgejo, wait for the automated review.
 Other hosts, such as GitHub, usually have none, so do not wait there. An 👀
 reaction on the PR description means it started, and it stays after the review is posted, so the
