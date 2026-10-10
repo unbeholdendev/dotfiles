@@ -6,7 +6,8 @@
     "baseRef": "head"
   },
   "enabledPlugins": {
-    "mattpocock-skills@mattpocock": true
+    "mattpocock-skills@mattpocock": true,
+    "impeccable@impeccable": true
   },
   "extraKnownMarketplaces": {
     "mattpocock": {
@@ -14,8 +15,15 @@
         "source": "github",
         "repo": "mattpocock/skills"
       }
+    },
+    "impeccable": {
+      "source": {
+        "source": "github",
+        "repo": "pbakaus/impeccable"
+      }
     }
   },
+  "feedbackDrafts": "off",
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark"
 }
