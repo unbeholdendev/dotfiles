@@ -7,7 +7,8 @@
   },
   "enabledPlugins": {
     "mattpocock-skills@mattpocock": true,
-    "impeccable@impeccable": true
+    "impeccable@impeccable": false,
+    "taste-skill@taste-skill": true
   },
   "extraKnownMarketplaces": {
     "mattpocock": {
@@ -20,6 +21,12 @@
       "source": {
         "source": "github",
         "repo": "pbakaus/impeccable"
+      }
+    },
+    "taste-skill": {
+      "source": {
+        "source": "github",
+        "repo": "Leonxlnx/taste-skill"
       }
     }
   },
