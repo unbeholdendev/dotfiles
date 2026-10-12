@@ -17,6 +17,11 @@ the project's CLAUDE.md already holds. This covers comments inside code: a
 docstring on a public function, a licence header and a generated-file marker are
 not comments in this sense, and a project convention for them wins.
 
+For any design or UI work, including audits, reviews, new pages and styling,
+load a taste-skill first: `taste-skill:redesign-existing-projects` for an
+existing interface, `taste-skill:design-taste-frontend` otherwise. Where it
+conflicts with the project's own brief or ADRs, the project wins.
+
 A CLAUDE.md answers to the same measure. It carries what an agent must not get
 wrong, and no history, because git holds that.
 
