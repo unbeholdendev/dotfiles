@@ -27,6 +27,7 @@
     pangolin-cli
     playerctl
     signal-desktop
+    sparrow
     thunderbird
     tor-browser
     ungoogled-chromium
