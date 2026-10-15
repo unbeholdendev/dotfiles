@@ -73,8 +73,9 @@ in
 
   services.tailscale = {
     enable = true;
+    useRoutingFeatures = "client";
     # The bar widget's panel runs `tailscale up`, `down` and `set` unprivileged.
-    extraSetFlags = [ "--operator=pycan" ];
+    extraSetFlags = [ "--operator=pycan" "--accept-routes" ];
   };
 
   services.fwupd.enable = true;
