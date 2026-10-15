@@ -7,6 +7,7 @@
   environment.systemPackages = with pkgs; [
     noctalia
     qt6Packages.qt6ct
+    xwayland-satellite
   ];
 
   environment.sessionVariables = {
