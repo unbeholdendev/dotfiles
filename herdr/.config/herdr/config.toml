@@ -18,4 +18,4 @@ rows = [["state_icon", "workspace", "tab"], ["terminal_title_stripped"], ["agent
 delivery = "terminal"
 
 [ui.sound]
-enabled = false
+enabled = true
