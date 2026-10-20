@@ -35,7 +35,7 @@ enable_ddcutil = true
 [calendar]
 enabled = true
 
-    [calendar.account.radicale]
+    [calendar.account.fam]
     provider = "custom"
     server_url = "https://cal.home.unbeholden.dev"
     type = "caldav"
@@ -174,7 +174,7 @@ temperature_night = 3500
 
 [notification]
 history_retention_hours = 168
-monitors = [ "DP-1", "DP-2" ]
+monitors = [ "DP-1" ]
 
 [plugin_settings."noctalia/screen_recorder"]
 audio_source = "none"
@@ -237,5 +237,5 @@ hide_inactive = true
 type = "noctalia/screen_recorder:recorder"
 
 [widget.tailscale]
-type = "davemhammer/tailscale:status"
 flag_problem = true
+type = "davemhammer/tailscale:status"
