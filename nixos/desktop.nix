@@ -2,6 +2,11 @@
 {
   programs.niri.enable = true;
 
+  services.displayManager.noctalia-greeter = {
+    enable = true;
+    settings.user.default = "pycan";
+  };
+
   programs.gpu-screen-recorder.enable = true;
 
   environment.systemPackages = with pkgs; [
