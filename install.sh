@@ -97,4 +97,20 @@ else
   # the clone: lastChangelogVersion alone would dirty it for every container.
   [[ -f $piconf/settings.json ]] ||
     cp "$repo/pi/.pi/agent/settings.json" "$piconf/settings.json"
+
+  for source in \
+    mattpocock/skills:5beb35b040e3de97e54fa9e386d7e42d15c295c2 \
+    pbakaus/impeccable:33003f1013a636e612752a1cad7b82b8bb4c67f2; do
+    upstream=${source%:*}
+    revision=${source#*:}
+    checkout=$piconf/third-party/${upstream%/*}
+    [[ -d $checkout/.git ]] || git init -q "$checkout"
+    if [[ $(git -C "$checkout" rev-parse HEAD 2>/dev/null || true) != "$revision" ]]; then
+      git -C "$checkout" fetch --depth=1 "https://github.com/$upstream.git" "$revision"
+      git -C "$checkout" checkout -q --detach "$revision"
+    fi
+  done
+  ln -sfn "$piconf/third-party/mattpocock/skills/engineering" "$piconf/skills/mattpocock-engineering"
+  ln -sfn "$piconf/third-party/mattpocock/skills/productivity" "$piconf/skills/mattpocock-productivity"
+  ln -sfn "$piconf/third-party/pbakaus/.pi/skills/impeccable" "$piconf/skills/impeccable"
 fi
