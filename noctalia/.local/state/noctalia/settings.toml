@@ -21,10 +21,8 @@ end = [
     "control-center",
     "session"
 ]
+margin_ends = 0
 start = [ "workspaces", "cpu", "ram", "active_window", "media" ]
-
-    [bar.default.monitor.eDP-1]
-    margin_ends = 0
 
 [battery]
 warning_threshold = 15
