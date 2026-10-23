@@ -5,7 +5,7 @@
       name = "dots";
       text = ''
         git -C ${dotfiles} switch main
-        git -C ${dotfiles} pull --rebase --autostash
+        git -C ${dotfiles} pull --rebase
         ${if nixos then "sudo nixos-rebuild" else "home-manager"} \
           switch --flake ${dotfiles}#${target}
       '';
