@@ -60,8 +60,12 @@ run; `home/container.nix` turns it into the package set through
   `PI_CODING_AGENT_DIR` there when it exists, respecting an explicit override.
   Auth, settings, extensions, packages, prompts and sessions are shared across
   containers. Repo settings seed an empty volume only. `AGENTS.md` and the
-  natural-voice skill still link to `agents/`, shared with Claude. Keep local
-  package paths under `/pi` or `/dotfiles` so every container can resolve them.
+  natural-voice skill still link to `agents/`, shared with Claude. `install.sh`
+  pins third-party skills in the agent directory's `third-party/`: Matt Pocock's
+  engineering and productivity groups, and Impeccable's Pi-specific skill.
+  Keep those checkouts outside `skills/` so Pi does not load other providers
+  or unfinished skills. Subagent support and automatic hooks are not installed.
+  Keep local package paths under `/pi` or `/dotfiles` so every container can resolve them.
   A theme noctalia renders is no file of ours: it renders every template at
   start, and a link into a clone not yet made breaks a fresh install.
 - A store file is read as it was at the switch, so an edit wants a switch before
