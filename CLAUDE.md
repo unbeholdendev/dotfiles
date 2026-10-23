@@ -5,7 +5,9 @@ onto the real machine. The container is for editing, not the target.
 
 Each top-level directory holds one program's files, laid out as they sit under
 `$HOME`, and a module in `home/` names every one of them. Nothing stows
-anything.
+anything. `agents/` is the exception: the prompt and the skills both coding
+agents share, which `install.sh` links under each agent's own name
+(`CLAUDE.md` for claude, `AGENTS.md` for pi).
 
 `flake.nix` has three outputs: `pycan@t460s`, the desktop; `root@oren`, a
 headless host whose work happens in the dev containers it runs; and `container`,
@@ -23,10 +25,16 @@ dev container dotfiles hook runs the first of `install.sh`, `install`,
 `bootstrap.sh`, `bootstrap`, `setup.sh` or `setup` it finds, with no argument,
 in a project this repo never sees.
 
-`dcup` and `dcclaude` are oren's own. `dcup` wraps `devcontainer up` with
-a bind mount of the clone at `/dotfiles`, the three mounts below, and the
-`common-utils` feature, then runs `install.sh container`. `dcclaude` starts
-claude in a container `dcup` brought up.
+`dcup`, `dcclaude` and `dcpi` are oren's own. `dcup` wraps `devcontainer up`
+with a bind mount of the clone at `/dotfiles`, the three mounts below, and the
+`common-utils` feature, then runs `install.sh container`. At a container's
+creation `dcup` asks which coding agent it holds, claude or pi, and passes the
+answer to `install.sh`, which records it in `~/.coding-agent` for every later
+run; `home/container.nix` turns it into the package set through
+`CONTAINER_AGENT`, read with `--impure` like `HOME_USER`. Pi comes from the
+`pi` flake input (`github:earendil-works/pi/stable`), not nixpkgs, whose
+`pi-coding-agent` lags. `dcclaude` and `dcpi` start their agent in a container
+`dcup` brought up.
 
 ## Constraints
 
@@ -46,7 +54,9 @@ claude in a container `dcup` brought up.
 - The store is read only, so nothing an app writes can live there. A settings
   or lock file an app rewrites stays a `mkOutOfStoreSymlink` into the clone; a
   container gets no such link, or an update there dirties the clone it was
-  started from. A theme noctalia renders is no file of ours: it renders every
+  started from. So a pi container's `settings.json` is a copy `install.sh`
+  makes once, never a link: pi rewrites it (`lastChangelogVersion`, a `/settings`
+  change), and repo edits reach new containers alone. A theme noctalia renders is no file of ours: it renders every
   template at start, and a link into a clone not yet made breaks a fresh install.
 - A store file is read as it was at the switch, so an edit wants a switch before
   anything sees it.
@@ -57,7 +67,9 @@ claude in a container `dcup` brought up.
   environment, because the image chooses the user.
 - `~/.dots-path` names the clone, since `~/.zshrc` now resolves into the store.
   `home/dots.nix` writes it on a host and `install.sh` in a container; `.zshenv`
-  exports `DOTFILES` from it, and `dcup` is the reader.
+  exports `DOTFILES` from it, and `dcup` is the reader. `~/.coding-agent` is the
+  same pattern for the container's agent: `install.sh` writes it and reads it
+  back when neither an argument nor a terminal gives it a choice.
 - `home/laptop.nix` is the standalone home and the NixOS module both, so
   `home.username` and `home.homeDirectory` stay in it: the NixOS module sets the
   same values, and equal definitions merge.
@@ -87,8 +99,10 @@ into `.git/config`, which the container reads and a push can leak.
 
 The forgejo MCP server is registered at user scope in `.claude.json` inside the
 `/claude` volume, so it loads in every project and a new store wants the entry
-once. The token goes in `FORGEJO_ACCESS_TOKEN`, never `--token`: argv is
-world readable in `ps`.
+once. Pi gets the same server from the tracked `pi/.pi/agent/mcp.json`, which
+`install.sh` links into the agent directory of a pi container. The token goes
+in `FORGEJO_ACCESS_TOKEN`, never `--token`: argv is world readable in `ps`.
+Pi's `"!cat"` env form reads it at call time, as claude's `sh -c` wrapper does.
 
 ```
 claude mcp add --scope user forgejo -- \

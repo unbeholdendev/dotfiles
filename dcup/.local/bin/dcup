@@ -13,11 +13,15 @@ folder=${1:-.}
 # The basename alone is not unique: two clones of one name would share a history.
 resolved=$(readlink -f "$folder")
 
-# A container that exists already holds the token it was built with.
+# A container that exists already holds the token and agent it was built with.
 forge=
+agent=
 if [[ -t 0 ]] &&
   ! docker ps -aq --filter "label=devcontainer.local_folder=$resolved" | grep -q .
 then
+  PS3='which coding agent for this container? '
+  select agent in claude pi; do [[ -n $agent ]] && break; done
+
   PS3='which token for this container? '
   select forge in none forgejo github; do [[ -n $forge ]] && break; done
   case ${forge:-none} in none) forge= ;; esac
@@ -55,7 +59,9 @@ devcontainer up --workspace-folder "$folder" --no-lockfile \
   --mount "type=volume,source=claude-state,target=/claude" \
   "${@:2}"
 
-devcontainer exec --workspace-folder "$folder" /dotfiles/install.sh container
+# No agent when the container pre-existed: install.sh reads ~/.coding-agent.
+devcontainer exec --workspace-folder "$folder" \
+  /dotfiles/install.sh container ${agent:+"$agent"}
 
 # A copy, because `--mount` cannot express a read-only bind.
 case $forge in
