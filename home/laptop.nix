@@ -29,6 +29,7 @@
     playerctl
     signal-desktop
     sparrow
+    talosctl
     thunderbird
     tor-browser
     ungoogled-chromium
