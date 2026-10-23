@@ -87,6 +87,7 @@ if [[ $agent == claude ]]; then
   mkdir -p "$cfg/skills"
   ln -sfn "$repo/agents/skills/natural-voice" "$cfg/skills/natural-voice"
 else
+  [[ -z ${PI_CODING_AGENT_DIR:-} && -d /pi ]] && export PI_CODING_AGENT_DIR=/pi
   piconf=${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}
   mkdir -p "$piconf/skills"
   ln -sfn "$repo/agents/AGENTS.md" "$piconf/AGENTS.md"
