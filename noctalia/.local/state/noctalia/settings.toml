@@ -239,6 +239,7 @@ builtin = "Gruvbox"
 directory = "/home/pycan/Pictures/Wallpapers"
 directory_dark = "/home/pycan/Pictures/Wallpapers"
 directory_light = "/home/pycan/Pictures/Wallpapers"
+fill_color = "on_primary"
 
     [wallpaper.automation]
     enabled = true
