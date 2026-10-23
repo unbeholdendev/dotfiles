@@ -1,8 +1,13 @@
-{ pkgs, ... }:
+{ pkgs, lib, pi, ... }:
 let
   fromEnv = name:
     let v = builtins.getEnv name;
     in if v != "" then v else throw "${name} is empty: run install.sh, not nix build";
+
+  # install.sh exports the agent dcup asked for; a bare nix build gets claude.
+  agent =
+    let a = builtins.getEnv "CONTAINER_AGENT";
+    in if a == "" then "claude" else a;
 in
 {
   imports = [
@@ -12,11 +17,10 @@ in
   ];
 
   # nix, because install.sh points ~/.nix-profile away from the installer's.
-  home.packages = with pkgs; [
-    claude-code
-    forgejo-mcp
-    nix
-  ];
+  # forgejo-mcp serves both agents: claude finds it in .claude.json, pi in mcp.json.
+  home.packages = with pkgs; [ forgejo-mcp nix ]
+    ++ lib.optionals (agent == "claude") [ claude-code ]
+    ++ lib.optionals (agent == "pi") [ pi.packages.${pkgs.system}.default ];
 
   xdg.configFile."git/ignore".text = ".claude/worktrees/\n";
 

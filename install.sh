@@ -12,8 +12,23 @@ case $profile in
   desktop|server)
     echo "$profile is a home-manager host: run dots" >&2; exit 1 ;;
   *)
-    echo "usage: ${0##*/} container" >&2; exit 1 ;;
+    echo "usage: ${0##*/} container [claude|pi]" >&2; exit 1 ;;
 esac
+
+# dcup passes the agent it asked for; later runs read it back from the file.
+agent=${2:-}
+[[ -z $agent && -f $HOME/.coding-agent ]] && agent=$(<"$HOME/.coding-agent")
+if [[ -z $agent && -t 0 ]]; then
+  PS3='which coding agent for this container? '
+  select agent in claude pi; do [[ -n $agent ]] && break; done
+fi
+agent=${agent:-claude}
+case $agent in
+  claude|pi) ;;
+  *) echo "usage: ${0##*/} container [claude|pi]" >&2; exit 1 ;;
+esac
+printf '%s\n' "$agent" > "$HOME/.coding-agent"
+export CONTAINER_AGENT=$agent
 
 # zsh is the login shell; the rest is what the nix installer needs to run.
 missing=()
@@ -60,13 +75,25 @@ HOME_MANAGER_BACKUP_EXT=hm-bak "$out/activate"
 repo=$(git rev-parse --path-format=absolute --git-common-dir)
 repo=${repo%/.git}
 # /claude is one volume in every container, and /dotfiles is the one clone path they all share.
-[[ -e /dotfiles/claude/.claude/CLAUDE.md ]] && repo=/dotfiles
+[[ -e /dotfiles/agents/AGENTS.md ]] && repo=/dotfiles
 printf '%s\n' "$repo" > "$HOME/.dots-path"
 
-[[ -z ${CLAUDE_CONFIG_DIR:-} && -d /claude ]] && export CLAUDE_CONFIG_DIR=/claude
-cfg=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
-mkdir -p "$cfg"
-ln -sfn "$repo/claude/.claude/settings.json" "$cfg/settings.json"
-ln -sfn "$repo/claude/.claude/CLAUDE.md" "$cfg/CLAUDE.md"
-mkdir -p "$cfg/skills"
-ln -sfn "$repo/claude/.claude/skills/natural-voice" "$cfg/skills/natural-voice"
+if [[ $agent == claude ]]; then
+  [[ -z ${CLAUDE_CONFIG_DIR:-} && -d /claude ]] && export CLAUDE_CONFIG_DIR=/claude
+  cfg=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
+  mkdir -p "$cfg"
+  ln -sfn "$repo/claude/.claude/settings.json" "$cfg/settings.json"
+  ln -sfn "$repo/agents/AGENTS.md" "$cfg/CLAUDE.md"
+  mkdir -p "$cfg/skills"
+  ln -sfn "$repo/agents/skills/natural-voice" "$cfg/skills/natural-voice"
+else
+  piconf=${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}
+  mkdir -p "$piconf/skills"
+  ln -sfn "$repo/agents/AGENTS.md" "$piconf/AGENTS.md"
+  ln -sfn "$repo/agents/skills/natural-voice" "$piconf/skills/natural-voice"
+  ln -sfn "$repo/pi/.pi/agent/mcp.json" "$piconf/mcp.json"
+  # Pi rewrites settings.json, so it is a copy made once, never a link into
+  # the clone: lastChangelogVersion alone would dirty it for every container.
+  [[ -f $piconf/settings.json ]] ||
+    cp "$repo/pi/.pi/agent/settings.json" "$piconf/settings.json"
+fi

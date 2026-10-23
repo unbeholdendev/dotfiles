@@ -9,9 +9,11 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # No follows: pi pins the nixpkgs its release was built against.
+    pi.url = "github:earendil-works/pi/stable";
   };
 
-  outputs = { nixpkgs, home-manager, disko, ... }:
+  outputs = { nixpkgs, home-manager, disko, pi, ... }:
     let
       system = "x86_64-linux";
 
@@ -48,6 +50,7 @@
           pkgs = containerPkgs;
           extraSpecialArgs = {
             dotfiles = null;
+            inherit pi;
           };
           modules = [ ./home/container.nix ];
         };
