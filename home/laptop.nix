@@ -25,6 +25,7 @@
     jq
     libnotify
     libreoffice
+    opentofu
     pangolin-cli
     playerctl
     signal-desktop
