@@ -18,6 +18,7 @@
   ];
 
   home.packages = with pkgs; [
+    age
     ansible
     ddcutil
     firefox
@@ -29,6 +30,7 @@
     pangolin-cli
     playerctl
     signal-desktop
+    sops
     sparrow
     talosctl
     thunderbird
