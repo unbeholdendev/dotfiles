@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, hermes, ... }:
 {
   imports = [
     ./common.nix
@@ -11,6 +11,8 @@
 
   home.username = "root";
   home.homeDirectory = "/root";
+
+  home.packages = [ hermes.packages.${pkgs.stdenv.hostPlatform.system}.default ];
 
   programs.home-manager.enable = true;
 

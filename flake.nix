@@ -11,9 +11,10 @@
     };
     # No follows: pi pins the nixpkgs its release was built against.
     pi.url = "github:earendil-works/pi/stable";
+    hermes.url = "github:NousResearch/hermes-agent";
   };
 
-  outputs = { nixpkgs, home-manager, disko, pi, ... }:
+  outputs = { nixpkgs, home-manager, disko, pi, hermes, ... }:
     let
       system = "x86_64-linux";
 
@@ -40,7 +41,7 @@
       host = target: { dotfiles, module }:
         home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages.${system};
-          extraSpecialArgs = { inherit dotfiles target; nixos = false; };
+          extraSpecialArgs = { inherit dotfiles target hermes; nixos = false; };
           modules = [ module ];
         };
     in
