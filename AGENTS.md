@@ -40,6 +40,22 @@ and Pi. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
 
 ## Shared agent state
 
+- Pi containers install `pi/.pi/agent/extensions/project-tools` in the shared
+  agent directory. The extension detects projects from their manifests and
+  declared npm/pnpm workspaces, then loads Pi Lens for TypeScript projects
+  and a Playwright MCP server for projects with a Playwright dependency.
+  Detection reads files only; there is no manual choice or override.
+- Pi Lens runs without formatting, autofix, test, and security mutations;
+  diagnostics and navigation remain on. Its config seeds once at
+  `$PI_CODING_AGENT_DIR/extensions/pi-lens.json`. The container profile
+  provides `typescript-language-server` and `chromium`; `install.sh` installs
+  the extension's pinned npm dependencies under a borrowed bun runtime, so
+  no package-manager runtime enters the profile. Bun blocks playwright's
+  browser-download postinstall, which is intended: Chromium comes from the
+  profile. Playwright stores its output under
+  `/history/pi` when the workspace state directory exists.
+
+
 - `dcup` selects the container's agent. `install.sh` uses an explicit argument,
   then `~/.coding-agent`, then a terminal prompt, defaulting to Claude without
   a terminal. It records the choice for later runs.
@@ -112,6 +128,10 @@ Choose checks for the files changed. Documentation-only edits need review and
 - For installer or container home configuration changes, run
   `./install.sh container` twice and check both runs succeed. This activates the
   worktree's Nix configuration in the running container; it is not a dry run.
+- For project-tools changes, run the committed detection tests with
+  `node --test pi/.pi/agent/extensions/project-tools/detect.test.js` and
+  reinstall the extension with `./install.sh container pi`. Real Pi Lens and
+  Playwright behavior needs a project fixture, not this repository.
 - For agent setup changes, test each affected agent explicitly. Check fresh
   settings seeding and preservation of existing settings. Agent resources come
   from the main clone even during a worktree install, so an install alone does

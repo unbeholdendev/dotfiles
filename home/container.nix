@@ -20,7 +20,11 @@ in
   # forgejo-mcp serves both agents: claude finds it in .claude.json, pi in mcp.json.
   home.packages = with pkgs; [ forgejo-mcp nix ]
     ++ lib.optionals (agent == "claude") [ claude-code ]
-    ++ lib.optionals (agent == "pi") [ pi.packages.${pkgs.stdenv.hostPlatform.system}.default ];
+    ++ lib.optionals (agent == "pi") [
+      pi.packages.${pkgs.stdenv.hostPlatform.system}.default
+      typescript-language-server
+      chromium
+    ];
 
   xdg.configFile."git/ignore".text = ".claude/worktrees/\n";
 
