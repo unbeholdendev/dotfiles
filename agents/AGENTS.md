@@ -1,5 +1,12 @@
 Make a worktree for work that changes files.
 
+Use available subagents when a complex task splits into independent pieces
+that can usefully run in parallel, without asking for permission each time.
+Keep small or tightly coupled tasks in the main session. Give each worker a
+clear scope, applicable instructions, and a worktree; avoid overlapping edits.
+The main session checks and integrates results and owns the final validation,
+commit, push, and PR.
+
 Make the smallest change that leaves a coherent design, not just the smallest
 diff. Code you do not write cannot break, and every line you do write is a line
 to keep. Delete before you add. Keep refactors within the task; when a local
