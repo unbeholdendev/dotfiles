@@ -42,6 +42,15 @@ stop. Choose the short word, cut the word that can go, and break a rule of
 grammar sooner than keep a sentence that is longer or less clear for it. A clear
 fragment beats a correct sentence that hides the point.
 
+Before writing or editing text for people to read, load the no-ai-slop skill.
+This includes replies, blog posts, articles, website and UI copy, documentation,
+emails, commit messages, and PR descriptions. Match existing writing from the
+same author or site when available. Use British spelling unless the user or
+project specifies otherwise. For new writing, draft it yourself instead of
+asking the user for a draft. Apply no-ai-slop as the final editing pass and run
+its eval.md checks before delivering the text. Return the finished text; include
+an editing or detection report only when requested.
+
 Do not write comments. A line earns one only when it looks wrong, arbitrary, or
 redundant, and then the comment gives that reason and nothing else, in one or
 two lines. Never write what the code does, what a thing used to be, or a reason

@@ -78,6 +78,11 @@ repo=${repo%/.git}
 [[ -e /dotfiles/agents/AGENTS.md ]] && repo=/dotfiles
 printf '%s\n' "$repo" > "$HOME/.dots-path"
 
+sources=(
+  petergyang/no-ai-slop:000650b156983f5159695b441477f4e63b25dc85
+  cloudflare/security-audit-skill:c1c8a8c1471069fb0e188eeaff69b8e8db6564a8
+)
+
 if [[ $agent == claude ]]; then
   [[ -z ${CLAUDE_CONFIG_DIR:-} && -d /claude ]] && export CLAUDE_CONFIG_DIR=/claude
   cfg=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
@@ -85,32 +90,42 @@ if [[ $agent == claude ]]; then
   ln -sfn "$repo/claude/.claude/settings.json" "$cfg/settings.json"
   ln -sfn "$repo/agents/AGENTS.md" "$cfg/CLAUDE.md"
   mkdir -p "$cfg/skills"
-  ln -sfn "$repo/agents/skills/natural-voice" "$cfg/skills/natural-voice"
 else
   [[ -z ${PI_CODING_AGENT_DIR:-} && -d /pi ]] && export PI_CODING_AGENT_DIR=/pi
-  piconf=${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}
-  mkdir -p "$piconf/skills"
-  ln -sfn "$repo/agents/AGENTS.md" "$piconf/AGENTS.md"
-  ln -sfn "$repo/agents/skills/natural-voice" "$piconf/skills/natural-voice"
-  ln -sfn "$repo/pi/.pi/agent/mcp.json" "$piconf/mcp.json"
+  cfg=${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}
+  mkdir -p "$cfg/skills"
+  ln -sfn "$repo/agents/AGENTS.md" "$cfg/AGENTS.md"
+  ln -sfn "$repo/pi/.pi/agent/mcp.json" "$cfg/mcp.json"
   # Pi rewrites settings.json, so it is a copy made once, never a link into
   # the clone: lastChangelogVersion alone would dirty it for every container.
-  [[ -f $piconf/settings.json ]] ||
-    cp "$repo/pi/.pi/agent/settings.json" "$piconf/settings.json"
+  [[ -f $cfg/settings.json ]] ||
+    cp "$repo/pi/.pi/agent/settings.json" "$cfg/settings.json"
+  sources+=(
+    mattpocock/skills:5beb35b040e3de97e54fa9e386d7e42d15c295c2
+    pbakaus/impeccable:33003f1013a636e612752a1cad7b82b8bb4c67f2
+  )
+fi
 
-  for source in \
-    mattpocock/skills:5beb35b040e3de97e54fa9e386d7e42d15c295c2 \
-    pbakaus/impeccable:33003f1013a636e612752a1cad7b82b8bb4c67f2; do
-    upstream=${source%:*}
-    revision=${source#*:}
-    checkout=$piconf/third-party/${upstream%/*}
-    [[ -d $checkout/.git ]] || git init -q "$checkout"
-    if [[ $(git -C "$checkout" rev-parse HEAD 2>/dev/null || true) != "$revision" ]]; then
-      git -C "$checkout" fetch --depth=1 "https://github.com/$upstream.git" "$revision"
-      git -C "$checkout" checkout -q --detach "$revision"
-    fi
-  done
-  ln -sfn "$piconf/third-party/mattpocock/skills/engineering" "$piconf/skills/mattpocock-engineering"
-  ln -sfn "$piconf/third-party/mattpocock/skills/productivity" "$piconf/skills/mattpocock-productivity"
-  ln -sfn "$piconf/third-party/pbakaus/.pi/skills/impeccable" "$piconf/skills/impeccable"
+if [[ -L $cfg/skills/natural-voice &&
+      $(readlink "$cfg/skills/natural-voice") == "$repo/agents/skills/natural-voice" ]]; then
+  rm "$cfg/skills/natural-voice"
+fi
+
+for source in "${sources[@]}"; do
+  upstream=${source%:*}
+  revision=${source#*:}
+  checkout=$cfg/third-party/${upstream%/*}
+  [[ -d $checkout/.git ]] || git init -q "$checkout"
+  if [[ $(git -C "$checkout" rev-parse HEAD 2>/dev/null || true) != "$revision" ]]; then
+    git -C "$checkout" fetch --depth=1 "https://github.com/$upstream.git" "$revision"
+    git -C "$checkout" checkout -q --detach "$revision"
+  fi
+done
+ln -sfn "$cfg/third-party/petergyang/skills/no-ai-slop" "$cfg/skills/no-ai-slop"
+ln -sfn "$cfg/third-party/cloudflare/skills/security-audit" "$cfg/skills/security-audit"
+
+if [[ $agent == pi ]]; then
+  ln -sfn "$cfg/third-party/mattpocock/skills/engineering" "$cfg/skills/mattpocock-engineering"
+  ln -sfn "$cfg/third-party/mattpocock/skills/productivity" "$cfg/skills/mattpocock-productivity"
+  ln -sfn "$cfg/third-party/pbakaus/.pi/skills/impeccable" "$cfg/skills/impeccable"
 fi
