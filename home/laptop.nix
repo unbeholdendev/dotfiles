@@ -43,6 +43,11 @@
     zip
   ];
 
+  home.sessionVariables = {
+    KUBECONFIG = "${config.home.homeDirectory}/talos/dion/kubeconfig";
+    TALOSCONFIG = "${config.home.homeDirectory}/talos/dion/talosconfig";
+  };
+
   home.pointerCursor = {
     enable = true;
     package = pkgs.adwaita-icon-theme;
