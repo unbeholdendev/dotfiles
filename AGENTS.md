@@ -45,7 +45,11 @@ and Pi. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
   a terminal. It records the choice for later runs.
 - `/claude` and `/pi` are shared across containers. Respect explicit
   `CLAUDE_CONFIG_DIR` and `PI_CODING_AGENT_DIR` overrides.
-- Pi's auth, settings, extensions, packages, prompts, and sessions live in its
+- With `/history` mounted, `.zshenv` sets `PI_CODING_AGENT_SESSION_DIR` to
+  `/history/pi/sessions` unless explicitly overridden. `dcup` mounts a distinct
+  host state directory per workspace there, so sessions survive rebuilds without
+  crossing workspaces. Existing sessions in `/pi/sessions` are not moved.
+- Pi's auth, settings, extensions, packages, and prompts live in its shared
   agent directory. `install.sh` copies repo settings only when `settings.json`
   is absent. Changing the seed does not update an existing volume. Keep it a
   copy: Pi rewrites settings, so a symlink would dirty the shared clone.
