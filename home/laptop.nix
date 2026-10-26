@@ -22,8 +22,10 @@
     ansible
     ddcutil
     firefox
+    fluxcd
     git
     jq
+    kubectl
     libnotify
     libreoffice
     opentofu
