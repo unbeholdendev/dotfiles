@@ -1,5 +1,12 @@
 {
   "$schema": "https://pi.dev/schemas/settings.schema.json",
-  "defaultProvider": "opencode-go",
-  "defaultModel": "kimi-k3"
+  "defaultProvider": "openai",
+  "defaultModel": "gpt-6.1-sol",
+  "packages": [
+    "npm:pi-subagents@0.83.0",
+    "npm:pi-web-access@0.45.0"
+  ],
+  "subagents": {
+    "defaultSubagentOnlyExtensions": ["npm:pi-web-access@0.45.0"]
+  }
 }
