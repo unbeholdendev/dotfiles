@@ -96,6 +96,14 @@ else
   mkdir -p "$cfg/skills"
   ln -sfn "$repo/agents/AGENTS.md" "$cfg/AGENTS.md"
   ln -sfn "$repo/pi/.pi/agent/mcp.json" "$cfg/mcp.json"
+  mkdir -p "$cfg/extensions/project-tools"
+  cp pi/.pi/agent/extensions/project-tools/{package.json,index.ts,detect.js} "$cfg/extensions/project-tools/"
+  [[ -f $cfg/extensions/pi-lens.json ]] ||
+    cp pi/.pi/agent/extensions/pi-lens.json "$cfg/extensions/pi-lens.json"
+  # A borrowed runtime: install.sh needs bun once, but no container profile
+  # should carry it. Bun blocks playwright's browser-download postinstall,
+  # which is what we want: Chromium comes from the profile.
+  nix shell nixpkgs#bun -c bun install --cwd "$cfg/extensions/project-tools"
   # Pi rewrites settings.json, so it is a copy made once, never a link into
   # the clone: lastChangelogVersion alone would dirty it for every container.
   [[ -f $cfg/settings.json ]] ||
