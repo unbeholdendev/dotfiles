@@ -1,118 +1,83 @@
 # dotfiles
 
-Config for a NixOS + niri machine, authored in this dev container and pulled
-onto the real machine. The container is for editing, not the target.
+NixOS + niri desktop, headless host, and dev container configuration.
+Desktop configuration is edited here but runs on the laptops. Container
+configuration runs here; there is no Wayland session.
 
-Each top-level directory holds one program's files, laid out as they sit under
-`$HOME`, and a module in `home/` names every one of them. Nothing stows
-anything. `agents/` is the exception: the prompt and the skills both coding
-agents share, which `install.sh` links under each agent's own name
-(`CLAUDE.md` for claude, `AGENTS.md` for pi).
+Program directories mirror paths under `$HOME`; modules in `home/` install
+them. Nothing uses stow. `agents/` holds the prompt and skills shared by Claude
+and Pi. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
 
-`flake.nix` has three outputs: `pycan@t460s`, the desktop; `root@oren`, a
-headless host whose work happens in the dev containers it runs; and `container`,
-which is one name for every container, since a container hostname is a random
-id. `nixosConfigurations.t460s` is the system half of that desktop.
-`nixosConfigurations.t14` is a second laptop on the same home.
-`flake.lock` is the pin. Home-manager runs standalone on the other two, so
-Debian stays Debian.
+## Nix and installation
 
-`dots` is the one command. On a host it is a program home-manager installs, with
-the clone and the flake output written into it. In a container it is a function
-in `.zshrc` calling `install.sh`, which is the container's script alone and
-refuses `desktop` and `server`. The name `install.sh` is not free choice: the
-dev container dotfiles hook runs the first of `install.sh`, `install`,
-`bootstrap.sh`, `bootstrap`, `setup.sh` or `setup` it finds, with no argument,
-in a project this repo never sees.
+- Use `$HOME` or the configured home directory in shared scripts and config.
+  Keep fixed usernames and home paths in host-specific Nix configuration.
+- Stage new files before a flake build or evaluation: Git flakes omit
+  untracked files.
+- `install.sh` is container-only. Hosts use `dots`; on NixOS that applies both
+  system and home configuration with `nixos-rebuild`.
+- Keep the name `install.sh` and its no-argument container detection: the dev
+  container dotfiles hook discovers and runs it in projects we do not control.
+- Detect containers with `/.dockerenv` or `/run/.containerenv`, not a variable
+  supplied by another project's `devcontainer.json`. Detect optional shared
+  mounts by directory existence and preserve the fallback when absent.
+- Container builds need `--impure`, `HOME_USER`, and `HOME`; the image chooses
+  the user. Use `install.sh` to supply these and the selected `CONTAINER_AGENT`.
+- `install.sh` builds from its own directory, including when run in a worktree.
+  Agent links and the settings seed instead use the main clone, preferring
+  `/dotfiles`. Keep shared-volume links and `~/.dots-path` pointed there:
+  a disposable worktree may disappear or be inaccessible to another container.
+- Store-backed files reflect the last switch. Apply a switch before expecting
+  an edit to take effect; out-of-store links are the exception.
+- Files an app rewrites must stay writable. Host configuration can use
+  `mkOutOfStoreSymlink` into the clone; container apps must not dirty the clone
+  through writable config links.
+- Home-manager refuses to overwrite existing files. Use `-b hm-bak` for a
+  standalone host, `HOME_MANAGER_BACKUP_EXT` for container activation, and
+  `home-manager.backupFileExtension` on NixOS.
+- Keep `home.username` and `home.homeDirectory` in `home/laptop.nix`: it serves
+  both standalone home-manager and NixOS, whose equal definitions merge.
 
-`dcup`, `dcclaude` and `dcpi` are oren's own. `dcup` wraps `devcontainer up`
-with a bind mount of the clone at `/dotfiles`, the shared mounts below, and the
-`common-utils` feature, then runs `install.sh container`. At a container's
-creation `dcup` asks which coding agent it holds, claude or pi, and passes the
-answer to `install.sh`, which records it in `~/.coding-agent` for every later
-run; `home/container.nix` turns it into the package set through
-`CONTAINER_AGENT`, read with `--impure` like `HOME_USER`. Pi comes from the
-`pi` flake input (`github:earendil-works/pi/stable`), not nixpkgs, whose
-`pi-coding-agent` lags. `dcclaude` and `dcpi` start their agent in a container
-`dcup` brought up.
+## Shared agent state
 
-## Constraints
+- `dcup` selects the container's agent. `install.sh` uses an explicit argument,
+  then `~/.coding-agent`, then a terminal prompt, defaulting to Claude without
+  a terminal. It records the choice for later runs.
+- `/claude` and `/pi` are shared across containers. Respect explicit
+  `CLAUDE_CONFIG_DIR` and `PI_CODING_AGENT_DIR` overrides.
+- Pi's auth, settings, extensions, packages, prompts, and sessions live in its
+  agent directory. `install.sh` copies repo settings only when `settings.json`
+  is absent. Changing the seed does not update an existing volume. Keep it a
+  copy: Pi rewrites settings, so a symlink would dirty the shared clone.
+- Keep local package paths under `/pi` or `/dotfiles` so every container can
+  resolve them.
+- Keep pinned third-party skill checkouts under `third-party/`, outside
+  `skills/`. Link only the intended skill groups so Pi does not discover other
+  providers' or unfinished skills.
 
-- Never hardcode `/root` or a username in a file this repo places. A container
-  runs as root; on the real machine `$HOME` is a normal user's.
-- Container-only behaviour is switched by a test for `/.dockerenv` or
-  `/run/.containerenv`, never by a variable a `devcontainer.json` sets, because
-  these files must work in a project whose file is not ours to edit. The `/nix`,
-  `/history`, `/claude` and `/pi` mounts follow the same rule: `.zshenv` and `.zshrc`
-  test for the directory and fall back to the old default.
-- A flake reads tracked files alone, so a new module wants `git add` before a
-  switch, committed or not.
-- `install.sh` cds to its own directory, so a run from a worktree switches the
-  container from that worktree, but `~/.dots-path` and the claude links name
-  the main clone, `/dotfiles` where it exists: `/claude` is shared by every
-  container, and a worktree is deleted.
-- The store is read only, so nothing an app writes can live there. A settings
-  or lock file an app rewrites stays a `mkOutOfStoreSymlink` into the clone; a
-  container gets no such link, or an update there dirties the clone it was
-  started from. So Pi's `settings.json` is a copy `install.sh`
-  makes once, never a link: pi rewrites it (`lastChangelogVersion`, a `/settings`
-  change). `dcup` mounts `pi-state` at `/pi`; `install.sh` and `.zshenv` set
-  `PI_CODING_AGENT_DIR` there when it exists, respecting an explicit override.
-  Auth, settings, extensions, packages, prompts and sessions are shared across
-  containers. Repo settings seed an empty volume only. `AGENTS.md` and the
-  natural-voice skill still link to `agents/`, shared with Claude. `install.sh`
-  pins third-party skills in the agent directory's `third-party/`: Matt Pocock's
-  engineering and productivity groups, and Impeccable's Pi-specific skill.
-  Keep those checkouts outside `skills/` so Pi does not load other providers
-  or unfinished skills. Subagent support and automatic hooks are not installed.
-  Keep local package paths under `/pi` or `/dotfiles` so every container can resolve them.
-  A theme noctalia renders is no file of ours: it renders every template at
-  start, and a link into a clone not yet made breaks a fresh install.
-- A store file is read as it was at the switch, so an edit wants a switch before
-  anything sees it.
-- Home-manager stops rather than write over a file already at the path it wants.
-  `-b hm-bak` is the flag for a host, `HOME_MANAGER_BACKUP_EXT` for a container,
-  and `home-manager.backupFileExtension` on NixOS, where there is no flag.
-- `container` is built with `--impure` and reads `HOME_USER` and `HOME` from the
-  environment, because the image chooses the user.
-- `~/.dots-path` names the clone, since `~/.zshrc` now resolves into the store.
-  `home/dots.nix` writes it on a host and `install.sh` in a container; `.zshenv`
-  exports `DOTFILES` from it, and `dcup` is the reader. `~/.coding-agent` is the
-  same pattern for the container's agent: `install.sh` writes it and reads it
-  back when neither an argument nor a terminal gives it a choice.
-- `home/laptop.nix` is the standalone home and the NixOS module both, so
-  `home.username` and `home.homeDirectory` stay in it: the NixOS module sets the
-  same values, and equal definitions merge.
-- `nixos` is the third `extraSpecialArgs` fact, and `home/dots.nix` is the one
-  reader. On NixOS one rebuild applies both, so `dots` runs `nixos-rebuild`.
-- `noctalia` is the nixpkgs attribute, not `noctalia-shell`, which is the old
-  name, left behind at 4.7.7.
-- `nixos/disk.nix` is disko and owns every local `fileSystems` entry. The NAS
-  mount in `nixos/laptop.nix` is the one that is not local. Confirm the disk in
-  the host file, `nixos/t460s.nix` or `nixos/t14.nix`, with `lsblk`, since
-  disko erases what it is given. `hardware-configuration.nix` is not
-  committed: the initrd list is in `nixos/laptop.nix` and the host file.
-- The `Mod+Alt` recording binds go through `noctalia/screen_recorder`, a plugin
-  noctalia fetches from github and no part of the flake. It is enabled by
-  `noctalia msg plugins enable noctalia/screen_recorder`, which writes
-  `[plugins].enabled` into the tracked `settings.toml`, and its own options
-  (codec, folder, replay buffer) live in noctalia's state, not here.
-  `programs.gpu-screen-recorder.enable` is the other half: the plain package
-  captures nothing without the wrapper that option installs.
+## Desktop
+
+- Let Noctalia render its themes. A template output linked into a clone that
+  does not yet exist breaks a fresh install.
+- `nixos/disk.nix` owns local filesystem configuration. NAS mounts are separate
+  in `nixos/laptop.nix`. Before running disko, confirm the target host's disk
+  with `lsblk` against `nixos/t460s.nix` or `nixos/t14.nix`: disko erases it.
+  Keep initrd modules in the shared and host NixOS modules rather than committing
+  `hardware-configuration.nix`.
+- Recording binds require both the `noctalia/screen_recorder` plugin and
+  `programs.gpu-screen-recorder.enable`; the plain package lacks the capture
+  wrapper. Enable the plugin with
+  `noctalia msg plugins enable noctalia/screen_recorder`. Plugin enablement is
+  tracked in Noctalia's `settings.toml`; recorder options live in plugin state.
 
 ## Secrets
 
-`~/.forgejo-token` and `~/.github-token` reach a container by answering `dcup`
-and no other way, and one container gets one of them, never both. Never print
-or commit either value, and never put a token in a remote URL: that writes it
-into `.git/config`, which the container reads and a push can leak.
+`dcup` copies the selected Forgejo or GitHub token into a new container, never
+both. Never print or commit tokens, put them in remote URLs, or pass them in
+argv. Read them at call time from their files.
 
-The forgejo MCP server is registered at user scope in `.claude.json` inside the
-`/claude` volume, so it loads in every project and a new store wants the entry
-once. Pi gets the same server from the tracked `pi/.pi/agent/mcp.json`, which
-`install.sh` links into the agent directory of a pi container. The token goes
-in `FORGEJO_ACCESS_TOKEN`, never `--token`: argv is world readable in `ps`.
-Pi's `"!cat"` env form reads it at call time, as claude's `sh -c` wrapper does.
+Pi's Forgejo MCP config is linked from `pi/.pi/agent/mcp.json`. Claude needs
+one user-scope registration per fresh `/claude` volume:
 
 ```
 claude mcp add --scope user forgejo -- \
@@ -120,25 +85,35 @@ claude mcp add --scope user forgejo -- \
     exec forgejo-mcp --transport stdio --url https://git.unbeholden.dev'
 ```
 
-A fine-grained github token is issued per owner and every owner is the same
-host, so the host keeps one file per owner in `~/.github-tokens/<owner>`, and
-`dcup` asks which one and scopes the helper to `https://github.com/<owner>`.
+Use `FORGEJO_ACCESS_TOKEN`, not `--token`; Pi's `"!cat"` env form also reads it
+at call time. GitHub tokens are owner-scoped: the host keeps
+`~/.github-tokens/<owner>`, and `dcup` scopes the container's credential helper
+to `https://github.com/<owner>`.
 
-`~/.groq-token` is `dictate`'s key, mode 600, written by hand on the desktop
-and never in the store: the script reads it at call time. A container has no
-use for it, so `dcup` does not offer it.
+`~/.groq-token` is `dictate`'s desktop-only key, mode 600, written by hand and
+never put in the store or offered to containers.
 
 ## Testing
 
-niri cannot be run here (no Wayland session), so review those edits rather than
-testing them. The NixOS half is checked by evaluation:
+Choose checks for the files changed. Documentation-only edits need review and
+`git diff --check`, not an activation.
 
-```
-nix eval .#nixosConfigurations.t460s.config.system.build.toplevel.drvPath
-nix eval .#nixosConfigurations.t14.config.system.build.toplevel.drvPath
-```
+- For NixOS changes, evaluate both laptops:
 
-For the rest: `./install.sh container` must succeed, and must succeed again on a
-second run, and `zsh -ic exit` must be silent. Test that one under a pty; with
-no terminal `fzf --zsh` reports `can't change option: zle`, which is the missing
-tty and not a fault.
+  ```
+  nix eval .#nixosConfigurations.t460s.config.system.build.toplevel.drvPath
+  nix eval .#nixosConfigurations.t14.config.system.build.toplevel.drvPath
+  ```
+
+- For installer or container home configuration changes, run
+  `./install.sh container` twice and check both runs succeed. This activates the
+  worktree's Nix configuration in the running container; it is not a dry run.
+- For agent setup changes, test each affected agent explicitly. Check fresh
+  settings seeding and preservation of existing settings. Agent resources come
+  from the main clone even during a worktree install, so an install alone does
+  not validate worktree edits to the seed, prompt, skills, or MCP config.
+  Validate those files directly or in a separate test agent directory.
+- For shell changes, `zsh -ic exit` must be silent under a PTY. Without a
+  terminal, `fzf --zsh` reports `can't change option: zle`; that is a missing
+  TTY, not a config fault.
+- Review niri changes statically; it cannot run here without a Wayland session.
