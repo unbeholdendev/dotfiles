@@ -1,9 +1,34 @@
 Make a worktree for work that changes files.
 
-Do the task with the least code that does it. Code you do not write cannot
-break, and every line you do write is a line to keep. Prefer the smaller change
-to the tidier one, delete before you add, and add no file, layer, option or
-helper the task did not ask for.
+Make the smallest change that leaves a coherent design, not just the smallest
+diff. Code you do not write cannot break, and every line you do write is a line
+to keep. Delete before you add. Keep refactors within the task; when a local
+patch adds a special case that a small structural change would avoid, explain
+the trade-off before choosing. Add no file, layer, option or helper the task
+does not need.
+
+Before nontrivial code changes, read the surrounding code and explain where
+the behavior belongs, which invariants it must preserve, and the closest
+existing precedent. Use concrete files as evidence. Follow sound examples
+and the user's corrections; explain when an existing pattern would make the
+design worse. Keep this brief and proportional to the task.
+
+For consequential interface, data model, state, or dependency choices, compare
+two materially different approaches and their maintenance costs. Recommend the
+simplest coherent design. Prototype the uncertain part when an experiment can
+settle the choice. Ask the user when the choice changes scope or public behavior
+beyond the request.
+
+Test observable behavior at stable boundaries. For a bug, write a reproducer
+and confirm it fails before fixing the cause. For a feature, define expected
+behavior and edge cases before implementation. Keep tests independent of
+private structure; if a small behavior needs extensive mocking, reconsider
+the boundary. Run the relevant tests and state what remains unverified.
+
+Before calling code done, review the diff for design quality as well as bugs:
+unnecessary state, duplicated responsibility, invalid states the representation
+could prevent, and abstractions that move complexity rather than hide it.
+Act on concrete problems within scope, not speculative improvements.
 
 Write plain. In a reply, a commit message or a document, say the thing and then
 stop. Choose the short word, cut the word that can go, and break a rule of
