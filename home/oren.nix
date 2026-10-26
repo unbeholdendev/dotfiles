@@ -12,7 +12,7 @@
   home.username = "root";
   home.homeDirectory = "/root";
 
-  home.packages = [ hermes.packages.${pkgs.stdenv.hostPlatform.system}.default ];
+  home.packages = [ hermes.packages.${pkgs.stdenv.hostPlatform.system}.minimal ];
 
   programs.home-manager.enable = true;
 
