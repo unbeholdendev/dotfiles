@@ -13,7 +13,7 @@ in
     enableDefaultConfig = false;
 
     settings = builtins.mapAttrs (_: block: identity // block) {
-      "git.unbeholden.dev" = { User = "git"; Port = 222; };
+      "git.home.unbeholden.dev" = { User = "git"; Port = 222; };
 
 
 

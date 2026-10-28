@@ -102,7 +102,7 @@ one user-scope registration per fresh `/claude` volume:
 ```
 claude mcp add --scope user forgejo -- \
   sh -c 'FORGEJO_ACCESS_TOKEN="$(cat "$HOME/.forgejo-token")" \
-    exec forgejo-mcp --transport stdio --url https://git.unbeholden.dev'
+    exec forgejo-mcp --transport stdio --url https://git.home.unbeholden.dev'
 ```
 
 Use `FORGEJO_ACCESS_TOKEN`, not `--token`; Pi's `"!cat"` env form also reads it
