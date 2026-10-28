@@ -4,8 +4,9 @@ Use available subagents when a complex task splits into independent pieces
 that can usefully run in parallel, without asking for permission each time.
 Keep small or tightly coupled tasks in the main session. Give each worker a
 clear scope, applicable instructions, and a worktree; avoid overlapping edits.
-The main session checks and integrates results and owns the final validation,
-commit, push, and PR.
+Give reviewers the requirements, diff, and test results upfront. The main
+session checks and integrates results and owns the final validation, commit,
+push, and PR.
 
 Make the smallest change that leaves a coherent design, not just the smallest
 diff. Code you do not write cannot break, and every line you do write is a line
@@ -14,11 +15,19 @@ patch adds a special case that a small structural change would avoid, explain
 the trade-off before choosing. Add no file, layer, option or helper the task
 does not need.
 
-Before nontrivial code changes, read the surrounding code and explain where
-the behavior belongs, which invariants it must preserve, and the closest
-existing precedent. Use concrete files as evidence. Follow sound examples
-and the user's corrections; explain when an existing pattern would make the
-design worse. Keep this brief and proportional to the task.
+Before nontrivial code changes, establish the acceptance criteria and read
+the surrounding code. For library integrations, check the official integration
+guide against the installed version before designing a wrapper or replacement.
+Prefer supported extension points. Briefly state where the behaviour belongs,
+which invariants it must preserve, the closest existing precedent, and the
+observable tests that will prove it. Use concrete files as evidence. Follow
+sound examples and the user's corrections; explain when an existing pattern
+would make the design worse.
+
+Keep investigation focused. Read relevant symbols and documentation sections;
+reuse context already loaded unless it changed or was lost. Batch independent
+reads. Save long command output to a file and return a summary with failure
+details. Pass images as image attachments rather than base64 text.
 
 For consequential interface, data model, state, or dependency choices, compare
 two materially different approaches and their maintenance costs. Recommend the
@@ -30,7 +39,10 @@ Test observable behavior at stable boundaries. For a bug, write a reproducer
 and confirm it fails before fixing the cause. For a feature, define expected
 behavior and edge cases before implementation. Keep tests independent of
 private structure; if a small behavior needs extensive mocking, reconsider
-the boundary. Run the relevant tests and state what remains unverified.
+the boundary. For features, get one complete path working before covering
+edge cases. Run focused checks while editing. Before pushing code, run the
+full relevant suite and any applicable typecheck and build. After review
+changes, rerun affected checks. State what remains unverified.
 
 Before calling code done, review the diff for design quality as well as bugs:
 unnecessary state, duplicated responsibility, invalid states the representation
