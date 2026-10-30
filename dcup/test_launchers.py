@@ -32,12 +32,15 @@ from pathlib import Path
 import sys
 
 command = Path(sys.argv[0]).name
+call = {{
+    "command": command,
+    "argv": sys.argv[1:],
+    "agent": os.environ.get("HERDR_AGENT"),
+}}
+if "litellm" in " ".join(sys.argv):
+    call["stdin"] = sys.stdin.read()
 with open(os.environ["CALL_LOG"], "a") as log:
-    log.write(json.dumps({{
-        "command": command,
-        "argv": sys.argv[1:],
-        "agent": os.environ.get("HERDR_AGENT"),
-    }}) + "\\n")
+    log.write(json.dumps(call) + "\\n")
 if command == "docker" and os.environ.get("EXISTING_CONTAINER"):
     print("container-id")
 """
@@ -140,6 +143,50 @@ if command == "docker" and os.environ.get("EXISTING_CONTAINER"):
         calls, _ = self.run_launcher("dcup", self.workspace)
         self.assertTrue(all(call["command"] == "devcontainer" for call in calls))
         self.assert_install_agents(calls, [])
+
+    def test_dcup_copies_litellm_key_when_present(self):
+        (self.home / ".litellm-key").write_text("sk-test\n")
+        calls, _ = self.run_launcher("dcup", self.workspace)
+        copies = [call for call in calls if "stdin" in call]
+        self.assertEqual([call["stdin"] for call in copies], ["sk-test\n"])
+        self.assertNotIn("sk-test", " ".join(copies[0]["argv"]))
+
+    def test_dcup_without_litellm_key_copies_nothing(self):
+        calls, _ = self.run_launcher("dcup", self.workspace)
+        self.assertFalse(any("litellm" in " ".join(call["argv"]) for call in calls))
+
+    def zsh_env(self, **inherited):
+        env = {k: v for k, v in self.env.items() if not k.startswith("ANTHROPIC_")}
+        env.update(inherited)
+        env["ZDOTDIR"] = str(BIN.parents[2] / "zsh")
+        result = subprocess.run(
+            ["zsh", "-c", 'print -r -- "$ANTHROPIC_BASE_URL|$ANTHROPIC_CUSTOM_HEADERS"'],
+            stdin=subprocess.DEVNULL, capture_output=True, text=True, env=env, timeout=10,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return result.stdout.strip()
+
+    def test_zshenv_routes_claude_through_litellm_with_key(self):
+        (self.home / ".litellm-key").write_text("sk-test\n")
+        self.assertEqual(
+            self.zsh_env(),
+            "https://llm.home.unbeholden.dev|x-litellm-api-key: Bearer sk-test",
+        )
+
+    def test_zshenv_stays_direct_without_key(self):
+        self.assertEqual(self.zsh_env(), "|")
+
+    def test_zshenv_clears_inherited_gateway_after_key_removed(self):
+        self.assertEqual(self.zsh_env(
+            ANTHROPIC_BASE_URL="https://llm.home.unbeholden.dev",
+            ANTHROPIC_CUSTOM_HEADERS="x-litellm-api-key: Bearer sk-test",
+        ), "|")
+
+    def test_zshenv_keeps_unrelated_config_without_key(self):
+        self.assertEqual(self.zsh_env(
+            ANTHROPIC_BASE_URL="https://other.example",
+            ANTHROPIC_CUSTOM_HEADERS="x-other: 1",
+        ), "https://other.example|x-other: 1")
 
     def test_dccodex_preserves_arguments_and_labels_agent(self):
         calls, _ = self.run_launcher(

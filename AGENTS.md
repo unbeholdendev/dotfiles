@@ -116,6 +116,10 @@ at call time. GitHub tokens are owner-scoped: the host keeps
 `~/.github-tokens/<owner>`, and `dcup` scopes the container's credential helper
 to `https://github.com/<owner>`.
 
+`~/.litellm-key` is Claude Code's LiteLLM virtual key, mode 600, written by hand
+on the host. `dcup` copies it into every container, and `.zshenv` routes Claude
+Code through the gateway only where the file exists. Never use the master key.
+
 `~/.groq-token` is `dictate`'s desktop-only key, mode 600, written by hand and
 never put in the store or offered to containers.
 

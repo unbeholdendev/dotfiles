@@ -7,6 +7,14 @@ typeset -U path PATH
 [[ -z ${PI_CODING_AGENT_DIR:-} && -d /pi ]] && export PI_CODING_AGENT_DIR=/pi
 [[ -z ${PI_CODING_AGENT_SESSION_DIR:-} && -d /history ]] && export PI_CODING_AGENT_SESSION_DIR=/history/pi/sessions
 
+if [[ -r ~/.litellm-key ]]; then
+  export ANTHROPIC_BASE_URL=https://llm.home.unbeholden.dev
+  export ANTHROPIC_CUSTOM_HEADERS="x-litellm-api-key: Bearer $(<~/.litellm-key)"
+elif [[ ${ANTHROPIC_BASE_URL:-} == https://llm.home.unbeholden.dev ]]; then
+  # Inherited from a parent shell that still had the key.
+  unset ANTHROPIC_BASE_URL ANTHROPIC_CUSTOM_HEADERS
+fi
+
 # Claude Code exits rather than run as root without this.
 [[ -f /.dockerenv || -f /run/.containerenv ]] && export IS_SANDBOX=1
 
