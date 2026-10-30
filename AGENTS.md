@@ -116,7 +116,7 @@ at call time. GitHub tokens are owner-scoped: the host keeps
 `~/.github-tokens/<owner>`, and `dcup` scopes the container's credential helper
 to `https://github.com/<owner>`.
 
-`~/.litellm-key` is Claude Code's LiteLLM virtual key, mode 600, written by hand
+`~/.litellm-claude-key` is Claude Code's LiteLLM virtual key, mode 600, written by hand
 on the host. `dcup` copies it into every container, and `.zshenv` routes Claude
 Code through the gateway only where the file exists. Never use the master key.
 
