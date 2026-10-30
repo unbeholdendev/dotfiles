@@ -145,7 +145,7 @@ if command == "docker" and os.environ.get("EXISTING_CONTAINER"):
         self.assert_install_agents(calls, [])
 
     def test_dcup_copies_litellm_key_when_present(self):
-        (self.home / ".litellm-key").write_text("sk-test\n")
+        (self.home / ".litellm-claude-key").write_text("sk-test\n")
         calls, _ = self.run_launcher("dcup", self.workspace)
         copies = [call for call in calls if "stdin" in call]
         self.assertEqual([call["stdin"] for call in copies], ["sk-test\n"])
@@ -167,7 +167,7 @@ if command == "docker" and os.environ.get("EXISTING_CONTAINER"):
         return result.stdout.strip()
 
     def test_zshenv_routes_claude_through_litellm_with_key(self):
-        (self.home / ".litellm-key").write_text("sk-test\n")
+        (self.home / ".litellm-claude-key").write_text("sk-test\n")
         self.assertEqual(
             self.zsh_env(),
             "https://llm.home.unbeholden.dev|x-litellm-api-key: Bearer sk-test",
