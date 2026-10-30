@@ -12,23 +12,34 @@ case $profile in
   desktop|server)
     echo "$profile is a home-manager host: run dots" >&2; exit 1 ;;
   *)
-    echo "usage: ${0##*/} container [claude|pi]" >&2; exit 1 ;;
+    echo "usage: ${0##*/} container [claude|pi|codex ...]" >&2; exit 1 ;;
 esac
 
-# dcup passes the agent it asked for; later runs read it back from the file.
-agent=${2:-}
-[[ -z $agent && -f $HOME/.coding-agent ]] && agent=$(<"$HOME/.coding-agent")
-if [[ -z $agent && -t 0 ]]; then
-  PS3='which coding agent for this container? '
-  select agent in claude pi; do [[ -n $agent ]] && break; done
+agents=("${@:2}")
+if (( ${#agents[@]} == 0 )) && [[ -f $HOME/.coding-agent ]]; then
+  read -r -a agents < "$HOME/.coding-agent" || true
 fi
-agent=${agent:-claude}
-case $agent in
-  claude|pi) ;;
-  *) echo "usage: ${0##*/} container [claude|pi]" >&2; exit 1 ;;
-esac
-printf '%s\n' "$agent" > "$HOME/.coding-agent"
-export CONTAINER_AGENT=$agent
+if (( ${#agents[@]} == 0 )) && [[ -t 0 ]]; then
+  while true; do
+    read -r -p 'coding agents (claude pi codex, space-separated) [claude]: ' -a agents || break
+    (( ${#agents[@]} )) || agents=(claude)
+    valid=true
+    for agent in "${agents[@]}"; do
+      case $agent in claude|pi|codex) ;; *) valid=false ;; esac
+    done
+    $valid && break
+    echo 'choose from claude pi codex' >&2
+  done
+fi
+(( ${#agents[@]} )) || agents=(claude)
+for agent in "${agents[@]}"; do
+  case $agent in
+    claude|pi|codex) ;;
+    *) echo "unknown coding agent: $agent" >&2; exit 1 ;;
+  esac
+done
+printf '%s\n' "${agents[*]}" > "$HOME/.coding-agent"
+export CONTAINER_AGENTS="${agents[*]}"
 
 # zsh is the login shell; the rest is what the nix installer needs to run.
 missing=()
@@ -78,62 +89,78 @@ repo=${repo%/.git}
 [[ -e /dotfiles/agents/AGENTS.md ]] && repo=/dotfiles
 printf '%s\n' "$repo" > "$HOME/.dots-path"
 
-sources=(
-  petergyang/no-ai-slop:000650b156983f5159695b441477f4e63b25dc85
-  cloudflare/security-audit-skill:c1c8a8c1471069fb0e188eeaff69b8e8db6564a8
-)
-
-if [[ $agent == claude ]]; then
-  [[ -z ${CLAUDE_CONFIG_DIR:-} && -d /claude ]] && export CLAUDE_CONFIG_DIR=/claude
-  cfg=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
-  mkdir -p "$cfg"
-  ln -sfn "$repo/claude/.claude/settings.json" "$cfg/settings.json"
-  ln -sfn "$repo/agents/AGENTS.md" "$cfg/CLAUDE.md"
-  mkdir -p "$cfg/skills"
-else
-  [[ -z ${PI_CODING_AGENT_DIR:-} && -d /pi ]] && export PI_CODING_AGENT_DIR=/pi
-  cfg=${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}
-  mkdir -p "$cfg/skills"
-  ln -sfn "$repo/agents/AGENTS.md" "$cfg/AGENTS.md"
-  ln -sfn "$repo/pi/.pi/agent/mcp.json" "$cfg/mcp.json"
-  mkdir -p "$cfg/extensions/project-tools"
-  cp pi/.pi/agent/extensions/project-tools/{package.json,index.ts,detect.js} "$cfg/extensions/project-tools/"
-  [[ -f $cfg/extensions/pi-lens.json ]] ||
-    cp pi/.pi/agent/extensions/pi-lens.json "$cfg/extensions/pi-lens.json"
-  # A borrowed runtime: install.sh needs bun once, but no container profile
-  # should carry it. Bun blocks playwright's browser-download postinstall,
-  # which is what we want: Chromium comes from the profile.
-  nix shell nixpkgs#bun -c bun install --cwd "$cfg/extensions/project-tools"
-  # Pi rewrites settings.json, so it is a copy made once, never a link into
-  # the clone: lastChangelogVersion alone would dirty it for every container.
-  [[ -f $cfg/settings.json ]] ||
-    cp "$repo/pi/.pi/agent/settings.json" "$cfg/settings.json"
-  sources+=(
-    mattpocock/skills:5beb35b040e3de97e54fa9e386d7e42d15c295c2
-    pbakaus/impeccable:33003f1013a636e612752a1cad7b82b8bb4c67f2
+for agent in "${agents[@]}"; do
+  sources=(
+    petergyang/no-ai-slop:000650b156983f5159695b441477f4e63b25dc85
+    cloudflare/security-audit-skill:c1c8a8c1471069fb0e188eeaff69b8e8db6564a8
   )
-fi
 
-if [[ -L $cfg/skills/natural-voice &&
-      $(readlink "$cfg/skills/natural-voice") == "$repo/agents/skills/natural-voice" ]]; then
-  rm "$cfg/skills/natural-voice"
-fi
+  if [[ $agent == claude ]]; then
+    [[ -z ${CLAUDE_CONFIG_DIR:-} && -d /claude ]] && export CLAUDE_CONFIG_DIR=/claude
+    cfg=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
+    mkdir -p "$cfg"
+    ln -sfn "$repo/claude/.claude/settings.json" "$cfg/settings.json"
+    ln -sfn "$repo/agents/AGENTS.md" "$cfg/CLAUDE.md"
+    mkdir -p "$cfg/skills"
+  elif [[ $agent == pi ]]; then
+    [[ -z ${PI_CODING_AGENT_DIR:-} && -d /pi ]] && export PI_CODING_AGENT_DIR=/pi
+    cfg=${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}
+    mkdir -p "$cfg/skills"
+    ln -sfn "$repo/agents/AGENTS.md" "$cfg/AGENTS.md"
+    ln -sfn "$repo/pi/.pi/agent/mcp.json" "$cfg/mcp.json"
+    mkdir -p "$cfg/extensions/project-tools"
+    cp pi/.pi/agent/extensions/project-tools/{package.json,index.ts,detect.js} "$cfg/extensions/project-tools/"
+    [[ -f $cfg/extensions/pi-lens.json ]] ||
+      cp pi/.pi/agent/extensions/pi-lens.json "$cfg/extensions/pi-lens.json"
+    # A borrowed runtime: install.sh needs bun once, but no container profile
+    # should carry it. Bun blocks playwright's browser-download postinstall,
+    # which is what we want: Chromium comes from the profile.
+    nix shell nixpkgs#bun -c bun install --cwd "$cfg/extensions/project-tools"
+    # Pi rewrites settings.json, so it is a copy made once, never a link into
+    # the clone: lastChangelogVersion alone would dirty it for every container.
+    [[ -f $cfg/settings.json ]] ||
+      cp "$repo/pi/.pi/agent/settings.json" "$cfg/settings.json"
+    sources+=(
+      mattpocock/skills:5beb35b040e3de97e54fa9e386d7e42d15c295c2
+      pbakaus/impeccable:33003f1013a636e612752a1cad7b82b8bb4c67f2
+    )
+  else
+    [[ -z ${CODEX_HOME:-} && -d /codex ]] && export CODEX_HOME=/codex
+    cfg=${CODEX_HOME:-$HOME/.codex}
+    mkdir -p "$cfg"
+    ln -sfn "$repo/agents/AGENTS.md" "$cfg/AGENTS.md"
+    [[ -f $cfg/config.toml ]] || cp "$repo/codex/.codex/config.toml" "$cfg/config.toml"
+    sources+=(
+      mattpocock/skills:5beb35b040e3de97e54fa9e386d7e42d15c295c2
+      pbakaus/impeccable:33003f1013a636e612752a1cad7b82b8bb4c67f2
+    )
+  fi
 
-for source in "${sources[@]}"; do
-  upstream=${source%:*}
-  revision=${source#*:}
-  checkout=$cfg/third-party/${upstream%/*}
-  [[ -d $checkout/.git ]] || git init -q "$checkout"
-  if [[ $(git -C "$checkout" rev-parse HEAD 2>/dev/null || true) != "$revision" ]]; then
-    git -C "$checkout" fetch --depth=1 "https://github.com/$upstream.git" "$revision"
-    git -C "$checkout" checkout -q --detach "$revision"
+  mkdir -p "$cfg/skills"
+
+  if [[ -L $cfg/skills/natural-voice &&
+        $(readlink "$cfg/skills/natural-voice") == "$repo/agents/skills/natural-voice" ]]; then
+    rm "$cfg/skills/natural-voice"
+  fi
+
+  for source in "${sources[@]}"; do
+    upstream=${source%:*}
+    revision=${source#*:}
+    checkout=$cfg/third-party/${upstream%/*}
+    [[ -d $checkout/.git ]] || git init -q "$checkout"
+    if [[ $(git -C "$checkout" rev-parse HEAD 2>/dev/null || true) != "$revision" ]]; then
+      git -C "$checkout" fetch --depth=1 "https://github.com/$upstream.git" "$revision"
+      git -C "$checkout" checkout -q --detach "$revision"
+    fi
+  done
+  ln -sfn "$cfg/third-party/petergyang/skills/no-ai-slop" "$cfg/skills/no-ai-slop"
+  ln -sfn "$cfg/third-party/cloudflare/skills/security-audit" "$cfg/skills/security-audit"
+
+  if [[ $agent == pi || $agent == codex ]]; then
+    impeccable=.pi
+    [[ $agent == codex ]] && impeccable=.agents
+    ln -sfn "$cfg/third-party/mattpocock/skills/engineering" "$cfg/skills/mattpocock-engineering"
+    ln -sfn "$cfg/third-party/mattpocock/skills/productivity" "$cfg/skills/mattpocock-productivity"
+    ln -sfn "$cfg/third-party/pbakaus/$impeccable/skills/impeccable" "$cfg/skills/impeccable"
   fi
 done
-ln -sfn "$cfg/third-party/petergyang/skills/no-ai-slop" "$cfg/skills/no-ai-slop"
-ln -sfn "$cfg/third-party/cloudflare/skills/security-audit" "$cfg/skills/security-audit"
-
-if [[ $agent == pi ]]; then
-  ln -sfn "$cfg/third-party/mattpocock/skills/engineering" "$cfg/skills/mattpocock-engineering"
-  ln -sfn "$cfg/third-party/mattpocock/skills/productivity" "$cfg/skills/mattpocock-productivity"
-  ln -sfn "$cfg/third-party/pbakaus/.pi/skills/impeccable" "$cfg/skills/impeccable"
-fi

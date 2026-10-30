@@ -15,12 +15,22 @@ resolved=$(readlink -f "$folder")
 
 # A container that exists already holds the token and agent it was built with.
 forge=
-agent=
+agents=()
 if [[ -t 0 ]] &&
   ! docker ps -aq --filter "label=devcontainer.local_folder=$resolved" | grep -q .
 then
-  PS3='which coding agent for this container? '
-  select agent in claude pi; do [[ -n $agent ]] && break; done
+  while true; do
+    read -r -a agents -p 'which coding agents (claude pi codex, space-separated) [claude]? '
+    ((${#agents[@]})) || agents=(claude)
+    valid=true
+    for agent in "${agents[@]}"; do
+      case $agent in
+        claude|pi|codex) ;;
+        *) echo "unknown coding agent: $agent" >&2; valid=false ;;
+      esac
+    done
+    $valid && break
+  done
 
   PS3='which token for this container? '
   select forge in none forgejo github; do [[ -n $forge ]] && break; done
@@ -58,11 +68,12 @@ devcontainer up --workspace-folder "$folder" --no-lockfile \
   --mount "type=bind,source=$state,target=/history" \
   --mount "type=volume,source=claude-state,target=/claude" \
   --mount "type=volume,source=pi-state,target=/pi" \
+  --mount "type=volume,source=codex-state,target=/codex" \
   "${@:2}"
 
 # No agent when the container pre-existed: install.sh reads ~/.coding-agent.
 devcontainer exec --workspace-folder "$folder" \
-  /dotfiles/install.sh container ${agent:+"$agent"}
+  /dotfiles/install.sh container "${agents[@]}"
 
 # A copy, because `--mount` cannot express a read-only bind.
 case $forge in
