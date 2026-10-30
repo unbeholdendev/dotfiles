@@ -2,6 +2,7 @@ typeset -U path PATH
 
 [[ -z ${DOTFILES:-} && -r ~/.dots-path ]] && export DOTFILES=$(<~/.dots-path)
 
+[[ -z ${CODEX_HOME:-} && -d /codex ]] && export CODEX_HOME=/codex
 [[ -z ${CLAUDE_CONFIG_DIR:-} && -d /claude ]] && export CLAUDE_CONFIG_DIR=/claude
 [[ -z ${PI_CODING_AGENT_DIR:-} && -d /pi ]] && export PI_CODING_AGENT_DIR=/pi
 [[ -z ${PI_CODING_AGENT_SESSION_DIR:-} && -d /history ]] && export PI_CODING_AGENT_SESSION_DIR=/history/pi/sessions

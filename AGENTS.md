@@ -22,7 +22,8 @@ and Pi. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
   supplied by another project's `devcontainer.json`. Detect optional shared
   mounts by directory existence and preserve the fallback when absent.
 - Container builds need `--impure`, `HOME_USER`, and `HOME`; the image chooses
-  the user. Use `install.sh` to supply these and the selected `CONTAINER_AGENT`.
+  the user. Use `install.sh` to supply these and `CONTAINER_AGENTS`, a
+  space-separated list.
 - `install.sh` builds from its own directory, including when run in a worktree.
   Agent links and the settings seed instead use the main clone, preferring
   `/dotfiles`. Keep shared-volume links and `~/.dots-path` pointed there:
@@ -56,11 +57,15 @@ and Pi. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
   `/history/pi` when the workspace state directory exists.
 
 
-- `dcup` selects the container's agent. `install.sh` uses an explicit argument,
-  then `~/.coding-agent`, then a terminal prompt, defaulting to Claude without
-  a terminal. It records the choice for later runs.
-- `/claude` and `/pi` are shared across containers. Respect explicit
-  `CLAUDE_CONFIG_DIR` and `PI_CODING_AGENT_DIR` overrides.
+- `dcup` selects one or more agents. `install.sh container claude pi codex`
+  installs all three. Without agent arguments it reads `~/.coding-agent`,
+  then prompts in a terminal, defaulting to Claude without one. Keep the
+  saved list compatible with existing single-agent files.
+- `/claude`, `/pi` and `/codex` are shared across containers. Respect explicit
+  `CLAUDE_CONFIG_DIR`, `PI_CODING_AGENT_DIR` and `CODEX_HOME` overrides.
+- Codex's writable config seeds once with no approvals or inner sandbox and
+  the Forgejo MCP server. Keep these defaults container-only. Its skills go in
+  `CODEX_HOME/skills`, linked to checkouts under `CODEX_HOME/third-party`.
 - With `/history` mounted, `.zshenv` sets `PI_CODING_AGENT_SESSION_DIR` to
   `/history/pi/sessions` unless explicitly overridden. `dcup` mounts a distinct
   host state directory per workspace there, so sessions survive rebuilds without
@@ -96,7 +101,8 @@ and Pi. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
 both. Never print or commit tokens, put them in remote URLs, or pass them in
 argv. Read them at call time from their files.
 
-Pi's Forgejo MCP config is linked from `pi/.pi/agent/mcp.json`. Claude needs
+Pi's Forgejo MCP config is linked from `pi/.pi/agent/mcp.json`; Codex's is
+seeded in `codex/.codex/config.toml`. Claude needs
 one user-scope registration per fresh `/claude` volume:
 
 ```
@@ -125,6 +131,8 @@ Choose checks for the files changed. Documentation-only edits need review and
   nix eval .#nixosConfigurations.t14.config.system.build.toplevel.drvPath
   ```
 
+- For launcher or installer changes, run
+  `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest test_install.py dcup/test_launchers.py`.
 - For installer or container home configuration changes, run
   `./install.sh container` twice and check both runs succeed. This activates the
   worktree's Nix configuration in the running container; it is not a dry run.
