@@ -75,12 +75,6 @@ devcontainer up --workspace-folder "$folder" --no-lockfile \
 devcontainer exec --workspace-folder "$folder" \
   /dotfiles/install.sh container "${agents[@]}"
 
-# A copy, because `--mount` cannot express a read-only bind.
-if [[ -f ~/.litellm-claude-key ]]; then
-  devcontainer exec --workspace-folder "$folder" \
-    sh -c 'umask 077; cat > "$HOME/.litellm-claude-key"' < ~/.litellm-claude-key
-fi
-
 case $forge in
   forgejo)
     devcontainer exec --workspace-folder "$folder" \
