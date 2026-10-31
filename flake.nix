@@ -9,12 +9,10 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # No follows: pi pins the nixpkgs its release was built against.
-    pi.url = "github:earendil-works/pi/stable";
     hermes.url = "github:NousResearch/hermes-agent";
   };
 
-  outputs = { nixpkgs, home-manager, disko, pi, hermes, ... }:
+  outputs = { nixpkgs, home-manager, disko, hermes, ... }:
     let
       system = "x86_64-linux";
 
@@ -49,10 +47,7 @@
       homeConfigurations = nixpkgs.lib.mapAttrs host hosts // {
         container = home-manager.lib.homeManagerConfiguration {
           pkgs = containerPkgs;
-          extraSpecialArgs = {
-            dotfiles = null;
-            inherit pi;
-          };
+          extraSpecialArgs.dotfiles = null;
           modules = [ ./home/container.nix ];
         };
       };
