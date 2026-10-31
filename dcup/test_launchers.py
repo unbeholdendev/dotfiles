@@ -90,57 +90,43 @@ if command == "docker" and os.environ.get("EXISTING_CONTAINER"):
         calls = [json.loads(line) for line in self.log.read_text().splitlines()]
         return calls, output.decode()
 
-    def assert_install_agents(self, calls, agents):
+    def assert_install(self, calls):
         devcontainer = [call["argv"] for call in calls if call["command"] == "devcontainer"]
         self.assertEqual(len(devcontainer), 2)
         self.assertEqual(devcontainer[1], [
             "exec", "--workspace-folder", str(self.workspace),
-            "/dotfiles/install.sh", "container", *agents,
+            "/dotfiles/install.sh", "container",
         ])
         mounts = [arg for arg in devcontainer[0] if arg.startswith("type=volume,")]
         self.assertEqual(mounts, [
             "type=volume,source=nix-store,target=/nix",
             "type=volume,source=claude-state,target=/claude",
-            "type=volume,source=pi-state,target=/pi",
             "type=volume,source=codex-state,target=/codex",
         ])
 
-    def test_dcup_new_container_passes_each_selected_agent(self):
-        calls, _ = self.run_launcher(
-            "dcup", self.workspace, "--log-level", "debug",
-            answers="claude pi codex\n1\n",
+    def test_dcup_new_container_asks_only_for_token(self):
+        calls, output = self.run_launcher(
+            "dcup", self.workspace, "--log-level", "debug", answers="1\n",
         )
-        self.assert_install_agents(calls, ["claude", "pi", "codex"])
+        self.assertNotIn("coding agent", output)
+        self.assertIn("which token", output)
+        self.assert_install(calls)
         self.assertEqual(calls[0]["argv"], [
             "ps", "-aq", "--filter",
             f"label=devcontainer.local_folder={self.workspace}",
         ])
         self.assertEqual(calls[1]["argv"][-2:], ["--log-level", "debug"])
 
-    def test_dcup_retries_unknown_selection_without_passing_partial_choice(self):
-        calls, output = self.run_launcher(
-            "dcup", self.workspace, answers="pi unknown\ncodex\n1\n",
-        )
-        self.assertIn("unknown coding agent: unknown", output)
-        self.assertEqual(output.count("which coding agents"), 2)
-        self.assert_install_agents(calls, ["codex"])
-
-    def test_dcup_empty_selection_uses_offered_claude_default(self):
-        calls, output = self.run_launcher("dcup", self.workspace, answers="\n1\n")
-        self.assertIn("[claude]", output)
-        self.assert_install_agents(calls, ["claude"])
-
-    def test_dcup_existing_container_does_not_override_saved_agents(self):
+    def test_dcup_existing_container_does_not_ask(self):
         self.env["EXISTING_CONTAINER"] = "1"
         calls, output = self.run_launcher("dcup", self.workspace, answers="")
-        self.assertNotIn("which coding agents", output)
         self.assertNotIn("which token", output)
-        self.assert_install_agents(calls, [])
+        self.assert_install(calls)
 
-    def test_dcup_without_terminal_leaves_selection_to_installer(self):
+    def test_dcup_without_terminal_does_not_ask(self):
         calls, _ = self.run_launcher("dcup", self.workspace)
         self.assertTrue(all(call["command"] == "devcontainer" for call in calls))
-        self.assert_install_agents(calls, [])
+        self.assert_install(calls)
 
     def test_dccodex_preserves_arguments_and_labels_agent(self):
         calls, _ = self.run_launcher(

@@ -12,34 +12,8 @@ case $profile in
   desktop|server)
     echo "$profile is a home-manager host: run dots" >&2; exit 1 ;;
   *)
-    echo "usage: ${0##*/} container [claude|pi|codex ...]" >&2; exit 1 ;;
+    echo "usage: ${0##*/} container" >&2; exit 1 ;;
 esac
-
-agents=("${@:2}")
-if (( ${#agents[@]} == 0 )) && [[ -f $HOME/.coding-agent ]]; then
-  read -r -a agents < "$HOME/.coding-agent" || true
-fi
-if (( ${#agents[@]} == 0 )) && [[ -t 0 ]]; then
-  while true; do
-    read -r -p 'coding agents (claude pi codex, space-separated) [claude]: ' -a agents || break
-    (( ${#agents[@]} )) || agents=(claude)
-    valid=true
-    for agent in "${agents[@]}"; do
-      case $agent in claude|pi|codex) ;; *) valid=false ;; esac
-    done
-    $valid && break
-    echo 'choose from claude pi codex' >&2
-  done
-fi
-(( ${#agents[@]} )) || agents=(claude)
-for agent in "${agents[@]}"; do
-  case $agent in
-    claude|pi|codex) ;;
-    *) echo "unknown coding agent: $agent" >&2; exit 1 ;;
-  esac
-done
-printf '%s\n' "${agents[*]}" > "$HOME/.coding-agent"
-export CONTAINER_AGENTS="${agents[*]}"
 
 # zsh is the login shell; the rest is what the nix installer needs to run.
 missing=()
@@ -89,7 +63,7 @@ repo=${repo%/.git}
 [[ -e /dotfiles/agents/AGENTS.md ]] && repo=/dotfiles
 printf '%s\n' "$repo" > "$HOME/.dots-path"
 
-for agent in "${agents[@]}"; do
+for agent in claude codex; do
   sources=(
     petergyang/no-ai-slop:000650b156983f5159695b441477f4e63b25dc85
     cloudflare/security-audit-skill:c1c8a8c1471069fb0e188eeaff69b8e8db6564a8
@@ -102,28 +76,6 @@ for agent in "${agents[@]}"; do
     ln -sfn "$repo/claude/.claude/settings.json" "$cfg/settings.json"
     ln -sfn "$repo/agents/AGENTS.md" "$cfg/CLAUDE.md"
     mkdir -p "$cfg/skills"
-  elif [[ $agent == pi ]]; then
-    [[ -z ${PI_CODING_AGENT_DIR:-} && -d /pi ]] && export PI_CODING_AGENT_DIR=/pi
-    cfg=${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}
-    mkdir -p "$cfg/skills"
-    ln -sfn "$repo/agents/AGENTS.md" "$cfg/AGENTS.md"
-    ln -sfn "$repo/pi/.pi/agent/mcp.json" "$cfg/mcp.json"
-    mkdir -p "$cfg/extensions/project-tools"
-    cp pi/.pi/agent/extensions/project-tools/{package.json,index.ts,detect.js} "$cfg/extensions/project-tools/"
-    [[ -f $cfg/extensions/pi-lens.json ]] ||
-      cp pi/.pi/agent/extensions/pi-lens.json "$cfg/extensions/pi-lens.json"
-    # A borrowed runtime: install.sh needs bun once, but no container profile
-    # should carry it. Bun blocks playwright's browser-download postinstall,
-    # which is what we want: Chromium comes from the profile.
-    nix shell nixpkgs#bun -c bun install --cwd "$cfg/extensions/project-tools"
-    # Pi rewrites settings.json, so it is a copy made once, never a link into
-    # the clone: lastChangelogVersion alone would dirty it for every container.
-    [[ -f $cfg/settings.json ]] ||
-      cp "$repo/pi/.pi/agent/settings.json" "$cfg/settings.json"
-    sources+=(
-      mattpocock/skills:5beb35b040e3de97e54fa9e386d7e42d15c295c2
-      pbakaus/impeccable:33003f1013a636e612752a1cad7b82b8bb4c67f2
-    )
   else
     [[ -z ${CODEX_HOME:-} && -d /codex ]] && export CODEX_HOME=/codex
     cfg=${CODEX_HOME:-$HOME/.codex}
@@ -156,11 +108,9 @@ for agent in "${agents[@]}"; do
   ln -sfn "$cfg/third-party/petergyang/skills/no-ai-slop" "$cfg/skills/no-ai-slop"
   ln -sfn "$cfg/third-party/cloudflare/skills/security-audit" "$cfg/skills/security-audit"
 
-  if [[ $agent == pi || $agent == codex ]]; then
-    impeccable=.pi
-    [[ $agent == codex ]] && impeccable=.agents
+  if [[ $agent == codex ]]; then
     ln -sfn "$cfg/third-party/mattpocock/skills/engineering" "$cfg/skills/mattpocock-engineering"
     ln -sfn "$cfg/third-party/mattpocock/skills/productivity" "$cfg/skills/mattpocock-productivity"
-    ln -sfn "$cfg/third-party/pbakaus/$impeccable/skills/impeccable" "$cfg/skills/impeccable"
+    ln -sfn "$cfg/third-party/pbakaus/.agents/skills/impeccable" "$cfg/skills/impeccable"
   fi
 done

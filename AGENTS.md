@@ -6,7 +6,7 @@ configuration runs here; there is no Wayland session.
 
 Program directories mirror paths under `$HOME`; modules in `home/` install
 them. Nothing uses stow. `agents/` holds the prompt and skills shared by Claude
-and Pi. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
+and Codex. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
 
 ## Nix and installation
 
@@ -22,8 +22,7 @@ and Pi. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
   supplied by another project's `devcontainer.json`. Detect optional shared
   mounts by directory existence and preserve the fallback when absent.
 - Container builds need `--impure`, `HOME_USER`, and `HOME`; the image chooses
-  the user. Use `install.sh` to supply these and `CONTAINER_AGENTS`, a
-  space-separated list.
+  the user. Use `install.sh` to supply these.
 - `install.sh` builds from its own directory, including when run in a worktree.
   Agent links and the settings seed instead use the main clone, preferring
   `/dotfiles`. Keep shared-volume links and `~/.dots-path` pointed there:
@@ -41,43 +40,14 @@ and Pi. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
 
 ## Shared agent state
 
-- Pi containers install `pi/.pi/agent/extensions/project-tools` in the shared
-  agent directory. The extension detects projects from their manifests and
-  declared npm/pnpm workspaces, then loads Pi Lens for TypeScript projects
-  and a Playwright MCP server for projects with a Playwright dependency.
-  Detection reads files only; there is no manual choice or override.
-- Pi Lens runs without formatting, autofix, test, and security mutations;
-  diagnostics and navigation remain on. Its config seeds once at
-  `$PI_CODING_AGENT_DIR/extensions/pi-lens.json`. The container profile
-  provides `typescript-language-server` and `chromium`; `install.sh` installs
-  the extension's pinned npm dependencies under a borrowed bun runtime, so
-  no package-manager runtime enters the profile. Bun blocks playwright's
-  browser-download postinstall, which is intended: Chromium comes from the
-  profile. Playwright stores its output under
-  `/history/pi` when the workspace state directory exists.
-
-
-- `dcup` selects one or more agents. `install.sh container claude pi codex`
-  installs all three. Without agent arguments it reads `~/.coding-agent`,
-  then prompts in a terminal, defaulting to Claude without one. Keep the
-  saved list compatible with existing single-agent files.
-- `/claude`, `/pi` and `/codex` are shared across containers. Respect explicit
-  `CLAUDE_CONFIG_DIR`, `PI_CODING_AGENT_DIR` and `CODEX_HOME` overrides.
+- Every container installs Claude and Codex; there is no selection.
+- `/claude` and `/codex` are shared across containers. Respect explicit
+  `CLAUDE_CONFIG_DIR` and `CODEX_HOME` overrides.
 - Codex's writable config seeds once with no approvals or inner sandbox and
   the Forgejo MCP server. Keep these defaults container-only. Its skills go in
   `CODEX_HOME/skills`, linked to checkouts under `CODEX_HOME/third-party`.
-- With `/history` mounted, `.zshenv` sets `PI_CODING_AGENT_SESSION_DIR` to
-  `/history/pi/sessions` unless explicitly overridden. `dcup` mounts a distinct
-  host state directory per workspace there, so sessions survive rebuilds without
-  crossing workspaces. Existing sessions in `/pi/sessions` are not moved.
-- Pi's auth, settings, extensions, packages, and prompts live in its shared
-  agent directory. `install.sh` copies repo settings only when `settings.json`
-  is absent. Changing the seed does not update an existing volume. Keep it a
-  copy: Pi rewrites settings, so a symlink would dirty the shared clone.
-- Keep local package paths under `/pi` or `/dotfiles` so every container can
-  resolve them.
 - Keep pinned third-party skill checkouts under `third-party/`, outside
-  `skills/`. Link only the intended skill groups so Pi does not discover other
+  `skills/`. Link only the intended skill groups so agents do not discover other
   providers' or unfinished skills.
 
 ## Desktop
@@ -101,9 +71,8 @@ and Pi. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
 both. Never print or commit tokens, put them in remote URLs, or pass them in
 argv. Read them at call time from their files.
 
-Pi's Forgejo MCP config is linked from `pi/.pi/agent/mcp.json`; Codex's is
-seeded in `codex/.codex/config.toml`. Claude needs
-one user-scope registration per fresh `/claude` volume:
+Codex's Forgejo MCP config is seeded in `codex/.codex/config.toml`. Claude
+needs one user-scope registration per fresh `/claude` volume:
 
 ```
 claude mcp add --scope user forgejo -- \
@@ -111,8 +80,7 @@ claude mcp add --scope user forgejo -- \
     exec forgejo-mcp --transport stdio --url https://git.home.unbeholden.dev'
 ```
 
-Use `FORGEJO_ACCESS_TOKEN`, not `--token`; Pi's `"!cat"` env form also reads it
-at call time. GitHub tokens are owner-scoped: the host keeps
+Use `FORGEJO_ACCESS_TOKEN`, not `--token`. GitHub tokens are owner-scoped: the host keeps
 `~/.github-tokens/<owner>`, and `dcup` scopes the container's credential helper
 to `https://github.com/<owner>`.
 
@@ -136,10 +104,6 @@ Choose checks for the files changed. Documentation-only edits need review and
 - For installer or container home configuration changes, run
   `./install.sh container` twice and check both runs succeed. This activates the
   worktree's Nix configuration in the running container; it is not a dry run.
-- For project-tools changes, run the committed detection tests with
-  `node --test pi/.pi/agent/extensions/project-tools/detect.test.js` and
-  reinstall the extension with `./install.sh container pi`. Real Pi Lens and
-  Playwright behavior needs a project fixture, not this repository.
 - For agent setup changes, test each affected agent explicitly. Check fresh
   settings seeding and preservation of existing settings. Agent resources come
   from the main clone even during a worktree install, so an install alone does
