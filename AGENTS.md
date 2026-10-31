@@ -5,7 +5,7 @@ Desktop configuration is edited here but runs on the laptops. Container
 configuration runs here; there is no Wayland session.
 
 Program directories mirror paths under `$HOME`; modules in `home/` install
-them. Nothing uses stow. `agents/` holds the prompt and skills shared by Claude
+them. `agents/` holds the prompt shared by Claude
 and Codex. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
 
 ## Nix and installation

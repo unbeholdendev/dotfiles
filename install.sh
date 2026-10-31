@@ -9,8 +9,6 @@ fi
 
 case $profile in
   container) ;;
-  desktop|server)
-    echo "$profile is a home-manager host: run dots" >&2; exit 1 ;;
   *)
     echo "usage: ${0##*/} container" >&2; exit 1 ;;
 esac
@@ -75,7 +73,6 @@ for agent in claude codex; do
     mkdir -p "$cfg"
     ln -sfn "$repo/claude/.claude/settings.json" "$cfg/settings.json"
     ln -sfn "$repo/agents/AGENTS.md" "$cfg/CLAUDE.md"
-    mkdir -p "$cfg/skills"
   else
     [[ -z ${CODEX_HOME:-} && -d /codex ]] && export CODEX_HOME=/codex
     cfg=${CODEX_HOME:-$HOME/.codex}
@@ -89,11 +86,6 @@ for agent in claude codex; do
   fi
 
   mkdir -p "$cfg/skills"
-
-  if [[ -L $cfg/skills/natural-voice &&
-        $(readlink "$cfg/skills/natural-voice") == "$repo/agents/skills/natural-voice" ]]; then
-    rm "$cfg/skills/natural-voice"
-  fi
 
   for source in "${sources[@]}"; do
     upstream=${source%:*}
