@@ -1,6 +1,6 @@
 { pkgs, ... }:
 let
-  prompt = "niri, noctalia, nixpkgs, NixOS, home-manager, disko, forgejo, yazi, foot, zsh.";
+  prompt = "niri, noctalia, nixpkgs, NixOS, home-manager, disko, Forgejo, Claude, yazi, foot, zsh.";
 
   dictate = pkgs.writeShellApplication {
     name = "dictate";
@@ -29,13 +29,15 @@ let
         exit 0
       fi
 
+      terms=$(cat "$HOME/.dictate-terms" 2>/dev/null || true)
+
       text=$(curl -sS --fail-with-body \
         https://api.groq.com/openai/v1/audio/transcriptions \
         -H "Authorization: Bearer $(cat "$HOME/.groq-token")" \
         -F model=whisper-large-v3-turbo \
         -F response_format=text \
         -F language=en \
-        -F prompt=${pkgs.lib.escapeShellArg prompt} \
+        --form-string prompt=${pkgs.lib.escapeShellArg prompt}" $terms" \
         -F file=@"$clip" | tee "$log") || text=
 
       rm -f "$clip"

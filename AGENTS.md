@@ -92,6 +92,14 @@ to `https://github.com/<owner>`.
 `~/.groq-token` is `dictate`'s desktop-only key, mode 600, written by hand and
 never put in the store or offered to containers.
 
+## Public mirror
+
+Main is mirrored to a public GitHub repo, and force-pushes cannot reliably
+remove anything from it. Commits, including messages and trailers, must not
+hold private hosts, public IPs, employer or client names, or private emails.
+SSH hosts belong in `~/.ssh/config.local` and private `dictate` vocabulary in
+`~/.dictate-terms`; both are untracked and written by hand.
+
 ## Testing
 
 Choose checks for the files changed. Documentation-only edits need review and

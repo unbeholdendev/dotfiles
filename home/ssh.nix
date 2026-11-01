@@ -12,14 +12,11 @@ in
     # The file this replaces has no `Host *` block.
     enableDefaultConfig = false;
 
-    settings = builtins.mapAttrs (_: block: identity // block) {
-      "git.home.unbeholden.dev" = { User = "git"; Port = 222; };
+    includes = [ "config.local" ];
 
+    settings = {
+      "git.home.unbeholden.dev" = identity // { User = "git"; Port = 222; };
 
-
-
-    }
-    // {
       "*" = {
         ServerAliveInterval = 15;
         ServerAliveCountMax = 3;
