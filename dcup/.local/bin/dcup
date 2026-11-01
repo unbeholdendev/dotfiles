@@ -73,10 +73,11 @@ while read -r _ url; do
 done < <(git -C "$folder" config --local --get-regexp '^remote\..*\.url$' 2>/dev/null || true)
 
 # The CLI's --mount rejects readonly. --no-hardlinks, or root in the container
-# could write through to the host clone's objects.
+# could write through to the host clone's objects. Outside $state, which the
+# container can write: it could swap the clone for a link to the host clone.
 if [[ -n $foreign ]]; then
-  [[ -d $state/dotfiles ]] || git clone -q --no-hardlinks "$dotfiles" "$state/dotfiles"
-  dotfiles=$state/dotfiles
+  [[ -d $state.dotfiles ]] || git clone -q --no-hardlinks "$dotfiles" "$state.dotfiles"
+  dotfiles=$state.dotfiles
 fi
 
 # installOhMyZshConfig writes a ~/.zshrc, which home-manager then refuses to
