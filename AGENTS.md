@@ -51,6 +51,13 @@ and Codex. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
   its libraries with the distro's package manager, where a failure must not stop
   the install, and it runs unsandboxed as root: use it only for the workspace's
   own dev servers.
+- With no config in the workspace, `dcup` writes `.devcontainer.json` and hides
+  it in `.git/info/exclude`.
+- `dcup` gives a repo with any remote outside Forgejo or `~/.github-tokens` its
+  own clone of the dotfiles at `/dotfiles`: `--mount` cannot be read-only. It
+  sits beside the workspace's state, never inside: `/history` could swap it for
+  a link to the host clone. It is made once; delete it to refresh. Never run git
+  on the host inside it, as the container can write its hooks and config.
 - `/claude` and `/codex` are shared across containers. Respect explicit
   `CLAUDE_CONFIG_DIR` and `CODEX_HOME` overrides.
 - Codex's writable config seeds once with no approvals or inner sandbox. Keep
