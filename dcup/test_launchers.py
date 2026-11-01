@@ -126,7 +126,7 @@ if command == "qrencode":
 
     def test_dcup_new_container_asks_only_for_token(self):
         calls, output = self.run_launcher(
-            "dcup", self.workspace, "--log-level", "debug", answers="1\n",
+            "dcup", self.workspace, "--log-level", "debug", answers="1\nn\n",
         )
         self.assertNotIn("coding agent", output)
         self.assertIn("which token", output)
@@ -139,7 +139,7 @@ if command == "qrencode":
 
     def test_dcup_existing_container_does_not_ask(self):
         self.env["EXISTING_CONTAINER"] = "1"
-        calls, output = self.run_launcher("dcup", self.workspace, answers="")
+        calls, output = self.run_launcher("dcup", self.workspace, answers="n\n")
         self.assertNotIn("which token", output)
         self.assert_install(calls)
 
@@ -260,6 +260,40 @@ if command == "qrencode":
         )
         self.assertIn("t3 start --no-browser", commands)
         self.assertNotIn("t3 serve", commands)
+
+    def dcup_exec_calls(self, answers):
+        self.log.unlink(missing_ok=True)
+        calls, _ = self.run_launcher("dcup", self.workspace, answers=answers)
+        return [call["argv"] for call in calls if call["command"] == "devcontainer"][1:3]
+
+    def test_dcup_enables_the_browser_only_when_asked_and_remembers(self):
+        self.env["EXISTING_CONTAINER"] = "1"
+        for argv in self.dcup_exec_calls("y\n"):
+            self.assertEqual(argv[3:5], ["--remote-env", "T3_BROWSER=1"])
+        for argv in self.dcup_exec_calls(""):
+            self.assertEqual(argv[3:5], ["--remote-env", "T3_BROWSER=1"])
+
+    def test_dcup_leaves_the_browser_off_when_declined_and_remembers(self):
+        self.env["EXISTING_CONTAINER"] = "1"
+        for answers in ("n\n", ""):
+            for argv in self.dcup_exec_calls(answers):
+                self.assertNotIn("--remote-env", argv)
+
+    def test_dcup_does_not_ask_about_the_browser_without_a_terminal(self):
+        calls, output = self.run_launcher("dcup", self.workspace)
+        self.assertNotIn("T3 browser", output)
+        self.assertFalse(any("--remote-env" in call["argv"] for call in calls))
+
+    def test_dcup_disables_the_browser_sandbox_only_when_enabled_and_root(self):
+        calls, _ = self.run_launcher("dcup", self.workspace)
+        script = next(
+            call["argv"][-1] for call in calls
+            if call["command"] == "devcontainer" and "t3 start" in " ".join(call["argv"])
+        )
+        self.assertIn(
+            "[[ -n $T3_BROWSER ]] && export T3CODE_SERVER_BROWSER_SANDBOX=$((EUID != 0))",
+            script,
+        )
 
     def test_dccodex_preserves_arguments_and_labels_agent(self):
         calls, _ = self.run_launcher(

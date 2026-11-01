@@ -20,14 +20,50 @@ command -v zsh  >/dev/null || missing+=(zsh)
 command -v curl >/dev/null || missing+=(curl)
 command -v xz   >/dev/null || missing+=(xz)
 
+sudo=; [[ $EUID == 0 ]] || sudo=sudo
+
 if (( ${#missing[@]} )); then
-  sudo=; [[ $EUID == 0 ]] || sudo=sudo
   if   command -v apt-get >/dev/null; then
     $sudo apt-get update
     $sudo apt-get install -y "${missing[@]/#xz/xz-utils}"
   elif command -v dnf >/dev/null; then $sudo dnf install -y "${missing[@]}"
   elif command -v apk >/dev/null; then $sudo apk add "${missing[@]}"
   else echo "cannot install ${missing[*]}: no known package manager" >&2; exit 1
+  fi
+fi
+
+# dcup sets T3_BROWSER when asked. It is a prebuilt Chrome: it cannot load
+# libraries from the nix store.
+# Agents work without it, so a failure here must not stop the install.
+t64() {
+  local policy
+  policy=$(apt-cache policy "$1t64" 2>/dev/null) || true
+  if [[ $policy == *Candidate:* && $policy != *"Candidate: (none)"* ]]; then echo "$1t64"; else echo "$1"; fi
+}
+
+loaded=$(PATH=$PATH:/sbin ldconfig -p 2>/dev/null) || true
+browser_ready=$(fc-match --format='%{file}' sans-serif 2>/dev/null) || true
+for lib in libnspr4.so libnss3.so libnssutil3.so libglib-2.0.so.0 libatk-1.0.so.0 \
+  libatk-bridge-2.0.so.0 libatspi.so.0 libdbus-1.so.3 libX11.so.6 libxcb.so.1 \
+  libXcomposite.so.1 libXdamage.so.1 libXext.so.6 libXfixes.so.3 libXrandr.so.2 \
+  libxkbcommon.so.0 libgbm.so.1 libasound.so.2 libexpat.so.1; do
+  [[ $loaded == *"$lib"* ]] || browser_ready=
+done
+
+if [[ -n ${T3_BROWSER:-} && -z $browser_ready ]]; then
+  if command -v apt-get >/dev/null; then
+    { $sudo apt-get update && $sudo apt-get install -y --no-install-recommends \
+      libnss3 libdbus-1-3 libx11-6 libxcb1 libxcomposite1 libxdamage1 libxext6 \
+      libxfixes3 libxrandr2 libxkbcommon0 libgbm1 libexpat1 fontconfig fonts-liberation \
+      "$(t64 libglib2.0-0)" "$(t64 libatk1.0-0)" "$(t64 libatk-bridge2.0-0)" \
+      "$(t64 libatspi2.0-0)" "$(t64 libasound2)"; } ||
+      echo "T3's browser libraries did not install" >&2
+  elif command -v dnf >/dev/null; then
+    $sudo dnf install -y --setopt=install_weak_deps=False \
+      nspr nss nss-util glib2 atk at-spi2-atk at-spi2-core dbus-libs \
+      libX11 libxcb libXcomposite libXdamage libXext libXfixes libXrandr \
+      libxkbcommon mesa-libgbm alsa-lib expat fontconfig dejavu-sans-fonts ||
+      echo "T3's browser libraries did not install" >&2
   fi
 fi
 
