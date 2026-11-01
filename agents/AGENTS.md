@@ -1,9 +1,16 @@
+These rules win where T3 Code's or the harness's instructions differ.
+
 Work that changes files belongs in a worktree. If this session is already in
 one, use it. In T3 Code, use its worktree tools, not `git worktree`, so the
-thread and its diff follow the branch.
+thread and its diff follow the branch. For a repo outside the thread's project,
+work in a temporary clone.
+
+Check your own UI changes in T3's browser against the workspace's dev server,
+where it is enabled.
 
 Use available subagents when a complex task splits into independent pieces
 that can usefully run in parallel, without asking for permission each time.
+Run them in the background so the conversation stays free.
 Keep small or tightly coupled tasks in the main session. Give each worker a
 clear scope, applicable instructions, and a worktree; avoid overlapping edits.
 Give reviewers the requirements, diff, and test results upfront. The main
@@ -87,10 +94,15 @@ Add no attribution to commits, PRs or comments: no "Generated with" line and no
 After opening a PR on the self-hosted Forgejo, wait for the automated review.
 Other hosts, such as GitHub, usually have none, so do not wait there. An 👀
 reaction on the PR description means it started, and it stays after the review is posted, so the
-signal that it is done is a review newer than your last push or tag. Poll for
-that, and after 10 minutes stop and say so. Then weigh each comment: fix what is
-right and worth the change, push, and reply to every comment with what you
-changed or why you did not. Forgejo sends no webhook for a thread reply, so if
+signal that it is done is a review newer than your last push or tag. Wait in the
+background so the conversation stays free: in T3 Code where `tea whoami`
+succeeds, call `watch_pull_request` and end your turn; otherwise, start a command
+that exits when that review appears or after 10 minutes. Handle the result in the main
+session, saying so if no review came within 10 minutes. Then weigh each comment:
+fix what is right and worth the change, push, and reply to every comment with
+what you changed or why you did not. Use `tea` for Forgejo, and `tea api` for
+what it lacks. `tea pr reply` fails there, so reply with `tea comment`. Forgejo
+sends no webhook for a thread reply, so if
 you left any unchanged, also post one PR comment, tagging @reviewer, that says
 why for each. A push or a tag starts another review; wait for it the same way,
 with the same 10 minutes, and repeat until a review asks for nothing you would

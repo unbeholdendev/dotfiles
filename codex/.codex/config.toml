@@ -1,9 +1,2 @@
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
-
-[mcp_servers.forgejo]
-command = "sh"
-args = [
-  "-c",
-  'FORGEJO_ACCESS_TOKEN="$(cat "$HOME/.forgejo-token")" exec forgejo-mcp --transport stdio --url https://git.home.unbeholden.dev',
-]

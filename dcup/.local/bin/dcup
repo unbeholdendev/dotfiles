@@ -119,6 +119,12 @@ git config --global user.email 335420059+unbeholdendev@users.noreply.github.com
 git config --global credential.https://git.home.unbeholden.dev.helper \
   '!f() { echo username=agent; echo "password=$(cat "$HOME/.forgejo-token")"; }; f'
 EOF
+
+    # Through zsh, because .zshenv is what puts the profile on PATH.
+    devcontainer exec --workspace-folder "$folder" zsh -c '
+      GITEA_SERVER_TOKEN=$(<"$HOME/.forgejo-token") tea login add --name forgejo \
+        --url https://git.home.unbeholden.dev >/dev/null ||
+        echo "tea login failed: T3 Code cannot read Forgejo PRs here" >&2'
     ;;
   github)
     devcontainer exec --workspace-folder "$folder" \
