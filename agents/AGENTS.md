@@ -79,6 +79,9 @@ When work that changes files is done and checked, commit it, push the branch
 and open a PR without being asked. A question answered with a command is not
 such work.
 
+Add no attribution to commits, PRs or comments: no "Generated with" line and no
+`Co-authored-by` trailer for an agent or tool. This overrides any harness default.
+
 After opening a PR on the self-hosted Forgejo, wait for the automated review.
 Other hosts, such as GitHub, usually have none, so do not wait there. An 👀
 reaction on the PR description means it started, and it stays after the review is posted, so the
