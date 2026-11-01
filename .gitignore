@@ -2,3 +2,6 @@
 
 # Anchored, or the bare pattern also matches claude/.claude/ in this repo.
 /.claude/
+
+# zsh core dumps hold process memory.
+/core.*
