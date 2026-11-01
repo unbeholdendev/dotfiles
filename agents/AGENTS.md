@@ -101,6 +101,8 @@ When work that changes files is done and checked, commit it, push the branch
 and open a PR without being asked. A question answered with a command is not
 such work.
 
+Never merge a PR; the user merges.
+
 Add no attribution to commits, PRs or comments: no "Generated with" line and no
 `Co-authored-by` trailer for an agent or tool. This overrides any harness default.
 

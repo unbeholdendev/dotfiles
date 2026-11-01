@@ -104,6 +104,49 @@ apt-get() {
         self.assertEqual(config["approval_policy"], "never")
         self.assertEqual(config["sandbox_mode"], "danger-full-access")
 
+    def hook_returncode(self, command):
+        return subprocess.run(
+            ["bash", str(REPO / "agents/deny-pr-merge.sh")],
+            input=json.dumps({"tool_input": {"command": command}}),
+            capture_output=True, text=True, timeout=10,
+        ).returncode
+
+    def test_hook_denies_merging_a_pr(self):
+        for command in (
+            "tea pr merge 5",
+            "tea pulls merge --style squash 5",
+            "tea pr m 5",
+            "cd repo && tea pr merge 5",
+            "git push\ntea pr merge 5",
+            "tea api -X POST repos/o/r/pulls/5/merge",
+            'tea api -X POST "repos/$R/pulls/$n/merge" -d @body',
+            "echo 'a; b' && tea pr merge 5",
+            'result="$(tea pr merge 5)"',
+            "cat <<EOF\ntext\nEOF\ntea pr merge 5",
+        ):
+            with self.subTest(command):
+                self.assertEqual(self.hook_returncode(command), 2)
+
+    def test_hook_allows_other_commands(self):
+        for command in (
+            "tea pr list --state merged",
+            "tea pr view 5",
+            'tea pr create --title "pr merge docs"',
+            'git commit -m "tea pr merge"',
+            'tea comment 5 "tea pr merge fails"',
+            "tea api repos/o/r/pulls/5",
+            "grep 'tea api' pulls/5/merge",
+            "tea comment 5 'Do not run this; tea pr merge 5'",
+            'tea comment 5 "see (tea pr merge 5)"',
+            "git commit -m 'Example: $(tea pr merge 5)'",
+            'tea comment 5 "first\ntea pr merge 5"',
+            "tea comment 5 \"don't; tea pr merge 5\"",
+            "git commit -F - <<'EOF'\nDon't merge\ntea pr merge 5\nEOF",
+            "cat <<EOF | tea comment 5\ntea api -X POST repos/o/r/pulls/5/merge\nEOF",
+        ):
+            with self.subTest(command):
+                self.assertEqual(self.hook_returncode(command), 0)
+
 
 if __name__ == "__main__":
     unittest.main()
