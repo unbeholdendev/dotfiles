@@ -1,4 +1,6 @@
-Make a worktree for work that changes files.
+Work that changes files belongs in a worktree. If this session is already in
+one, use it. In T3 Code, use its worktree tools, not `git worktree`, so the
+thread and its diff follow the branch.
 
 Use available subagents when a complex task splits into independent pieces
 that can usefully run in parallel, without asking for permission each time.
