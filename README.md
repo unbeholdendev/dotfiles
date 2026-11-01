@@ -4,8 +4,7 @@ NixOS and niri on two ThinkPads, plus Home Manager config for a headless host
 and dev containers. Program directories mirror paths under `$HOME`; modules in
 `home/` install them.
 
-This is a mirror of my private repo. Issues and pull requests are welcome. I
-apply changes in the private repo, and they reach main here from there.
+This is a mirror of my private repo.
 
 ## Before you run any of this
 
