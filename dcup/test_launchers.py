@@ -116,7 +116,7 @@ if command == "qrencode":
         self.assertEqual(devcontainer[2][:3], [
             "exec", "--workspace-folder", str(self.workspace),
         ])
-        self.assertIn("t3 serve", devcontainer[2][-1])
+        self.assertIn("t3 start", devcontainer[2][-1])
         mounts = [arg for arg in devcontainer[0] if arg.startswith("type=volume,")]
         self.assertEqual(mounts, [
             "type=volume,source=nix-store,target=/nix",
@@ -249,9 +249,17 @@ if command == "qrencode":
         self.assertEqual(calls[label]["argv"][:5], ["exec", "-i", "-u", "root", "container-id"])
         server = next(
             index for index, call in enumerate(calls)
-            if call["command"] == "devcontainer" and "t3 serve" in " ".join(call["argv"])
+            if call["command"] == "devcontainer" and "t3 start" in " ".join(call["argv"])
         )
         self.assertLess(label, server)
+
+    def test_dcup_starts_t3_with_the_command_that_adds_the_workspace_project(self):
+        calls, _ = self.run_launcher("dcup", self.workspace)
+        commands = " ".join(
+            " ".join(call["argv"]) for call in calls if call["command"] == "devcontainer"
+        )
+        self.assertIn("t3 start --no-browser", commands)
+        self.assertNotIn("t3 serve", commands)
 
     def test_dccodex_preserves_arguments_and_labels_agent(self):
         calls, _ = self.run_launcher(
