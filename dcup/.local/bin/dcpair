@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+folder=${1:-.}
+resolved=$(readlink -f "$folder")
+
+port=$(grep -lxF -- "$resolved" "$HOME/.devcontainer-state/t3-ports"/* 2>/dev/null || true)
+[[ -n $port ]] || { echo "no t3 port for $resolved: run dcup" >&2; exit 1; }
+
+url=$(devcontainer exec --workspace-folder "$folder" zsh -c \
+  't3 auth pairing create --base-dir /history/t3 --base-url "$1" --json' \
+  zsh "http://$(hostname -I | cut -d' ' -f1):${port##*/}" | jq -r .pairUrl)
+
+printf %s "$url" | qrencode -t ansiutf8
+echo "$url"

@@ -40,12 +40,22 @@ call = {{
     "agent": os.environ.get("HERDR_AGENT"),
     "folder": os.environ.get("T3_FOLDER"),
 }}
+if command == "docker" and sys.argv[1] == "exec":
+    call["stdin"] = sys.stdin.read()
 with open(os.environ["CALL_LOG"], "a") as log:
     log.write(json.dumps(call) + "\\n")
 if command == "docker" and os.environ.get("EXISTING_CONTAINER"):
     print("container-id")
+if command == "devcontainer" and "pairing create" in " ".join(sys.argv):
+    print(json.dumps({{"pairUrl": sys.argv[-1] + "/pair#token=SECRET"}}))
+if command == "hostname":
+    print("192.0.2.7 10.0.0.1 ")
+if command == "jq":
+    print(json.load(sys.stdin)["pairUrl"])
+if command == "qrencode":
+    print("QR:" + sys.stdin.read())
 """
-        for command in ("devcontainer", "docker", "socat"):
+        for command in ("devcontainer", "docker", "socat", "hostname", "jq", "qrencode"):
             path = stub_bin / command
             path.write_text(stub)
             path.chmod(0o755)
@@ -136,7 +146,7 @@ if command == "docker" and os.environ.get("EXISTING_CONTAINER"):
     def test_dcup_without_terminal_does_not_ask(self):
         calls, _ = self.run_launcher("dcup", self.workspace)
         self.assertEqual(
-            {call["command"] for call in calls}, {"devcontainer", "socat"},
+            {call["command"] for call in calls}, {"devcontainer", "docker", "hostname", "socat"},
         )
         self.assert_install(calls)
 
@@ -201,16 +211,47 @@ if command == "docker" and os.environ.get("EXISTING_CONTAINER"):
         claims = list((self.home / ".devcontainer-state/t3-ports").glob("[0-9]*"))
         self.assertEqual([claim.name for claim in claims], ["37731"])
 
-    def test_dcup_prints_a_pair_command_that_survives_spaces(self):
+    def test_dcup_prints_the_host_address_and_a_pair_command(self):
         _, output = self.run_launcher("dcup", self.workspace)
-        command = next(
-            line.split("pair with: ")[1] for line in output.splitlines()
-            if "pair with: " in line
+        line = next(line for line in output.splitlines() if line.startswith("t3: "))
+        self.assertIn("http://192.0.2.7:37731", line)
+        self.assertEqual(
+            shlex.split(line.split("pair with: ")[1]), ["dcpair", str(self.workspace)],
         )
-        self.assertEqual(shlex.split(command)[:3], [
-            "devcontainer", "exec", "--workspace-folder",
-        ])
-        self.assertEqual(shlex.split(command)[3], str(self.workspace))
+
+    def test_dcpair_links_to_the_forward_and_keeps_the_token_out_of_argv(self):
+        self.run_launcher("dcup", self.workspace)
+        calls, output = self.run_launcher("dcpair", self.workspace)
+        url = "http://192.0.2.7:37731/pair#token=SECRET"
+        self.assertIn(url, output)
+        self.assertIn("QR:" + url, output)
+        qrencode = next(call for call in calls if call["command"] == "qrencode")
+        self.assertNotIn("SECRET", " ".join(qrencode["argv"]))
+
+    def test_dcpair_without_a_claimed_port_says_to_run_dcup(self):
+        result = subprocess.run(
+            [str(BIN / "dcpair"), str(self.workspace)], stdin=subprocess.DEVNULL,
+            capture_output=True, text=True, env=self.env, timeout=10,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("dcup", result.stderr)
+
+    def test_dcup_labels_the_server_with_the_folder_name_before_starting_it(self):
+        self.env["EXISTING_CONTAINER"] = "1"
+        calls, _ = self.run_launcher("dcup", self.workspace)
+        label = next(
+            index for index, call in enumerate(calls)
+            if call["command"] == "docker" and call["argv"][0] == "exec"
+        )
+        self.assertEqual(
+            calls[label]["stdin"], "PRETTY_HOSTNAME=workspace with spaces\n",
+        )
+        self.assertEqual(calls[label]["argv"][:5], ["exec", "-i", "-u", "root", "container-id"])
+        server = next(
+            index for index, call in enumerate(calls)
+            if call["command"] == "devcontainer" and "t3 serve" in " ".join(call["argv"])
+        )
+        self.assertLess(label, server)
 
     def test_dccodex_preserves_arguments_and_labels_agent(self):
         calls, _ = self.run_launcher(
