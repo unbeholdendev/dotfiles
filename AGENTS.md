@@ -46,6 +46,11 @@ and Codex. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
   port claimed under `~/.devcontainer-state/t3-ports`. It listens on every host
   interface, with the pairing code the only gate, so the host must stay off
   public networks. Do not add T3 Connect: nothing here needs a third party.
+- `dcup` asks once per workspace whether to enable T3's browser, and keeps the
+  answer in the workspace's state as `t3-browser`. Enabled, `install.sh` installs
+  its libraries with the distro's package manager, where a failure must not stop
+  the install, and it runs unsandboxed as root: use it only for the workspace's
+  own dev servers.
 - `/claude` and `/codex` are shared across containers. Respect explicit
   `CLAUDE_CONFIG_DIR` and `CODEX_HOME` overrides.
 - Codex's writable config seeds once with no approvals or inner sandbox and

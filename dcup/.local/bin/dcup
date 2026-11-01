@@ -40,6 +40,16 @@ stamp=$(printf %s "$resolved" | md5sum | cut -c1-8)
 state=$HOME/.devcontainer-state/$(basename "$resolved")-$stamp
 mkdir -p "$state"
 
+browser=$state/t3-browser
+if [[ -t 0 && ! -f $browser ]]; then
+  read -rp 'enable the T3 browser here? As root it runs unsandboxed. [y/N] ' answer
+  if [[ $answer == [yY]* ]]; then echo yes > "$browser"; else echo no > "$browser"; fi
+fi
+browser_env=()
+if [[ -f $browser && $(<"$browser") == yes ]]; then
+  browser_env=(--remote-env T3_BROWSER=1)
+fi
+
 # installOhMyZshConfig writes a ~/.zshrc, which home-manager then refuses to
 # replace. --no-lockfile, or the CLI dirties the project with a lock file.
 devcontainer up --workspace-folder "$folder" --no-lockfile \
@@ -56,7 +66,7 @@ devcontainer up --workspace-folder "$folder" --no-lockfile \
   --mount "type=volume,source=codex-state,target=/codex" \
   "${@:2}"
 
-devcontainer exec --workspace-folder "$folder" \
+devcontainer exec --workspace-folder "$folder" "${browser_env[@]}" \
   /dotfiles/install.sh container
 
 # T3 Code names a server after this, or else the container's random hostname.
@@ -68,7 +78,9 @@ printf 'PRETTY_HOSTNAME=%s\n' "$(basename "$resolved")" |
 # Not t3 serve: it never adds the workspace as a project, so threads land in a
 # scratch folder. The lock turns a rerun into a no-op while the server lives.
 # Its output holds pairing details, so it goes nowhere; T3 Code keeps its logs.
-devcontainer exec --workspace-folder "$folder" zsh -c '
+# Chrome has no sandbox as root, and T3's browser refuses to start without this.
+devcontainer exec --workspace-folder "$folder" "${browser_env[@]}" zsh -c '
+  [[ -n $T3_BROWSER ]] && export T3CODE_SERVER_BROWSER_SANDBOX=$((EUID != 0))
   T3CODE_TELEMETRY_ENABLED=false setsid -f flock -n /history/t3.lock \
     t3 start --no-browser --host 0.0.0.0 --port 3773 --base-dir /history/t3 \
     </dev/null >/dev/null 2>&1'
