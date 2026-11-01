@@ -97,6 +97,31 @@ repo=${repo%/.git}
 [[ -e /dotfiles/agents/AGENTS.md ]] && repo=/dotfiles
 printf '%s\n' "$repo" > "$HOME/.dots-path"
 
+trust_codex_hooks() {
+  local reply state
+  coproc APP { timeout 30 "$HOME/.nix-profile/bin/codex" app-server 2>/dev/null; }
+  send() { printf '%s\n' "$1" >&"${APP[1]}"; }
+  await() {
+    while read -r reply <&"${APP[0]}"; do
+      [[ $(jq -c .id <<<"$reply") == "$1" ]] && return
+    done
+    return 1
+  }
+  send '{"id":1,"method":"initialize","params":{"clientInfo":{"name":"install","version":"0"}}}'
+  await 1 || return 1
+  send '{"method":"initialized"}'
+  send "$(jq -nc --arg cwd "$PWD" '{id:2,method:"hooks/list",params:{cwds:[$cwd]}}')"
+  await 2 || return 1
+  state=$(jq -c --arg source "$1" '[.result.data[].hooks[] | select(.sourcePath == $source)
+    | {key, value: {trusted_hash: .currentHash}}] | from_entries' <<<"$reply")
+  [[ $state != '{}' ]] || return 1
+  send "$(jq -nc --argjson state "$state" \
+    '{id:3,method:"config/value/write",params:{keyPath:"hooks.state",value:$state,mergeStrategy:"upsert"}}')"
+  await 3 || return 1
+  kill "$APP_PID" 2>/dev/null || true
+  jq -e .result >/dev/null <<<"$reply"
+}
+
 for agent in claude codex; do
   sources=(
     petergyang/no-ai-slop:000650b156983f5159695b441477f4e63b25dc85
@@ -115,6 +140,10 @@ for agent in claude codex; do
     mkdir -p "$cfg"
     ln -sfn "$repo/agents/AGENTS.md" "$cfg/AGENTS.md"
     [[ -f $cfg/config.toml ]] || cp "$repo/codex/.codex/config.toml" "$cfg/config.toml"
+    ln -sfn "$repo/codex/.codex/hooks.json" "$cfg/hooks.json"
+    # Codex skips a hook nobody has trusted, and no one is there to answer its prompt.
+    PATH="$HOME/.nix-profile/bin:$PATH" CODEX_HOME=$cfg trust_codex_hooks "$cfg/hooks.json" ||
+      echo "Codex PR merge hook not trusted: approve it with /hooks" >&2
     sources+=(
       mattpocock/skills:5beb35b040e3de97e54fa9e386d7e42d15c295c2
       pbakaus/impeccable:33003f1013a636e612752a1cad7b82b8bb4c67f2

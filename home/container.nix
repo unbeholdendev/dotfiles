@@ -12,7 +12,20 @@ in
   ];
 
   # nix, because install.sh points ~/.nix-profile away from the installer's.
-  home.packages = with pkgs; [ claude-code codex nix t3code tea util-linux ];
+  home.packages = with pkgs; [
+    claude-code
+    codex
+    jq
+    nix
+    t3code
+    tea
+    util-linux
+    (writeShellApplication {
+      name = "deny-pr-merge";
+      runtimeInputs = [ jq ];
+      text = builtins.readFile ../agents/deny-pr-merge.sh;
+    })
+  ];
 
   xdg.configFile."git/ignore".text = ".claude/worktrees/\n";
 

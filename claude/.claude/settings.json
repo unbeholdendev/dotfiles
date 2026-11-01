@@ -7,6 +7,19 @@
   "permissions": {
     "defaultMode": "bypassPermissions"
   },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "deny-pr-merge"
+          }
+        ]
+      }
+    ]
+  },
   "worktree": {
     "baseRef": "head"
   },
