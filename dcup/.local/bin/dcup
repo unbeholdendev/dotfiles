@@ -50,6 +50,35 @@ if [[ -f $browser && $(<"$browser") == yes ]]; then
   browser_env=(--remote-env T3_BROWSER=1)
 fi
 
+# Root, because the shared /nix volume belongs to root.
+if [[ ! -d $folder/.devcontainer && ! -e $folder/.devcontainer.json ]]; then
+  cat > "$folder/.devcontainer.json" <<'EOF'
+{
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "remoteUser": "root"
+}
+EOF
+  if exclude=$(git -C "$folder" rev-parse --path-format=absolute --git-path info/exclude 2>/dev/null); then
+    mkdir -p "$(dirname "$exclude")"
+    grep -qsxF .devcontainer.json "$exclude" || echo .devcontainer.json >> "$exclude"
+  fi
+fi
+
+foreign=
+while read -r _ url; do
+  [[ $url =~ ^(https://|ssh://git@|git@)git\.home\.unbeholden\.dev[/:] ]] && continue
+  [[ $url =~ ^(https://|ssh://git@|git@)github\.com[/:]([^/]+)/ &&
+    -f ~/.github-tokens/${BASH_REMATCH[2]} ]] && continue
+  foreign=1
+done < <(git -C "$folder" config --local --get-regexp '^remote\..*\.url$' 2>/dev/null || true)
+
+# The CLI's --mount rejects readonly. --no-hardlinks, or root in the container
+# could write through to the host clone's objects.
+if [[ -n $foreign ]]; then
+  [[ -d $state/dotfiles ]] || git clone -q --no-hardlinks "$dotfiles" "$state/dotfiles"
+  dotfiles=$state/dotfiles
+fi
+
 # installOhMyZshConfig writes a ~/.zshrc, which home-manager then refuses to
 # replace. --no-lockfile, or the CLI dirties the project with a lock file.
 devcontainer up --workspace-folder "$folder" --no-lockfile \
