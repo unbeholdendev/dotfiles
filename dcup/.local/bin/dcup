@@ -59,6 +59,12 @@ devcontainer up --workspace-folder "$folder" --no-lockfile \
 devcontainer exec --workspace-folder "$folder" \
   /dotfiles/install.sh container
 
+# T3 Code names a server after this, or else the container's random hostname.
+printf 'PRETTY_HOSTNAME=%s\n' "$(basename "$resolved")" |
+  docker exec -i -u root \
+    "$(docker ps -q --filter "label=devcontainer.local_folder=$resolved")" \
+    sh -c 'cat > /etc/machine-info'
+
 # The lock turns a rerun into a no-op while the server lives. Its output holds
 # pairing details, so it goes nowhere; T3 Code keeps its own logs.
 devcontainer exec --workspace-folder "$folder" zsh -c '
@@ -87,7 +93,7 @@ T3_FOLDER=$resolved setsid -f socat "TCP-LISTEN:$port,fork,reuseaddr" \
   'SYSTEM:"exec socat - TCP4:$(docker inspect -f \"{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}\" $(docker ps -q --filter label=devcontainer.local_folder=\"$T3_FOLDER\")):3773"' \
   </dev/null >/dev/null 2>&1
 
-echo "t3: http://$HOSTNAME:$port, pair with: devcontainer exec --workspace-folder $(printf %q "$folder") zsh -c 't3 pair --base-dir /history/t3'"
+echo "t3: http://$(hostname -I | cut -d' ' -f1):$port, pair with: dcpair $(printf %q "$folder")"
 
 case $forge in
   forgejo)
