@@ -197,6 +197,7 @@ if command == "qrencode":
         (tokens / "me").write_text("token")
         calls, _ = self.run_launcher("dcup", self.workspace)
         up = next(call["argv"] for call in calls if call["argv"][0] == "up")
+        self.up_args = up
         return next(arg for arg in up if arg.endswith("target=/dotfiles"))
 
     def assert_own(self, *remotes):
@@ -223,6 +224,10 @@ if command == "qrencode":
                 self.setUp()
                 mount = self.dotfiles_mount(*remotes)
                 source = Path(mount.split(",")[1].removeprefix("source="))
+                history = next(
+                    arg for arg in self.up_args if arg.endswith("target=/history")
+                ).split(",")[1].removeprefix("source=")
+                self.assertFalse(source.is_relative_to(history))
                 self.assertNotEqual(source, self.dotfiles)
                 self.assertTrue((source / ".git").is_dir())
                 objects = list((source / ".git/objects").rglob("*"))
