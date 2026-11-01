@@ -59,6 +59,36 @@ devcontainer up --workspace-folder "$folder" --no-lockfile \
 devcontainer exec --workspace-folder "$folder" \
   /dotfiles/install.sh container
 
+# The lock turns a rerun into a no-op while the server lives. Its output holds
+# pairing details, so it goes nowhere; T3 Code keeps its own logs.
+devcontainer exec --workspace-folder "$folder" zsh -c '
+  T3CODE_TELEMETRY_ENABLED=false setsid -f flock -n /history/t3.lock \
+    t3 serve --host 0.0.0.0 --port 3773 --base-dir /history/t3 \
+    --auto-bootstrap-project-from-cwd </dev/null >/dev/null 2>&1'
+
+ports=$HOME/.devcontainer-state/t3-ports
+mkdir -p "$ports"
+exec 9>"$ports/.lock"
+flock 9
+port=$(grep -lxF -- "$resolved" "$ports"/* 2>/dev/null || true)
+port=${port##*/}
+if [[ -z $port ]]; then
+  port=37731
+  while [[ -e $ports/$port ]] || (exec 3<>"/dev/tcp/127.0.0.1/$port") 2>/dev/null; do
+    port=$((port + 1))
+  done
+  echo "$resolved" > "$ports/$port"
+fi
+exec 9>&-
+
+# The container is looked up per connection because a rebuild changes its IP. A
+# forward left from an earlier run holds the port, so this one exits.
+T3_FOLDER=$resolved setsid -f socat "TCP-LISTEN:$port,fork,reuseaddr" \
+  'SYSTEM:"exec socat - TCP4:$(docker inspect -f \"{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}\" $(docker ps -q --filter label=devcontainer.local_folder=\"$T3_FOLDER\")):3773"' \
+  </dev/null >/dev/null 2>&1
+
+echo "t3: http://$HOSTNAME:$port, pair with: devcontainer exec --workspace-folder $(printf %q "$folder") zsh -c 't3 pair --base-dir /history/t3'"
+
 case $forge in
   forgejo)
     devcontainer exec --workspace-folder "$folder" \

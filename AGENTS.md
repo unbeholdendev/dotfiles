@@ -41,6 +41,11 @@ and Codex. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
 ## Shared agent state
 
 - Every container installs Claude and Codex; there is no selection.
+- `dcup` runs one T3 Code server per container, its state in `/history/t3` so
+  threads and pairings survive a rebuild, and forwards a per-workspace host
+  port claimed under `~/.devcontainer-state/t3-ports`. It listens on every host
+  interface, with the pairing code the only gate, so the host must stay off
+  public networks. Do not add T3 Connect: nothing here needs a third party.
 - `/claude` and `/codex` are shared across containers. Respect explicit
   `CLAUDE_CONFIG_DIR` and `CODEX_HOME` overrides.
 - Codex's writable config seeds once with no approvals or inner sandbox and
