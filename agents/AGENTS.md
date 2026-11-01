@@ -20,18 +20,19 @@ push, and PR.
 Make the smallest change that leaves a coherent design, not just the smallest
 diff. Code you do not write cannot break, and every line you do write is a line
 to keep. Delete before you add. Keep refactors within the task; when a local
-patch adds a special case that a small structural change would avoid, explain
-the trade-off before choosing. Add no file, layer, option or helper the task
-does not need.
+patch adds a special case that a small structural change would avoid, give the
+trade-off in one sentence before choosing. Add no file, layer, option or helper
+the task does not need.
 
 Before nontrivial code changes, establish the acceptance criteria and read
 the surrounding code. For library integrations, check the official integration
 guide against the installed version before designing a wrapper or replacement.
-Prefer supported extension points. Briefly state where the behaviour belongs,
-which invariants it must preserve, the closest existing precedent, and the
-observable tests that will prove it. Use concrete files as evidence. Follow
-sound examples and the user's corrections; explain when an existing pattern
-would make the design worse.
+Prefer supported extension points. Work out where the behaviour belongs, which
+invariants it must preserve, the closest existing precedent, and the observable
+tests that will prove it; report these in one line, and only when the design is
+in doubt. Use concrete files as evidence. Follow sound examples and the user's
+corrections; say in one sentence when an existing pattern would make the design
+worse.
 
 Keep investigation focused. Read relevant symbols and documentation sections;
 reuse context already loaded unless it changed or was lost. Batch independent
@@ -39,9 +40,9 @@ reads. Save long command output to a file and return a summary with failure
 details. Pass images as image attachments rather than base64 text.
 
 For consequential interface, data model, state, or dependency choices, compare
-two materially different approaches and their maintenance costs. Recommend the
-simplest coherent design. Prototype the uncertain part when an experiment can
-settle the choice. Ask the user when the choice changes scope or public behavior
+two materially different approaches and their maintenance costs. Reply with one
+recommendation, the simplest coherent design, and one reason. Prototype the
+uncertain part when an experiment can settle the choice. Ask the user when the choice changes scope or public behavior
 beyond the request.
 
 Test observable behavior at stable boundaries. For a bug, write a reproducer
@@ -62,6 +63,18 @@ Write plain. In a reply, a commit message or a document, say the thing and then
 stop. Choose the short word, cut the word that can go, and break a rule of
 grammar sooner than keep a sentence that is longer or less clear for it. A clear
 fragment beats a correct sentence that hides the point.
+
+Shape every reply for someone switching between many projects:
+- First line: the answer, or what happened.
+- Then only what they must decide, or what is wrong or unverified.
+- Default under 5 lines. Go longer only for a request for detail, a failure, or
+  a risky action.
+- Name the project or topic if the thread covers several.
+- Keep commands, paths, numbers and errors exact.
+
+Example, after a fix:
+Fixed: `dcup` lost the T3 port on rebuild. PR #261 open, tests pass.
+Unverified: NixOS hosts.
 
 Use British spelling unless the user or project specifies otherwise.
 
