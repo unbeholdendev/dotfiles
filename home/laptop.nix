@@ -34,6 +34,7 @@
     signal-desktop
     sops
     sparrow
+    t3code
     talosctl
     thunderbird
     tor-browser
