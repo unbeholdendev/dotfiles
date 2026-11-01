@@ -53,8 +53,8 @@ and Codex. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
   own dev servers.
 - `/claude` and `/codex` are shared across containers. Respect explicit
   `CLAUDE_CONFIG_DIR` and `CODEX_HOME` overrides.
-- Codex's writable config seeds once with no approvals or inner sandbox and
-  the Forgejo MCP server. Keep these defaults container-only. Its skills go in
+- Codex's writable config seeds once with no approvals or inner sandbox. Keep
+  these defaults container-only. Its skills go in
   `CODEX_HOME/skills`, linked to checkouts under `CODEX_HOME/third-party`.
 - Keep pinned third-party skill checkouts under `third-party/`, outside
   `skills/`. Link only the intended skill groups so agents do not discover other
@@ -81,16 +81,11 @@ and Codex. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
 both. Never print or commit tokens, put them in remote URLs, or pass them in
 argv. Read them at call time from their files.
 
-Codex's Forgejo MCP config is seeded in `codex/.codex/config.toml`. Claude
-needs one user-scope registration per fresh `/claude` volume:
+Agents and T3 Code both reach Forgejo through `tea`, so the token needs
+`read:user`, or T3 Code cannot read PRs and `tea login add` refuses it. `dcup`
+logs `tea` in only when it creates a container.
 
-```
-claude mcp add --scope user forgejo -- \
-  sh -c 'FORGEJO_ACCESS_TOKEN="$(cat "$HOME/.forgejo-token")" \
-    exec forgejo-mcp --transport stdio --url https://git.home.unbeholden.dev'
-```
-
-Use `FORGEJO_ACCESS_TOKEN`, not `--token`. GitHub tokens are owner-scoped: the host keeps
+GitHub tokens are owner-scoped: the host keeps
 `~/.github-tokens/<owner>`, and `dcup` scopes the container's credential helper
 to `https://github.com/<owner>`.
 

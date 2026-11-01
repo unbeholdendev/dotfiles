@@ -12,7 +12,7 @@ in
   ];
 
   # nix, because install.sh points ~/.nix-profile away from the installer's.
-  home.packages = with pkgs; [ claude-code codex forgejo-mcp nix t3code util-linux ];
+  home.packages = with pkgs; [ claude-code codex nix t3code tea util-linux ];
 
   xdg.configFile."git/ignore".text = ".claude/worktrees/\n";
 

@@ -99,14 +99,10 @@ apt-get() {
         self.assertEqual(result.returncode, 89, result.stderr)
         self.assertIn("T3's browser", result.stderr)
 
-    def test_codex_defaults_to_full_permissions_and_forgejo_mcp(self):
+    def test_codex_defaults_to_full_permissions(self):
         config = tomllib.loads((REPO / "codex/.codex/config.toml").read_text())
         self.assertEqual(config["approval_policy"], "never")
         self.assertEqual(config["sandbox_mode"], "danger-full-access")
-        forgejo = config["mcp_servers"]["forgejo"]
-        self.assertEqual(forgejo["command"], "sh")
-        self.assertIn("FORGEJO_ACCESS_TOKEN=", forgejo["args"][1])
-        self.assertIn("forgejo-mcp --transport stdio --url https://git.home.unbeholden.dev", forgejo["args"][1])
 
 
 if __name__ == "__main__":
