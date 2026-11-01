@@ -94,9 +94,9 @@ never put in the store or offered to containers.
 
 ## Public mirror
 
-Main is mirrored to a public GitHub repo, and force-pushes cannot reliably
-remove anything from it. Commits, including messages and trailers, must not
-hold private hosts, public IPs, employer or client names, or private emails.
+Main is mirrored to a public GitHub repo with no check before the push, and
+force-pushes cannot reliably remove anything from it. Stage files by name.
+Commits, including messages and trailers, must not hold private hosts, public IPs, employer or client names, or private emails.
 SSH hosts belong in `~/.ssh/config.local` and private `dictate` vocabulary in
 `~/.dictate-terms`; both are untracked and written by hand.
 
