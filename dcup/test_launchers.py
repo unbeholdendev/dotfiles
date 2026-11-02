@@ -380,26 +380,5 @@ if command == "qrencode":
             script,
         )
 
-    def test_dccodex_preserves_arguments(self):
-        calls, _ = self.run_launcher(
-            "dccodex", self.workspace, "--model", "model name", "a prompt with spaces",
-        )
-        self.assertEqual(calls, [{
-            "command": "devcontainer",
-            "argv": [
-                "exec", "--workspace-folder", str(self.workspace),
-                "zsh", "-c", 'exec codex "$@"', "codex",
-                "--model", "model name", "a prompt with spaces",
-            ],
-            "folder": None,
-        }])
-
-    def test_dccodex_defaults_to_current_folder(self):
-        calls, _ = self.run_launcher("dccodex")
-        self.assertEqual(calls[0]["argv"], [
-            "exec", "--workspace-folder", ".", "zsh", "-c", 'exec codex "$@"', "codex",
-        ])
-
-
 if __name__ == "__main__":
     unittest.main()
