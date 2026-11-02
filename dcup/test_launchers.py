@@ -150,6 +150,93 @@ if command == "qrencode":
         )
         self.assert_install(calls)
 
+    def test_dcup_writes_an_excluded_default_config_when_the_repo_has_none(self):
+        subprocess.run(["git", "init", "-q", self.workspace], check=True)
+        self.run_launcher("dcup", self.workspace)
+        self.run_launcher("dcup", self.workspace)
+        config = json.loads((self.workspace / ".devcontainer.json").read_text())
+        self.assertEqual(config["remoteUser"], "root")
+        status = subprocess.run(
+            ["git", "-C", self.workspace, "status", "--porcelain"],
+            check=True, capture_output=True, text=True,
+        )
+        self.assertEqual(status.stdout, "")
+        exclude = self.workspace / ".git/info/exclude"
+        self.assertEqual(exclude.read_text().splitlines().count(".devcontainer.json"), 1)
+
+    def test_dcup_writes_a_default_config_outside_a_repo(self):
+        self.run_launcher("dcup", self.workspace)
+        self.assertTrue((self.workspace / ".devcontainer.json").exists())
+
+    def test_dcup_leaves_an_existing_config_alone(self):
+        for existing in (".devcontainer.json", ".devcontainer/devcontainer.json", ".devcontainer/a/devcontainer.json"):
+            with self.subTest(existing):
+                workspace = self.workspace.parent / existing.replace("/", "-")
+                path = workspace / existing
+                path.parent.mkdir(parents=True)
+                path.write_text("{}")
+                self.run_launcher("dcup", workspace)
+                self.assertEqual(path.read_text(), "{}")
+                if existing != ".devcontainer.json":
+                    self.assertFalse((workspace / ".devcontainer.json").exists())
+
+    def dotfiles_mount(self, *remotes):
+        subprocess.run(["git", "init", "-q", self.workspace], check=True)
+        for index, url in enumerate(remotes):
+            subprocess.run(
+                ["git", "-C", self.workspace, "remote", "add", f"r{index}", url], check=True,
+            )
+        subprocess.run(["git", "init", "-q", self.dotfiles], check=True)
+        subprocess.run(
+            ["git", "-C", self.dotfiles, "-c", "user.name=t", "-c", "user.email=t@example.com",
+             "commit", "-q", "--allow-empty", "-m", "seed"],
+            check=True,
+        )
+        tokens = self.home / ".github-tokens"
+        tokens.mkdir()
+        (tokens / "me").write_text("token")
+        calls, _ = self.run_launcher("dcup", self.workspace)
+        up = next(call["argv"] for call in calls if call["argv"][0] == "up")
+        self.up_args = up
+        return next(arg for arg in up if arg.endswith("target=/dotfiles"))
+
+    def assert_own(self, *remotes):
+        self.assertEqual(
+            self.dotfiles_mount(*remotes), f"type=bind,source={self.dotfiles},target=/dotfiles",
+        )
+
+    def test_dcup_mounts_the_clone_for_a_repo_without_remotes(self):
+        self.assert_own()
+
+    def test_dcup_mounts_the_clone_for_an_owned_github_repo(self):
+        self.assert_own("git@github.com:me/project.git")
+
+    def test_dcup_mounts_the_clone_for_a_forgejo_repo(self):
+        self.assert_own("https://git.home.unbeholden.dev/someone/project.git")
+
+    def test_dcup_mounts_a_separate_clone_for_a_foreign_repo(self):
+        for remotes in (
+            ["https://github.com/stranger/project.git"],
+            ["https://github.com/me/project.git", "https://github.com/stranger/project.git"],
+            ["https://example.com/git.home.unbeholden.dev/project.git"],
+        ):
+            with self.subTest(remotes):
+                self.setUp()
+                mount = self.dotfiles_mount(*remotes)
+                source = Path(mount.split(",")[1].removeprefix("source="))
+                history = next(
+                    arg for arg in self.up_args if arg.endswith("target=/history")
+                ).split(",")[1].removeprefix("source=")
+                self.assertFalse(source.is_relative_to(history))
+                self.assertNotEqual(source, self.dotfiles)
+                self.assertTrue((source / ".git").is_dir())
+                objects = list((source / ".git/objects").rglob("*"))
+                host = list((self.dotfiles / ".git/objects").rglob("*"))
+                shared = {p.stat().st_ino for p in objects if p.is_file()} & {
+                    p.stat().st_ino for p in host if p.is_file()
+                }
+                self.assertEqual(shared, set())
+
     def forward_port(self, calls):
         forward = next(call for call in calls if call["command"] == "socat")
         self.assertEqual(forward["folder"], str(self.workspace))
