@@ -6,7 +6,6 @@ command -v devcontainer >/dev/null ||
 
 folder=${1:-.}
 
-# The agent runs out of the process tree herdr reads, so HERDR_AGENT labels it
-# here. Through zsh, because .zshenv is what puts the profile on PATH.
-exec env HERDR_AGENT=claude devcontainer exec --workspace-folder "$folder" \
+# Through zsh, because .zshenv is what puts the profile on PATH.
+exec devcontainer exec --workspace-folder "$folder" \
   zsh -c 'exec claude "$@"' claude "${@:2}"

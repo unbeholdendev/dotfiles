@@ -6,5 +6,5 @@ command -v devcontainer >/dev/null ||
 
 folder=${1:-.}
 
-exec env HERDR_AGENT=codex devcontainer exec --workspace-folder "$folder" \
+exec devcontainer exec --workspace-folder "$folder" \
   zsh -c 'exec codex "$@"' codex "${@:2}"
