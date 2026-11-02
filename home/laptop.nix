@@ -5,7 +5,6 @@
     ./dictate.nix
     ./dots.nix
     ./foot.nix
-    ./herdr.nix
     ./mime.nix
     ./mpv.nix
     ./niri.nix
