@@ -37,7 +37,6 @@ command = Path(sys.argv[0]).name
 call = {{
     "command": command,
     "argv": sys.argv[1:],
-    "agent": os.environ.get("HERDR_AGENT"),
     "folder": os.environ.get("T3_FOLDER"),
 }}
 if command == "docker" and sys.argv[1] == "exec":
@@ -70,7 +69,6 @@ if command == "qrencode":
             "CALL_LOG": str(self.log),
         }
         self.env.pop("EXISTING_CONTAINER", None)
-        self.env.pop("HERDR_AGENT", None)
 
     def run_launcher(self, name, *args, answers=None):
         command = [str(BIN / name), *map(str, args)]
@@ -381,29 +379,6 @@ if command == "qrencode":
             "[[ -n $T3_BROWSER ]] && export T3CODE_SERVER_BROWSER_SANDBOX=$((EUID != 0))",
             script,
         )
-
-    def test_dccodex_preserves_arguments_and_labels_agent(self):
-        calls, _ = self.run_launcher(
-            "dccodex", self.workspace, "--model", "model name", "a prompt with spaces",
-        )
-        self.assertEqual(calls, [{
-            "command": "devcontainer",
-            "argv": [
-                "exec", "--workspace-folder", str(self.workspace),
-                "zsh", "-c", 'exec codex "$@"', "codex",
-                "--model", "model name", "a prompt with spaces",
-            ],
-            "agent": "codex",
-            "folder": None,
-        }])
-
-    def test_dccodex_defaults_to_current_folder(self):
-        calls, _ = self.run_launcher("dccodex")
-        self.assertEqual(calls[0]["argv"], [
-            "exec", "--workspace-folder", ".", "zsh", "-c", 'exec codex "$@"', "codex",
-        ])
-        self.assertEqual(calls[0]["agent"], "codex")
-
 
 if __name__ == "__main__":
     unittest.main()
