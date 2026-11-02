@@ -4,7 +4,6 @@
     ./common.nix
     ./dcup.nix
     ./dots.nix
-    ./herdr.nix
     ./nvim.nix
     ./zsh.nix
   ];
