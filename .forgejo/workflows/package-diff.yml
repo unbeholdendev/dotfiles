@@ -1,0 +1,41 @@
+name: package diff
+
+on:
+  pull_request:
+    paths:
+      - flake.lock
+
+jobs:
+  comment:
+    runs-on: docker
+    container:
+      image: nixos/nix
+    steps:
+      - name: Comment with package version changes
+        env:
+          TOKEN: ${{ forgejo.token }}
+          API: ${{ forgejo.api_url }}
+          REPO: ${{ forgejo.repository }}
+          SERVER: ${{ forgejo.server_url }}
+          PR: ${{ forgejo.event.pull_request.number }}
+          BASE_SHA: ${{ forgejo.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ forgejo.event.pull_request.head.sha }}
+          NIX_CONFIG: experimental-features = nix-command flakes
+        run: |
+          set -euo pipefail
+          work=$(mktemp -d)
+          printf 'Authorization: token %s\n' "$TOKEN" > "$work/auth"
+          export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.extraHeader
+          export GIT_CONFIG_VALUE_0="Authorization: token $TOKEN"
+
+          git init -q "$work/repo"
+          cd "$work/repo"
+          git fetch -q --depth 1 "$SERVER/$REPO.git" "$BASE_SHA" "$HEAD_SHA"
+          mkdir "$work/base" "$work/head"
+          git archive "$BASE_SHA" | tar -x -C "$work/base"
+          git archive "$HEAD_SHA" | tar -x -C "$work/head"
+
+          BASE=$work/base HEAD=$work/head HOME_USER=runner HOME=/home/runner \
+            nix eval --impure --json --file "$work/head/.forgejo/package-diff.nix" > "$work/body.json"
+          curl -sSf -H @"$work/auth" -H 'Content-Type: application/json' \
+            --data @"$work/body.json" "$API/repos/$REPO/issues/$PR/comments" > /dev/null
