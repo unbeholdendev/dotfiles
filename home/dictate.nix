@@ -1,6 +1,6 @@
 { pkgs, ... }:
 let
-  prompt = "niri, noctalia, nixpkgs, NixOS, home-manager, disko, Forgejo, Claude, yazi, foot, zsh.";
+  prompt = "niri, noctalia, nixpkgs, NixOS, home-manager, disko, Forgejo, Dokploy, Claude, yazi, foot, zsh.";
 
   dictate = pkgs.writeShellApplication {
     name = "dictate";
