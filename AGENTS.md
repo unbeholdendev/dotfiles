@@ -53,10 +53,10 @@ and Codex. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
   own dev servers.
 - With no config in the workspace, `dcup` writes `.devcontainer.json` and hides
   it in `.git/info/exclude`.
-- `dcup` gives a repo with any remote outside Forgejo or `~/.github-tokens` its
-  own clone of the dotfiles at `/dotfiles`: `--mount` cannot be read-only. It
-  sits beside the workspace's state, never inside: `/history` could swap it for
-  a link to the host clone. It is made once; delete it to refresh. Never run git
+- `dcup` gives a repo with any remote outside Forgejo or the GitHub token's
+  account its own clone of the dotfiles at `/dotfiles`: `--mount` cannot be
+  read-only. It sits beside the workspace's state, never inside: `/history`
+  could swap it for a link to the host clone. It is made once; delete it to refresh. Never run git
   on the host inside it, as the container can write its hooks and config.
 - `/claude` and `/codex` are shared across containers. Respect explicit
   `CLAUDE_CONFIG_DIR` and `CODEX_HOME` overrides.
@@ -92,9 +92,9 @@ Agents and T3 Code both reach Forgejo through `tea`, so the token needs
 `read:user`, or T3 Code cannot read PRs and `tea login add` refuses it. `dcup`
 logs `tea` in only when it creates a container.
 
-GitHub tokens are owner-scoped: the host keeps
-`~/.github-tokens/<owner>`, and `dcup` scopes the container's credential helper
-to `https://github.com/<owner>`.
+The host keeps one GitHub token, `~/.github-token`; `dcup` asks GitHub for its
+account. In the container it logs `gh` in and sets git's identity to that
+account, or commits would carry the host's copied `.gitconfig`.
 
 `~/.groq-token` is `dictate`'s desktop-only key, mode 600, written by hand and
 never put in the store or offered to containers.

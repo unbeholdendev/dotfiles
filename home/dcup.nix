@@ -1,6 +1,7 @@
 { pkgs, ... }:
 {
   home.packages = [
+    pkgs.curl
     pkgs.jq
     pkgs.qrencode
     pkgs.socat

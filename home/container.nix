@@ -18,6 +18,7 @@ in
     jq
     nix
     t3code
+    gh
     tea
     util-linux
     (writeShellApplication {

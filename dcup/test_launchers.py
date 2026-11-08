@@ -39,7 +39,7 @@ call = {{
     "argv": sys.argv[1:],
     "folder": os.environ.get("T3_FOLDER"),
 }}
-if command == "docker" and sys.argv[1] == "exec":
+if command == "curl" or (command == "docker" and sys.argv[1] == "exec"):
     call["stdin"] = sys.stdin.read()
 with open(os.environ["CALL_LOG"], "a") as log:
     log.write(json.dumps(call) + "\\n")
@@ -49,12 +49,14 @@ if command == "devcontainer" and "pairing create" in " ".join(sys.argv):
     print(json.dumps({{"pairUrl": sys.argv[-1] + "/pair#token=SECRET"}}))
 if command == "hostname":
     print("192.0.2.7 10.0.0.1 ")
+if command == "curl" and "Authorization: Bearer SECRET" in call["stdin"]:
+    print(json.dumps({{"login": "me"}}))
 if command == "jq":
-    print(json.load(sys.stdin)["pairUrl"])
+    print(json.load(sys.stdin)[sys.argv[-1].lstrip(".")])
 if command == "qrencode":
     print("QR:" + sys.stdin.read())
 """
-        for command in ("devcontainer", "docker", "socat", "hostname", "jq", "qrencode"):
+        for command in ("curl", "devcontainer", "docker", "socat", "hostname", "jq", "qrencode"):
             path = stub_bin / command
             path.write_text(stub)
             path.chmod(0o755)
@@ -135,6 +137,15 @@ if command == "qrencode":
         ])
         self.assertEqual(calls[1]["argv"][-2:], ["--log-level", "debug"])
 
+    def test_dcup_copies_the_github_token_and_logs_gh_in(self):
+        (self.home / ".github-token").write_text("token")
+        calls, output = self.run_launcher("dcup", self.workspace, answers="3\nn\n")
+        self.assertNotIn("owner", output)
+        scripts = [
+            " ".join(call["argv"]) for call in calls if call["command"] == "devcontainer"
+        ]
+        self.assertTrue(any("gh auth login --with-token" in s for s in scripts))
+
     def test_dcup_existing_container_does_not_ask(self):
         self.env["EXISTING_CONTAINER"] = "1"
         calls, output = self.run_launcher("dcup", self.workspace, answers="n\n")
@@ -190,10 +201,10 @@ if command == "qrencode":
              "commit", "-q", "--allow-empty", "-m", "seed"],
             check=True,
         )
-        tokens = self.home / ".github-tokens"
-        tokens.mkdir()
-        (tokens / "me").write_text("token")
+        (self.home / ".github-token").write_text("SECRET")
         calls, _ = self.run_launcher("dcup", self.workspace)
+        for call in calls:
+            self.assertNotIn("SECRET", " ".join(call["argv"]))
         up = next(call["argv"] for call in calls if call["argv"][0] == "up")
         self.up_args = up
         return next(arg for arg in up if arg.endswith("target=/dotfiles"))
