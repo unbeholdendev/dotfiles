@@ -124,7 +124,7 @@ trust_codex_hooks() {
 
 for agent in claude codex; do
   sources=(
-    petergyang/no-ai-slop:000650b156983f5159695b441477f4e63b25dc85
+    cursor/plugins:6b0300214a09fd6029cfb7077043125758cd1fd2
     cloudflare/security-audit-skill:c1c8a8c1471069fb0e188eeaff69b8e8db6564a8
   )
 
@@ -162,7 +162,10 @@ for agent in claude codex; do
       git -C "$checkout" checkout -q --detach "$revision"
     fi
   done
-  ln -sfn "$cfg/third-party/petergyang/skills/no-ai-slop" "$cfg/skills/no-ai-slop"
+  [[ ! -L $cfg/skills/no-ai-slop ]] || rm "$cfg/skills/no-ai-slop"
+  mkdir -p "$cfg/skills/unslop"
+  sed '/^disable-model-invocation: true$/d' \
+    "$cfg/third-party/cursor/pstack/skills/unslop/SKILL.md" > "$cfg/skills/unslop/SKILL.md"
   ln -sfn "$cfg/third-party/cloudflare/skills/security-audit" "$cfg/skills/security-audit"
 
   if [[ $agent == codex ]]; then

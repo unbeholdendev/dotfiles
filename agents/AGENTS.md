@@ -78,14 +78,17 @@ Unverified: NixOS hosts.
 
 Use British spelling unless the user or project specifies otherwise.
 
-Load no-ai-slop only before writing or editing public-facing text, such as
-published articles, website and UI copy, public documentation or external
-communications. Do not load it for routine chat replies, internal documentation,
-commit messages or PR descriptions. For public-facing text, match existing
+Load unslop before writing or editing replies to the user or public-facing
+text, such as published articles, website and UI copy, public documentation or
+external communications. Do not load it for internal documentation, commit
+messages or PR descriptions. For public-facing text, match existing
 writing from the same author or site when available and draft it yourself
 instead of asking the user for a draft. Apply the skill as the final editing
-pass and run its eval.md checks before delivering that text. Return the finished
-text; include an editing or detection report only when requested.
+pass and check the result against its rules before delivering that text.
+Preserve the author's voice and meaning; add no claims, examples or opinions.
+Treat its punctuation and jargon rules as guidance: keep useful punctuation
+and precise technical terms when they make the text clearer. Return the
+finished text; include an editing or detection report only when requested.
 
 Do not write comments. A line earns one only when it looks wrong, arbitrary, or
 redundant, and then the comment gives that reason and nothing else, in one or
