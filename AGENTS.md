@@ -94,7 +94,7 @@ logs `tea` in only when it creates a container.
 
 The host keeps one GitHub token, `~/.github-token`; `dcup` asks GitHub for its
 account. In the container it logs `gh` in and sets git's identity to that
-account, or commits would carry the host's copied `.gitconfig`.
+account, as nothing else gives GitHub containers one.
 
 `~/.groq-token` is `dictate`'s desktop-only key, mode 600, written by hand and
 never put in the store or offered to containers.
