@@ -168,7 +168,7 @@ git config --global credential.https://github.com.helper \
   '!f() { echo username=x-access-token; echo "password=$(cat "$HOME/.github-token")"; }; f'
 EOF
 
-    # The CLI copies the host's .gitconfig, whose identity GitHub would credit.
+    # Nothing else gives a GitHub container a git identity.
     devcontainer exec --workspace-folder "$folder" zsh -c '
       gh auth login --with-token < "$HOME/.github-token" &&
         read -r id login < <(gh api user --jq "\(.id) \(.login)") &&
