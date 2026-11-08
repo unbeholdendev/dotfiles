@@ -3,7 +3,6 @@
     "commit": "",
     "pr": ""
   },
-  "outputStyle": "Concise",
   "permissions": {
     "defaultMode": "bypassPermissions"
   },
@@ -39,8 +38,15 @@
         "source": "github",
         "repo": "pbakaus/impeccable"
       }
+    },
+    "visual-explainer-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "nicobailon/visual-explainer"
+      }
     }
   },
+  "outputStyle": "Concise",
   "feedbackDrafts": "off",
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark"
