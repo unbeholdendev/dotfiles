@@ -33,7 +33,7 @@
     signal-desktop
     sops
     sparrow
-    t3code
+    (t3code.override { enableCodex = false; })
     talosctl
     thunderbird
     tor-browser
