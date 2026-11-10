@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/f37ff5c2009e3923aa79378f923f01d5759b6d84";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -16,17 +16,9 @@
     let
       system = "x86_64-linux";
 
-      overlays = [
-        (final: prev: {
-          codex = prev.codex.overrideAttrs (old: {
-            buildInputs = old.buildInputs ++ [ final.aws-lc final.zstd ];
-          });
-        })
-      ];
-
       # Named rather than allowUnfree, so a second one cannot arrive unseen.
       containerPkgs = import nixpkgs {
-        inherit system overlays;
+        inherit system;
         config.allowUnfreePredicate =
           p: builtins.elem (nixpkgs.lib.getName p) [ "claude-code" ];
       };
@@ -46,7 +38,7 @@
 
       host = target: { dotfiles, module }:
         home-manager.lib.homeManagerConfiguration {
-          pkgs = import nixpkgs { inherit system overlays; };
+          pkgs = nixpkgs.legacyPackages.${system};
           extraSpecialArgs = { inherit dotfiles target hermes; nixos = false; };
           modules = [ module ];
         };
@@ -64,7 +56,6 @@
         nixpkgs.lib.nixosSystem {
           inherit system;
           modules = [
-            { nixpkgs.overlays = overlays; }
             disko.nixosModules.disko
             home-manager.nixosModules.home-manager
             ./nixos/${name}.nix
