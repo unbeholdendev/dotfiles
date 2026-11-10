@@ -16,9 +16,17 @@
     let
       system = "x86_64-linux";
 
+      overlays = [
+        (final: prev: {
+          codex = prev.codex.overrideAttrs (old: {
+            buildInputs = old.buildInputs ++ [ final.aws-lc final.zstd ];
+          });
+        })
+      ];
+
       # Named rather than allowUnfree, so a second one cannot arrive unseen.
       containerPkgs = import nixpkgs {
-        inherit system;
+        inherit system overlays;
         config.allowUnfreePredicate =
           p: builtins.elem (nixpkgs.lib.getName p) [ "claude-code" ];
       };
@@ -38,7 +46,7 @@
 
       host = target: { dotfiles, module }:
         home-manager.lib.homeManagerConfiguration {
-          pkgs = nixpkgs.legacyPackages.${system};
+          pkgs = import nixpkgs { inherit system overlays; };
           extraSpecialArgs = { inherit dotfiles target hermes; nixos = false; };
           modules = [ module ];
         };
@@ -56,6 +64,7 @@
         nixpkgs.lib.nixosSystem {
           inherit system;
           modules = [
+            { nixpkgs.overlays = overlays; }
             disko.nixosModules.disko
             home-manager.nixosModules.home-manager
             ./nixos/${name}.nix
