@@ -174,7 +174,7 @@ EOF
     # Nothing else gives a GitHub container a git identity.
     devcontainer exec --workspace-folder "$folder" zsh -c '
       gh auth login --with-token < "$HOME/.github-token" &&
-        read -r id login < <(gh api user --jq "\(.id) \(.login)") &&
+        read -r id login < <(gh api user --jq "[.id, .login] | @tsv") &&
         git config --global user.name "$login" &&
         git config --global user.email "$id+$login@users.noreply.github.com" ||
         echo "gh login failed: T3 Code cannot read GitHub PRs here, and commits keep the host identity" >&2'
