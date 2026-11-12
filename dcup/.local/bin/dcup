@@ -112,10 +112,13 @@ printf 'PRETTY_HOSTNAME=%s\n' "$(basename "$resolved")" |
 # scratch folder. The lock turns a rerun into a no-op while the server lives.
 # Its output holds pairing details, so it goes nowhere; T3 Code keeps its logs.
 # Chrome has no sandbox as root, and T3's browser refuses to start without this.
+# With the lock held no server lives, yet a rebuild can reuse the recorded PID,
+# and t3 start then refuses to run.
 devcontainer exec --workspace-folder "$folder" "${browser_env[@]}" zsh -c '
   [[ -n $T3_BROWSER ]] && export T3CODE_SERVER_BROWSER_SANDBOX=$((EUID != 0))
-  T3CODE_TELEMETRY_ENABLED=false setsid -f flock -n /history/t3.lock \
-    t3 start --no-browser --host 0.0.0.0 --port 3773 --base-dir /history/t3 \
+  T3CODE_TELEMETRY_ENABLED=false setsid -f flock -n /history/t3.lock zsh -c "
+    rm -f /history/t3/userdata/server-runtime.json
+    exec t3 start --no-browser --host 0.0.0.0 --port 3773 --base-dir /history/t3" \
     </dev/null >/dev/null 2>&1'
 
 ports=$HOME/.devcontainer-state/t3-ports

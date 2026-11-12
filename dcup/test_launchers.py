@@ -391,5 +391,16 @@ if command == "qrencode":
             script,
         )
 
+    def test_dcup_clears_the_stale_t3_record_only_under_the_lock(self):
+        calls, _ = self.run_launcher("dcup", self.workspace)
+        script = next(
+            call["argv"][-1] for call in calls
+            if call["command"] == "devcontainer" and "t3 start" in " ".join(call["argv"])
+        )
+        locked = script.index("flock -n /history/t3.lock")
+        cleared = script.index("rm -f /history/t3/userdata/server-runtime.json")
+        self.assertLess(locked, cleared)
+        self.assertLess(cleared, script.index("exec t3 start"))
+
 if __name__ == "__main__":
     unittest.main()
