@@ -152,6 +152,14 @@ if command == "qrencode":
         self.assertNotIn("which token", output)
         self.assert_install(calls)
 
+    def test_dcup_caps_the_container_resources(self):
+        self.env["EXISTING_CONTAINER"] = "1"
+        calls, _ = self.run_launcher("dcup", self.workspace)
+        self.assertIn([
+            "update", "--memory", "3g", "--memory-swap", "3g", "--cpus", "4",
+            "--pids-limit", "4096", "container-id",
+        ], [call["argv"] for call in calls if call["command"] == "docker"])
+
     def test_dcup_without_terminal_does_not_ask(self):
         calls, _ = self.run_launcher("dcup", self.workspace)
         self.assertEqual(

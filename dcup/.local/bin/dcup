@@ -99,14 +99,18 @@ devcontainer up --workspace-folder "$folder" --no-lockfile \
   --mount "type=volume,source=codex-state,target=/codex" \
   "${@:2}"
 
+container=$(docker ps -q --filter "label=devcontainer.local_folder=$resolved")
+
+# Applied after up so it also covers a project's own devcontainer config. Swap
+# equal to memory means none: a runaway is killed instead of thrashing the host.
+docker update --memory 3g --memory-swap 3g --cpus 4 --pids-limit 4096 "$container" >/dev/null
+
 devcontainer exec --workspace-folder "$folder" "${browser_env[@]}" \
   /dotfiles/install.sh container
 
 # T3 Code names a server after this, or else the container's random hostname.
 printf 'PRETTY_HOSTNAME=%s\n' "$(basename "$resolved")" |
-  docker exec -i -u root \
-    "$(docker ps -q --filter "label=devcontainer.local_folder=$resolved")" \
-    sh -c 'cat > /etc/machine-info'
+  docker exec -i -u root "$container" sh -c 'cat > /etc/machine-info'
 
 # Not t3 serve: it never adds the workspace as a project, so threads land in a
 # scratch folder. The lock turns a rerun into a no-op while the server lives.
