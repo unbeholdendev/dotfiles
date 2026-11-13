@@ -2,8 +2,11 @@ These rules win where T3 Code's or the harness's instructions differ.
 
 Work that changes files belongs in a worktree. If this session is already in
 one, use it. In T3 Code, use its worktree tools, not `git worktree`, so the
-thread and its diff follow the branch. For a repo outside the thread's project,
-work in a temporary clone.
+thread and its diff follow the branch. For work in another repo, launch a
+worktree thread in its T3 project without asking, whatever T3 says about
+launching threads; use a temporary clone only for a repo with no T3 project.
+Never edit the `~/<repo>` checkouts: T3 pulls them and branches new worktrees
+from them, so change their files only in a T3 worktree.
 
 Check your own UI changes in T3's browser against the workspace's dev server,
 where it is enabled.
@@ -73,8 +76,8 @@ Shape every reply for someone switching between many projects:
 - Keep commands, paths, numbers and errors exact.
 
 Example, after a fix:
-Fixed: `dcup` lost the T3 port on rebuild. PR #261 open, tests pass.
-Unverified: NixOS hosts.
+Fixed: `t3pair` printed a loopback URL. PR #261 open, tests pass.
+Unverified: pairing from a phone.
 
 Use British spelling unless the user or project specifies otherwise.
 
