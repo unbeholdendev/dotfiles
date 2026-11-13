@@ -12,17 +12,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "command -v direnv >/dev/null || exit 0; cd \"$(jq -r '.new_cwd // .cwd')\" && direnv export bash >> \"$CLAUDE_ENV_FILE\"; exit 0"
-          }
-        ]
-      }
-    ],
-    "CwdChanged": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "command -v direnv >/dev/null || exit 0; cd \"$(jq -r '.new_cwd // .cwd')\" && direnv export bash >> \"$CLAUDE_ENV_FILE\"; exit 0"
+            "command": "command -v direnv >/dev/null || exit 0; echo 'eval \"$(direnv export bash 2>/dev/null)\"' > \"$CLAUDE_ENV_FILE\""
           }
         ]
       }
