@@ -17,36 +17,42 @@
       system = "x86_64-linux";
 
       # Named rather than allowUnfree, so a second one cannot arrive unseen.
-      containerPkgs = import nixpkgs {
+      agentPkgs = import nixpkgs {
         inherit system;
         config.allowUnfreePredicate =
           p: builtins.elem (nixpkgs.lib.getName p) [ "claude-code" ];
       };
 
       laptopDotfiles = "/home/pycan/Documents/dotfiles";
+      # Root's, readable by agent: root must never build from a clone agent can write.
+      orenDotfiles = "/srv/dotfiles";
 
-      hosts = {
-        "pycan@t460s" = {
-          dotfiles = laptopDotfiles;
-          module = ./home/laptop.nix;
-        };
-        "root@oren" = {
-          dotfiles = "/root/dotfiles";
-          module = ./home/oren.nix;
+      homeOn = { user, module, dotfiles, target, extraSpecialArgs ? { } }: {
+        home-manager = {
+          useGlobalPkgs = true;
+          useUserPackages = false;
+          backupFileExtension = "hm-bak";
+          extraSpecialArgs = {
+            inherit dotfiles target;
+            nixos = true;
+          } // extraSpecialArgs;
+          users.${user} = import module;
         };
       };
-
-      host = target: { dotfiles, module }:
-        home-manager.lib.homeManagerConfiguration {
-          pkgs = nixpkgs.legacyPackages.${system};
-          extraSpecialArgs = { inherit dotfiles target hermes; nixos = false; };
-          modules = [ module ];
-        };
     in
     {
-      homeConfigurations = nixpkgs.lib.mapAttrs host hosts // {
+      homeConfigurations = {
+        "pycan@t460s" = home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.${system};
+          extraSpecialArgs = {
+            dotfiles = laptopDotfiles;
+            target = "pycan@t460s";
+            nixos = false;
+          };
+          modules = [ ./home/laptop.nix ];
+        };
         container = home-manager.lib.homeManagerConfiguration {
-          pkgs = containerPkgs;
+          pkgs = agentPkgs;
           extraSpecialArgs.dotfiles = null;
           modules = [ ./home/container.nix ];
         };
@@ -59,20 +65,31 @@
             disko.nixosModules.disko
             home-manager.nixosModules.home-manager
             ./nixos/${name}.nix
-            {
-              home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = false;
-                backupFileExtension = "hm-bak";
-                extraSpecialArgs = {
-                  dotfiles = laptopDotfiles;
-                  target = name;
-                  nixos = true;
-                };
-                users.pycan = import ./home/laptop.nix;
-              };
-            }
+            (homeOn {
+              user = "pycan";
+              module = ./home/laptop.nix;
+              dotfiles = laptopDotfiles;
+              target = name;
+            })
           ];
-        });
+        }) // {
+        oren = nixpkgs.lib.nixosSystem {
+          inherit system;
+          specialArgs.dotfiles = orenDotfiles;
+          modules = [
+            disko.nixosModules.disko
+            home-manager.nixosModules.home-manager
+            ./nixos/oren.nix
+            { nixpkgs.pkgs = agentPkgs; }
+            (homeOn {
+              user = "agent";
+              module = ./home/oren.nix;
+              dotfiles = orenDotfiles;
+              target = "oren";
+              extraSpecialArgs = { inherit hermes; };
+            })
+          ];
+        };
+      };
     };
 }

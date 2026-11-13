@@ -148,5 +148,62 @@ apt-get() {
                 self.assertEqual(self.hook_returncode(command), 0)
 
 
+class AgentSetupTests(unittest.TestCase):
+    def setUp(self):
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        root = Path(temp.name)
+        bin_dir = root / "bin"
+        bin_dir.mkdir()
+        (bin_dir / "git").write_text('''#!/usr/bin/env bash
+[[ $1 == init ]] && exec mkdir -p "$3/.git"
+[[ $3 == rev-parse ]] && exit 1
+[[ $3 == checkout ]] || exit 0
+mkdir -p "$2/pstack/skills/unslop"
+printf 'name: unslop\\ndisable-model-invocation: true\\n' > "$2/pstack/skills/unslop/SKILL.md"
+''')
+        (bin_dir / "codex").write_text("#!/bin/sh\n")
+        for tool in bin_dir.iterdir():
+            tool.chmod(0o755)
+        self.claude = root / "claude"
+        self.codex = root / "codex"
+        self.env = {
+            **os.environ,
+            "HOME": str(root),
+            "PATH": f"{bin_dir}:{os.environ['PATH']}",
+            "CLAUDE_CONFIG_DIR": str(self.claude),
+            "CODEX_HOME": str(self.codex),
+        }
+
+    def run_setup(self):
+        result = subprocess.run(
+            ["bash", str(REPO / "agents/setup.sh"), str(REPO)], env=self.env,
+            stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=60,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return result
+
+    def test_links_prompt_settings_and_skills(self):
+        result = self.run_setup()
+        self.assertEqual((self.claude / "settings.json").readlink(), REPO / "claude/.claude/settings.json")
+        self.assertEqual((self.claude / "CLAUDE.md").readlink(), REPO / "agents/AGENTS.md")
+        self.assertEqual((self.codex / "AGENTS.md").readlink(), REPO / "agents/AGENTS.md")
+        self.assertEqual((self.codex / "hooks.json").readlink(), REPO / "codex/.codex/hooks.json")
+        self.assertEqual((self.codex / "config.toml").read_text(), (REPO / "codex/.codex/config.toml").read_text())
+        for cfg in (self.claude, self.codex):
+            self.assertEqual((cfg / "skills/unslop/SKILL.md").read_text(), "name: unslop\n")
+            self.assertEqual((cfg / "skills/security-audit").readlink(),
+                             cfg / "third-party/cloudflare/skills/security-audit")
+        self.assertTrue((self.codex / "skills/impeccable").is_symlink())
+        self.assertFalse((self.claude / "skills/impeccable").exists())
+        self.assertIn("approve it with /hooks", result.stderr)
+
+    def test_keeps_existing_codex_config(self):
+        self.codex.mkdir()
+        (self.codex / "config.toml").write_text("model = 'mine'\n")
+        self.run_setup()
+        self.assertEqual((self.codex / "config.toml").read_text(), "model = 'mine'\n")
+
+
 if __name__ == "__main__":
     unittest.main()

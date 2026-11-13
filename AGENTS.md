@@ -1,12 +1,14 @@
 # dotfiles
 
 NixOS + niri desktop, headless host, and dev container configuration.
-Desktop configuration is edited here but runs on the laptops. Container
-configuration runs here; there is no Wayland session.
+Desktop configuration is edited here but runs on the laptops; `oren`, the
+headless host, is a NixOS Proxmox VM configured here. Container configuration
+runs here; there is no Wayland session.
 
 Program directories mirror paths under `$HOME`; modules in `home/` install
-them. `agents/` holds the prompt shared by Claude
-and Codex. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
+them. `agents/` holds the prompt shared by Claude and Codex, and `setup.sh`,
+which links it as `CLAUDE.md` or `AGENTS.md`. `install.sh` runs it in a
+container; on `oren`, a home-manager activation step does.
 
 ## Nix and installation
 
@@ -40,7 +42,30 @@ and Codex. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
 
 ## Shared agent state
 
-- Every container installs Claude and Codex; there is no selection.
+- Every container and `oren` install Claude and Codex from `home/agents.nix`;
+  there is no selection. Keep the agent packages there, not in a host or
+  container module. Claude Code is unfree: allow it by name in `agentPkgs`,
+  never with `allowUnfree`, and keep the laptops on plain nixpkgs.
+- Agent setup lives in `agents/setup.sh`, which `install.sh` and `oren`'s
+  activation both run. Change it there, not in either caller.
+- `oren` runs agents and one T3 Code server on the host as the unprivileged
+  user `agent`, with no dev container: a lingering systemd user unit on port
+  3773, the only port its firewall opens, with its state in `~/.t3`. `t3pair`
+  pairs with it. Derive its paths from the configured home, never `/root`.
+- `agent` must never gain root: no `wheel`, `docker` or other privileged
+  group, no sudo rule, not a Nix trusted user. Root rebuilds `oren` with root's
+  `dots` from the root-owned clone at `/srv/dotfiles`, which only pulls merged
+  main. Never let root build from, or `agent` write to, a clone `agent` can
+  change: agents edit this repo in T3 worktrees, so that would make `agent`
+  root. `agent`'s config links read `/srv/dotfiles` and are read-only to it.
+- On `oren`, direnv with nix-direnv loads per-project toolchains. Claude gets
+  them from the SessionStart and CwdChanged hooks in its settings, which must
+  do nothing where direnv is absent, as in the containers. direnv's whitelist
+  covers only `~/.t3/worktrees/`; widen it no further. Never set `BASH_ENV` to
+  run direnv: direnv starts bash, which reads it again, and the loop stalls T3.
+- `dcup`, `dcpair`, `home/container.nix` and `install.sh` now serve only the
+  dev containers on the previous headless host; no configuration here installs
+  `dcup`.
 - `dcup` runs one T3 Code server per container, its state in `/history/t3` so
   threads and pairings survive a rebuild, and forwards a per-workspace host
   port claimed under `~/.devcontainer-state/t3-ports`. It listens on every host
@@ -60,8 +85,10 @@ and Codex. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
   on the host inside it, as the container can write its hooks and config.
 - `/claude` and `/codex` are shared across containers. Respect explicit
   `CLAUDE_CONFIG_DIR` and `CODEX_HOME` overrides.
-- Codex's writable config seeds once with no approvals or inner sandbox. Keep
-  these defaults container-only. Its skills go in
+- Codex's writable config seeds once with no approvals or inner sandbox, and
+  Claude bypasses permissions. Keep these defaults to the containers and
+  `oren`, a disposable VM with no SSH, where agents run unsandboxed as an
+  unprivileged user. Never apply them to the laptops. Codex's skills go in
   `CODEX_HOME/skills`, linked to checkouts under `CODEX_HOME/third-party`.
 - Keep pinned third-party skill checkouts under `third-party/`, outside
   `skills/`. Link only the intended skill groups so agents do not discover other
@@ -85,8 +112,10 @@ and Codex. `install.sh` links the prompt as `CLAUDE.md` or `AGENTS.md`.
 ## Secrets
 
 `dcup` copies the selected Forgejo or GitHub token into a new container, never
-both. Never print or commit tokens, put them in remote URLs, or pass them in
-argv. Read them at call time from their files.
+both. On `oren` both sit in `agent`'s home, mode 600, placed by hand; its
+activation logs `tea` and `gh` in once each.
+Never print or commit tokens, put them in remote URLs, or pass them in argv.
+Read them at call time from their files.
 
 Agents and T3 Code both reach Forgejo through `tea`, so the token needs
 `read:user`, or T3 Code cannot read PRs and `tea login add` refuses it. `dcup`
@@ -113,15 +142,20 @@ both are untracked and written by hand.
 Choose checks for the files changed. Documentation-only edits need review and
 `git diff --check`, not an activation.
 
-- For NixOS changes, evaluate both laptops:
+- For NixOS changes, evaluate both laptops and `oren`:
 
   ```
   nix eval .#nixosConfigurations.t460s.config.system.build.toplevel.drvPath
   nix eval .#nixosConfigurations.t14.config.system.build.toplevel.drvPath
+  nix eval .#nixosConfigurations.oren.config.system.build.toplevel.drvPath
   ```
+
+  A change meant for `oren` alone must leave the laptops' drvPaths unchanged.
 
 - For launcher or installer changes, run
   `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest test_install.py dcup/test_launchers.py`.
+- For `oren` changes, also build its toplevel. Never activate or switch it
+  here.
 - For installer or container home configuration changes, run
   `./install.sh container` twice and check both runs succeed. This activates the
   worktree's Nix configuration in the running container; it is not a dry run.
