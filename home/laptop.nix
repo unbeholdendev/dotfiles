@@ -44,6 +44,7 @@
   ];
 
   home.sessionVariables = {
+    DOTFILES_SHOW_HOST = "0";
     KUBECONFIG = "${config.home.homeDirectory}/talos/dion/kubeconfig";
     TALOSCONFIG = "${config.home.homeDirectory}/talos/dion/talosconfig";
   };

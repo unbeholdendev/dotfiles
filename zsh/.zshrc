@@ -57,7 +57,7 @@ zstyle ':vcs_info:git:*' actionformats ' (%b|%a%u%c)'
 add-zsh-hook precmd vcs_info
 setopt prompt_subst
 PROMPT=''
-[[ -n ${SSH_CONNECTION:-} ]] && PROMPT='%F{109}%m%f '
+[[ ${DOTFILES_SHOW_HOST:-1} != 0 || -n ${SSH_CONNECTION:-} ]] && PROMPT='%F{109}%m%f '
 PROMPT+='%F{180}%~%f%F{244}${vcs_info_msg_0_}%f %(?.%F{71}.%F{167})❯%f '
 
 for d in ${(s.:.)XDG_DATA_DIRS}; do
