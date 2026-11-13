@@ -52,9 +52,12 @@ runs it.
   change: agents edit this repo in T3 worktrees, so that would make `agent`
   root. `agent`'s config links read `/srv/dotfiles` and are read-only to it.
 - On `oren`, direnv with nix-direnv loads per-project toolchains. Claude gets
-  them from the SessionStart and CwdChanged hooks in its settings, which must
-  do nothing where direnv is absent; Claude's shell snapshot re-exports `PATH`
-  after `.zshenv`, so the hooks stay. Codex gets them from `oren`'s `.zshenv`,
+  them from a SessionStart hook in its settings, which must do nothing where
+  direnv is absent. It writes a line that runs `direnv export` before each
+  Bash command, in that command's cwd. Add no CwdChanged hook: hooks lack the
+  loaded `DIRENV_*` state, so it cannot unload a dev shell. Claude's shell
+  snapshot re-exports `PATH` after `.zshenv`, so the hook stays. Codex gets
+  them from `oren`'s `.zshenv`,
   which runs direnv in non-interactive zsh: Codex runs each command that way,
   after sourcing its snapshot. direnv's whitelist
   covers only `~/.t3/worktrees/`; widen it no further. Never set `BASH_ENV` to
