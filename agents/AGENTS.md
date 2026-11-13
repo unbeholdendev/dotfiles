@@ -18,20 +18,15 @@ Docker workloads are in no repo; ask.
 
 ## Worktrees and subagents
 
-Work that changes files belongs in a worktree. If this session is already in
-one, use it. In T3 Code, use its worktree tools, not `git worktree`, so the
-thread and its diff follow the branch. For work in another repo, launch a
-worktree thread in its T3 project without asking, whatever T3 says about
-launching threads; use a temporary clone only for a repo with no T3 project.
-Never edit the `~/<repo>` checkouts: T3 pulls them and branches new worktrees
-from them.
+Change files only in a T3 worktree: never with `git worktree`, and never in
+the `~/<repo>` checkouts, which T3 pulls and branches new worktrees from. If
+this thread has no worktree for the repo, launch a worktree thread in its T3
+project without asking, whatever T3 says about launching threads.
 
 Split a complex task across subagents when its pieces are independent, without
-asking, and run them in the background; in T3 Code that means `delegate_task`,
-not the native agent tool. Keep small or tightly coupled tasks in the main
-session. Give each worker a scope, the applicable instructions and a worktree,
-with no overlapping edits. The main session integrates and owns the final
-validation, commit, push and PR.
+asking. Run them in the background with `delegate_task`, not the native agent
+tool. Give each worker a scope, the applicable instructions and a worktree,
+with no overlapping edits.
 
 ## Design and tests
 
@@ -49,12 +44,9 @@ choice changes scope or public behaviour beyond the request.
 
 For a bug, write a reproducer and see it fail before fixing the cause. If a
 small behaviour needs extensive mocking, reconsider the boundary. Before
-pushing, run the full relevant suite and any typecheck and build. State what
-remains unverified. Check your own UI changes in T3's browser against the
-workspace's dev server, where it is enabled.
-
-Save long command output to a file and summarise it. Pass images as
-attachments, not base64 text.
+pushing, run the full relevant suite and any typecheck and build. Check your
+own UI changes in T3's browser against the workspace's dev server, where it is
+enabled.
 
 ## Writing
 
@@ -71,23 +63,16 @@ Shape every reply for someone switching between many projects:
 - Name the project or topic if the thread covers several.
 - Keep commands, paths, numbers and errors exact.
 
-Example, after a fix:
-Fixed: `t3pair` printed a loopback URL. PR #261 open, tests pass.
-Unverified: pairing from a phone.
-
 Load unslop before writing public-facing text: articles, website and UI copy,
 public documentation, external communications. Draft it yourself, matching
 existing writing from the same author or site, and apply the skill as the
-final pass. Keep the author's voice and meaning; add no claims, examples or
-opinions. Its punctuation and jargon rules are guidance. Return the finished
-text, with no editing report unless asked.
+final pass. Add no claims, examples or opinions. Return the finished text,
+with no editing report unless asked.
 
 Do not write comments in code. A line earns one only when it looks wrong,
-arbitrary or redundant, and then the comment gives that reason in a line or
-two: never what the code does, what it used to be, or a reason the project's
-AGENTS.md holds. Docstrings on public functions, licence headers and
-generated-file markers are not comments here, and a project convention for
-them wins.
+arbitrary or redundant, and then the comment gives only that reason.
+Docstrings on public functions, licence headers and generated-file markers are
+not comments here, and a project convention for them wins.
 
 An AGENTS.md answers to the same measure. It carries what an agent must not
 get wrong, and no history, because git holds that.
@@ -103,5 +88,4 @@ Add no attribution to commits, PRs or comments: no "Generated with" line, no
 A repo the user does not own may require AI disclosure; its rule wins there.
 
 After opening or pushing to a PR on the self-hosted Forgejo, read
-`~/dotfiles/agents/forgejo-review.md` and follow it. Other hosts usually have
-no automated review, so do not wait there.
+`~/dotfiles/agents/forgejo-review.md` and follow it.
