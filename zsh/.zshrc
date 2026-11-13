@@ -23,6 +23,7 @@ bindkey '^[OB' history-beginning-search-forward
 
 source <(fzf --zsh)
 eval "$(zoxide init zsh)"
+eval "$(direnv hook zsh)"
 
 export EDITOR=nvim
 export VISUAL=nvim

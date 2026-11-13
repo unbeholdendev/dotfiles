@@ -1,4 +1,4 @@
-{ dotfiles, lib, modulesPath, pkgs, ... }:
+{ dotfiles, modulesPath, pkgs, ... }:
 {
   imports = [ "${modulesPath}/profiles/qemu-guest.nix" ];
 
@@ -68,7 +68,6 @@
   programs.zsh = {
     enable = true;
     enableGlobalCompInit = false;
-    interactiveShellInit = ''eval "$(${lib.getExe pkgs.direnv} hook zsh)"'';
   };
 
   # Playwright's browsers are prebuilt for Ubuntu 24.04, hence the pinned sonames.
