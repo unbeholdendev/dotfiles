@@ -35,13 +35,11 @@ for agent in claude codex; do
   )
 
   if [[ $agent == claude ]]; then
-    [[ -z ${CLAUDE_CONFIG_DIR:-} && -d /claude ]] && export CLAUDE_CONFIG_DIR=/claude
     cfg=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
     mkdir -p "$cfg"
     ln -sfn "$repo/claude/.claude/settings.json" "$cfg/settings.json"
     ln -sfn "$repo/agents/AGENTS.md" "$cfg/CLAUDE.md"
   else
-    [[ -z ${CODEX_HOME:-} && -d /codex ]] && export CODEX_HOME=/codex
     cfg=${CODEX_HOME:-$HOME/.codex}
     mkdir -p "$cfg"
     ln -sfn "$repo/agents/AGENTS.md" "$cfg/AGENTS.md"

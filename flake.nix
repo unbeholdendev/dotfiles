@@ -51,11 +51,6 @@
           };
           modules = [ ./home/laptop.nix ];
         };
-        container = home-manager.lib.homeManagerConfiguration {
-          pkgs = agentPkgs;
-          extraSpecialArgs.dotfiles = null;
-          modules = [ ./home/container.nix ];
-        };
       };
 
       nixosConfigurations = nixpkgs.lib.genAttrs [ "t460s" "t14" ] (name:
