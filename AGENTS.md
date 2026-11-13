@@ -50,7 +50,7 @@ container; on `oren`, a home-manager activation step does.
   activation both run. Change it there, not in either caller.
 - `oren` runs agents and one T3 Code server on the host as the unprivileged
   user `agent`, with no dev container: a lingering systemd user unit on port
-  3773, the only port its firewall opens, with its state in `~/.t3`. `t3pair`
+  3773, with its state in `~/.t3`. `t3pair`
   pairs with it. Derive its paths from the configured home, never `/root`.
 - `agent` must never gain root: no `wheel`, `docker` or other privileged
   group, no sudo rule, not a Nix trusted user. Root rebuilds `oren` with root's
@@ -87,7 +87,7 @@ container; on `oren`, a home-manager activation step does.
   `CLAUDE_CONFIG_DIR` and `CODEX_HOME` overrides.
 - Codex's writable config seeds once with no approvals or inner sandbox, and
   Claude bypasses permissions. Keep these defaults to the containers and
-  `oren`, a disposable VM with no SSH, where agents run unsandboxed as an
+  `oren`, a disposable VM where agents run unsandboxed as an
   unprivileged user. Never apply them to the laptops. Codex's skills go in
   `CODEX_HOME/skills`, linked to checkouts under `CODEX_HOME/third-party`.
 - Keep pinned third-party skill checkouts under `third-party/`, outside
