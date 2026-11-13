@@ -43,6 +43,7 @@ in
     cargo
     go
     nodejs
+    openssl
     python3
     rustc
     (writeShellApplication {
