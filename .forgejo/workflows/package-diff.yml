@@ -35,7 +35,7 @@ jobs:
           git archive "$BASE_SHA" | tar -x -C "$work/base"
           git archive "$HEAD_SHA" | tar -x -C "$work/head"
 
-          BASE=$work/base HEAD=$work/head HOME_USER=runner HOME=/home/runner \
+          BASE=$work/base HEAD=$work/head \
             nix eval --impure --json --file "$work/head/.forgejo/package-diff.nix" > "$work/body.json"
           curl -sSf -H @"$work/auth" -H 'Content-Type: application/json' \
             --data @"$work/body.json" "$API/repos/$REPO/issues/$PR/comments" > /dev/null
