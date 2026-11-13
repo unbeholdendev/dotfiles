@@ -35,6 +35,16 @@ runs it.
   user `agent`, with no dev container: a lingering systemd user unit on port
   3773, with its state in `~/.t3`. `t3pair`
   pairs with it. Derive its paths from the configured home, never `/root`.
+- T3 keeps its projects only in `~/.t3`, and t3code 0.1.8 cannot declare
+  them. After a reinstall, recreate them by hand. Each repo under `~agent` is
+  its own project with default thread mode `worktree` and auto-pull on. Its
+  worktree-create script runs `bun install` where the repo has a `bun.lock`,
+  then `(cd site && bun install)` where `site/` has one too; repos without
+  one get no script. A project `agent` at `/home/agent`, in local mode, serves
+  read-only cross-repo work.
+- Playwright's downloaded browsers load through nix-ld. When one reports a
+  missing library, add it to `programs.nix-ld.libraries` in `nixos/oren.nix`;
+  `playwright install --with-deps` needs root.
 - `agent` must never gain root: no `wheel`, `docker` or other privileged
   group, no sudo rule, not a Nix trusted user. Root rebuilds `oren` with root's
   `dots` from the root-owned clone at `/srv/dotfiles`, which only pulls merged

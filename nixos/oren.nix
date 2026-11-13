@@ -71,8 +71,76 @@
     interactiveShellInit = ''eval "$(${lib.getExe pkgs.direnv} hook zsh)"'';
   };
 
-  # Agents run prebuilt binaries, such as browsers, that expect a loader path.
-  programs.nix-ld.enable = true;
+  # Playwright's browsers are prebuilt for Ubuntu 24.04, hence the pinned sonames.
+  programs.nix-ld = {
+    enable = true;
+    libraries = with pkgs; [
+      alsa-lib
+      at-spi2-atk
+      at-spi2-core
+      atk
+      cairo
+      cups
+      dbus
+      enchant
+      expat
+      flite
+      fontconfig
+      freetype
+      gdk-pixbuf
+      glib
+      graphene
+      gst_all_1.gst-plugins-bad
+      gst_all_1.gst-plugins-base
+      gst_all_1.gstreamer
+      gtk3
+      gtk4
+      harfbuzz
+      harfbuzzFull
+      hyphen
+      icu74
+      lcms2
+      libavif
+      libdrm
+      libepoxy
+      libevent
+      libgbm
+      libgcrypt
+      libgpg-error
+      libjpeg8
+      libmanette
+      libopus
+      libpng
+      libpsl
+      libsecret
+      libtasn1
+      libwebp
+      libxkbcommon
+      libxml2_13
+      libxslt
+      mesa
+      nghttp2
+      nspr
+      nss
+      pango
+      sqlite
+      vulkan-loader
+      wayland
+      woff2
+      xorg.libX11
+      xorg.libXcomposite
+      xorg.libXdamage
+      xorg.libXext
+      xorg.libXfixes
+      xorg.libXrandr
+      xorg.libxcb
+      xorg.libxshmfence
+    ];
+  };
+  # WebKit finds Mesa's EGL vendor and GBM backends in /run/opengl-driver.
+  hardware.graphics.enable = true;
+  # Playwright checks browser libraries with ldd, which cannot see nix-ld's.
+  environment.variables.PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = "1";
 
   virtualisation.docker.rootless = {
     enable = true;
