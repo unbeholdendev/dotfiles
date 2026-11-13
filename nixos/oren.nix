@@ -34,7 +34,13 @@
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.systemd-boot.configurationLimit = 5;
 
-  networking.hostName = "oren";
+  networking = {
+    hostName = "oren";
+    useDHCP = false;
+    interfaces.ens18.ipv4.addresses = [{ address = "192.168.4.101"; prefixLength = 24; }];
+    defaultGateway = "192.168.4.1";
+    nameservers = [ "192.168.4.1" ];
+  };
 
   services.qemuGuest.enable = true;
   services.openssh = {
