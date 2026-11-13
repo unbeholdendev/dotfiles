@@ -6,6 +6,7 @@ let
 in
 {
   imports = [
+    ./agents.nix
     ./common.nix
     ./nvim.nix
     ./zsh.nix
@@ -13,22 +14,9 @@ in
 
   # nix, because install.sh points ~/.nix-profile away from the installer's.
   home.packages = with pkgs; [
-    claude-code
-    codex
-    jq
     nix
-    t3code
-    gh
-    tea
     util-linux
-    (writeShellApplication {
-      name = "deny-pr-merge";
-      runtimeInputs = [ jq ];
-      text = builtins.readFile ../agents/deny-pr-merge.sh;
-    })
   ];
-
-  xdg.configFile."git/ignore".text = ".claude/worktrees/\n";
 
   # A container has no user systemd, and nobody reads a man page in one.
   systemd.user.enable = false;

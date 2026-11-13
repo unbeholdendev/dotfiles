@@ -7,6 +7,26 @@
     "defaultMode": "bypassPermissions"
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "command -v direnv >/dev/null || exit 0; cd \"$(jq -r '.new_cwd // .cwd')\" && direnv export bash >> \"$CLAUDE_ENV_FILE\"; exit 0"
+          }
+        ]
+      }
+    ],
+    "CwdChanged": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "command -v direnv >/dev/null || exit 0; cd \"$(jq -r '.new_cwd // .cwd')\" && direnv export bash >> \"$CLAUDE_ENV_FILE\"; exit 0"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Bash",
