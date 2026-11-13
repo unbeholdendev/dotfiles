@@ -59,7 +59,9 @@ runs it.
   snapshot re-exports `PATH` after `.zshenv`, so the hook stays. Codex gets
   them from `oren`'s `.zshenv`,
   which runs direnv in non-interactive zsh: Codex runs each command that way,
-  after sourcing its snapshot. direnv's whitelist
+  after sourcing its snapshot. That `.zshenv` must skip Claude (`CLAUDECODE`
+  set): its `DIRENV_*` would survive the snapshot's `PATH`, so Claude's line
+  would find nothing to load. direnv's whitelist
   covers only `~/.t3/worktrees/`; widen it no further. Never set `BASH_ENV` to
   run direnv: direnv starts bash, which reads it again, and the loop stalls T3.
 - Respect explicit `CLAUDE_CONFIG_DIR` and `CODEX_HOME` overrides.
