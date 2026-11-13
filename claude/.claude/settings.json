@@ -29,9 +29,6 @@
       }
     ]
   },
-  "worktree": {
-    "baseRef": "head"
-  },
   "enabledPlugins": {
     "mattpocock-skills@mattpocock": true,
     "impeccable@impeccable": true
