@@ -11,6 +11,4 @@
       '';
     })
   ];
-
-  home.file.".dots-path".text = "${dotfiles}\n";
 }

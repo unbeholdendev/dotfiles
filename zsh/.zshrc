@@ -37,16 +37,6 @@ alias ll='ls -lah'
 alias ..='cd ..'
 alias ...='cd ../..'
 
-if ! command -v dots >/dev/null; then
-  dots() {
-    if [[ -z ${DOTFILES:-} ]]; then
-      echo "no DOTFILES: run the clone's install.sh once to write ~/.dots-path" >&2
-      return 1
-    fi
-    "$DOTFILES/install.sh" "$@"
-  }
-fi
-
 autoload -Uz vcs_info add-zsh-hook
 zstyle ':vcs_info:*' enable git
 zstyle ':vcs_info:git:*' check-for-changes true
