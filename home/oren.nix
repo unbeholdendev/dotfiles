@@ -85,11 +85,7 @@ in
   # Neovim rewrites its lock, and agent cannot write root's clone.
   xdg.configFile."nvim/nvim-pack-lock.json".enable = false;
 
-  programs.direnv = {
-    enable = true;
-    nix-direnv.enable = true;
-    config.whitelist.prefix = [ "${t3Dir}/worktrees/" ];
-  };
+  programs.direnv.config.whitelist.prefix = [ "${t3Dir}/worktrees/" ];
 
   systemd.user.services.t3 = {
     Unit.Description = "T3 Code";

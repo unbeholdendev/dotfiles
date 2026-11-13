@@ -9,4 +9,9 @@
     zsh-autosuggestions
     zsh-syntax-highlighting
   ];
+
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+  };
 }
