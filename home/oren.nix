@@ -90,8 +90,9 @@ in
 
   # Codex runs each command in a fresh non-interactive zsh, which skips the .zshrc hook.
   # DIRENV_DIR outside the worktrees is a dev shell inherited from Codex's snapshot: unload it.
+  # Skip Claude: its snapshot then resets PATH but keeps DIRENV_*, so its own direnv line would load nothing.
   home.file.".zshenv".source = lib.mkForce (pkgs.writeText "zshenv" (builtins.readFile ../zsh/.zshenv + ''
-    if [[ ! -o interactive && ( $PWD/ == ${t3Dir}/worktrees/* || -n ''${DIRENV_DIR:-} ) ]]; then
+    if [[ ! -o interactive && -z ''${CLAUDECODE:-} && ( $PWD/ == ${t3Dir}/worktrees/* || -n ''${DIRENV_DIR:-} ) ]]; then
       eval "$(DIRENV_LOG_FORMAT= ${lib.getExe config.programs.direnv.package} export zsh)"
     fi
   ''));
