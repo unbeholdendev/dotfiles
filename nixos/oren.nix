@@ -37,7 +37,20 @@
   networking.hostName = "oren";
 
   services.qemuGuest.enable = true;
-  services.openssh.enable = false;
+  services.openssh = {
+    enable = true;
+    settings = {
+      PasswordAuthentication = false;
+      KbdInteractiveAuthentication = false;
+      PermitRootLogin = "prohibit-password";
+      AllowUsers = [ "root" ];
+    };
+  };
+
+  users.users.root.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP14ZKie7ITD7Qj64XLf2JZQmo5d30Hh2HYwhrOKpJ+Y t14"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJJKC+NQ6TYLkWQ09hcMh+YKrXoo7+pE3U4U1V71Xkf8 t460s"
+  ];
 
   users.users.agent = {
     isNormalUser = true;
@@ -60,7 +73,6 @@
     setSocketVariable = true;
   };
 
-  # T3 Code, the only port open.
   networking.firewall.allowedTCPPorts = [ 3773 ];
 
   environment.systemPackages = [
