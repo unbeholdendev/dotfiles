@@ -53,7 +53,10 @@ runs it.
   root. `agent`'s config links read `/srv/dotfiles` and are read-only to it.
 - On `oren`, direnv with nix-direnv loads per-project toolchains. Claude gets
   them from the SessionStart and CwdChanged hooks in its settings, which must
-  do nothing where direnv is absent. direnv's whitelist
+  do nothing where direnv is absent; Claude's shell snapshot re-exports `PATH`
+  after `.zshenv`, so the hooks stay. Codex gets them from `oren`'s `.zshenv`,
+  which runs direnv in non-interactive zsh: Codex runs each command that way,
+  after sourcing its snapshot. direnv's whitelist
   covers only `~/.t3/worktrees/`; widen it no further. Never set `BASH_ENV` to
   run direnv: direnv starts bash, which reads it again, and the loop stalls T3.
 - Respect explicit `CLAUDE_CONFIG_DIR` and `CODEX_HOME` overrides.
