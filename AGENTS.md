@@ -5,9 +5,9 @@ edited here but runs on the laptops; `oren`, the headless host, is a NixOS
 Proxmox VM configured here. Agents run on `oren`; there is no Wayland session.
 
 Program directories mirror paths under `$HOME`; modules in `home/` install
-them. `agents/` holds the prompt shared by Claude and Codex, and `setup.sh`,
-which links it as `CLAUDE.md` or `AGENTS.md`; `oren`'s home-manager activation
-runs it.
+them. `agents/` holds the prompt shared by Claude and Codex, the
+`forgejo-review.md` it points to, and `setup.sh`, which links the prompt as
+`CLAUDE.md` or `AGENTS.md`; `oren`'s home-manager activation runs it.
 
 ## Nix and installation
 
