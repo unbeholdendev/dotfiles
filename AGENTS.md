@@ -28,7 +28,7 @@ them. `agents/` holds the prompt shared by Claude and Codex, the
 
 ## Shared agent state
 
-- `oren` installs Claude and Codex from `home/agents.nix`. Keep the agent
+- `oren` installs Claude, Codex and OpenCode from `home/agents.nix`. Keep the agent
   packages there, not in the host module. Claude Code is unfree: allow it by name in `agentPkgs`,
   never with `allowUnfree`, and keep the laptops on plain nixpkgs.
 - `oren` runs agents and one T3 Code server on the host as the unprivileged

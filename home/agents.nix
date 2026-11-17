@@ -5,6 +5,7 @@
     codex
     gh
     jq
+    opencode
     t3code
     tea
     (writeShellApplication {
