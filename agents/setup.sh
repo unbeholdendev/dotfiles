@@ -32,6 +32,8 @@ for agent in claude codex; do
   sources=(
     cursor/plugins:6b0300214a09fd6029cfb7077043125758cd1fd2
     cloudflare/security-audit-skill:c1c8a8c1471069fb0e188eeaff69b8e8db6564a8
+    mattpocock/skills:5beb35b040e3de97e54fa9e386d7e42d15c295c2
+    pbakaus/impeccable:33003f1013a636e612752a1cad7b82b8bb4c67f2
   )
 
   if [[ $agent == claude ]]; then
@@ -48,10 +50,6 @@ for agent in claude codex; do
     # Codex skips a hook nobody has trusted, and no one is there to answer its prompt.
     CODEX_HOME=$cfg trust_codex_hooks "$cfg/hooks.json" ||
       echo "Codex PR merge hook not trusted: approve it with /hooks" >&2
-    sources+=(
-      mattpocock/skills:5beb35b040e3de97e54fa9e386d7e42d15c295c2
-      pbakaus/impeccable:33003f1013a636e612752a1cad7b82b8bb4c67f2
-    )
   fi
 
   mkdir -p "$cfg/skills"
@@ -72,9 +70,12 @@ for agent in claude codex; do
     "$cfg/third-party/cursor/pstack/skills/unslop/SKILL.md" > "$cfg/skills/unslop/SKILL.md"
   ln -sfn "$cfg/third-party/cloudflare/skills/security-audit" "$cfg/skills/security-audit"
 
-  if [[ $agent == codex ]]; then
-    ln -sfn "$cfg/third-party/mattpocock/skills/engineering" "$cfg/skills/mattpocock-engineering"
-    ln -sfn "$cfg/third-party/mattpocock/skills/productivity" "$cfg/skills/mattpocock-productivity"
-    ln -sfn "$cfg/third-party/pbakaus/.agents/skills/impeccable" "$cfg/skills/impeccable"
-  fi
+  rm -f "$cfg/skills/mattpocock-engineering" "$cfg/skills/mattpocock-productivity"
+  for skill in "$cfg"/third-party/mattpocock/skills/{engineering,productivity}/*/; do
+    skill=${skill%/}
+    ln -sfn "$skill" "$cfg/skills/${skill##*/}"
+  done
+  impeccable=.agents
+  [[ $agent == codex ]] || impeccable=.claude
+  ln -sfn "$cfg/third-party/pbakaus/$impeccable/skills/impeccable" "$cfg/skills/impeccable"
 done
