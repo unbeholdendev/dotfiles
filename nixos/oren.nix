@@ -147,6 +147,15 @@
   };
 
   networking.firewall.allowedTCPPorts = [ 3773 ];
+  networking.firewall.extraCommands = ''
+    iptables -A nixos-fw -p tcp -s 192.168.4.133 --dport 9100 -j nixos-fw-accept
+  '';
+
+  services.prometheus.exporters.node = {
+    enable = true;
+    port = 9100;
+    enabledCollectors = [ "systemd" ];
+  };
 
   environment.systemPackages = [
     (pkgs.writeShellApplication {
