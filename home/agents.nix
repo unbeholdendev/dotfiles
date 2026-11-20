@@ -10,7 +10,7 @@
     tea
     (writeShellApplication {
       name = "deny-pr-merge";
-      runtimeInputs = [ jq ];
+      runtimeInputs = [ git jq ];
       text = builtins.readFile ../agents/deny-pr-merge.sh;
     })
   ];

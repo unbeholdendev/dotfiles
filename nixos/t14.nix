@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 {
   imports = [ ./laptop.nix ];
 
@@ -16,6 +16,9 @@
   # noctalia's lock screen authenticates as login and drives the reader itself;
   # pam_fprintd there would contend for the sensor.
   security.pam.services.login.fprintAuth = false;
+  # The greeter submits an empty password to start fprintd; pam_unix must not
+  # accept it.
+  security.pam.services.login.allowNullPassword = lib.mkForce false;
 
   # greetd turns off useDefaultRules, so its fprintAuth adds nothing, and the
   # `substack login` it keeps has no fprintd since the line above.

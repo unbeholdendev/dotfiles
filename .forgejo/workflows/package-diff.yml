@@ -24,18 +24,19 @@ jobs:
         run: |
           set -euo pipefail
           work=$(mktemp -d)
-          printf 'Authorization: token %s\n' "$TOKEN" > "$work/auth"
-          export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.extraHeader
-          export GIT_CONFIG_VALUE_0="Authorization: token $TOKEN"
-
           git init -q "$work/repo"
           cd "$work/repo"
-          git fetch -q --depth 1 "$SERVER/$REPO.git" "$BASE_SHA" "$HEAD_SHA"
+          GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.extraHeader \
+            GIT_CONFIG_VALUE_0="Authorization: token $TOKEN" \
+            git fetch -q --depth 1 "$SERVER/$REPO.git" "$BASE_SHA" "$HEAD_SHA"
           mkdir "$work/base" "$work/head"
           git archive "$BASE_SHA" | tar -x -C "$work/base"
-          git archive "$HEAD_SHA" | tar -x -C "$work/head"
+          git archive "$BASE_SHA" | tar -x -C "$work/head"
+          git show "$HEAD_SHA:flake.lock" > "$work/head/flake.lock"
 
-          BASE=$work/base HEAD=$work/head \
-            nix eval --impure --json --file "$work/head/.forgejo/package-diff.nix" > "$work/body.json"
+          # Evaluate the base's code against the head's lock, without the token.
+          BASE=$work/base HEAD=$work/head env -u TOKEN \
+            nix eval --impure --json --file "$work/base/.forgejo/package-diff.nix" > "$work/body.json"
+          printf 'Authorization: token %s\n' "$TOKEN" > "$work/auth"
           curl -sSf -H @"$work/auth" -H 'Content-Type: application/json' \
             --data @"$work/body.json" "$API/repos/$REPO/issues/$PR/comments" > /dev/null
