@@ -7,7 +7,7 @@ let
 
   agentSetup = pkgs.writeShellApplication {
     name = "agent-setup";
-    runtimeInputs = with pkgs; [ codex coreutils git gnused jq ];
+    runtimeInputs = with pkgs; [ coreutils git gnused ];
     text = builtins.readFile ../agents/setup.sh;
   };
 
